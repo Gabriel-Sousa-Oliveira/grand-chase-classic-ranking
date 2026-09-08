@@ -60,6 +60,8 @@ O MVP navegável e o núcleo local estão prontos. O projeto parou na fronteira 
 
 O crawler periódico da YouTube Data API foi implementado com oito consultas amplas, deduplicação, filtro inicial, persistência em SQLite e execução pelo GitHub Actions. O painel possui API, banco D1, fila real e decisões persistentes. O revisor pode informar ou corrigir tempos no formato `mm:ss` ou `mm:ss.mmm` antes de aprovar uma run.
 
+O workflow também oferece o modo manual `fill-ranking`: ele pesquisa os 25 personagens em português e inglês durante 365 dias e só aceita Void Invasion 3F. A rodada usa 50 chamadas de pesquisa, sem paginação adicional.
+
 Depois disso, a sequência prevista é:
 
 1. ativar o segredo de ingestão no GitHub;

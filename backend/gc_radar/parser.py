@@ -18,8 +18,9 @@ CHARACTER_ALIASES = {
     "zero": "Zero", "ley": "Ley/Rey", "rey": "Ley/Rey",
     "rufus": "Rufus/Lupus", "lupus": "Rufus/Lupus",
     "rin": "Rin/Lin", "lin": "Rin/Lin", "asin": "Asin", "lime": "Lime/Holy",
-    "holy": "Lime/Holy", "edel": "Edel", "veigas": "Veigas",
-    "decanee": "Decanee", "kallia": "Kallia", "ai": "Ai", "iris": "Iris",
+    "holy": "Lime/Holy", "edel": "Edel", "veigas": "Veigas", "uno": "Uno",
+    "decanee": "Decanee", "decane": "Decanee", "kallia": "Kallia", "ai": "Ai", "iris": "Iris",
+    "azin": "Asin",
     "ereb": "Ereb",
 }
 

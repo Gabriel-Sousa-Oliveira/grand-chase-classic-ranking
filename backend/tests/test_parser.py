@@ -30,7 +30,11 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(parse_title("Ronan Void Invasion 3F 01:02.345").time_ms, 62_345)
         self.assertEqual(parse_title("Ronan Void Invasion 3F 1m 02s").time_ms, 62_000)
 
+    def test_regional_character_aliases(self):
+        self.assertEqual(parse_title("Azin Vazio Invasão 3F 1:00").character, "Asin")
+        self.assertEqual(parse_title("Decane Void Invasion 3F 1:00").character, "Decanee")
+        self.assertEqual(parse_title("Uno Void Invasion 3F 1:00").character, "Uno")
+
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -4,7 +4,7 @@ import unittest
 from datetime import datetime, timezone
 from urllib.parse import parse_qs, urlparse
 
-from gc_radar.youtube import discover_videos, search_videos
+from gc_radar.youtube import discover_videos, fill_ranking_queries, search_videos
 
 
 class FakeResponse(io.BytesIO):
@@ -51,6 +51,14 @@ class YouTubeSearchTests(unittest.TestCase):
         videos = discover_videos(["query one", "query two"], api_key="test-key", opener=opener)
         self.assertEqual(len(videos), 1)
         self.assertEqual(videos[0]["video_id"], "aTglQvuekIE")
+
+    def test_fill_ranking_covers_all_characters_in_both_locales(self):
+        queries = fill_ranking_queries()
+        self.assertEqual(len(queries), 50)
+        self.assertEqual(len(set(queries)), 50)
+        self.assertIn("Grand Chase Classic Lupus Vazio Invasão 3F", queries)
+        self.assertIn("Grand Chase Classic Rufus Void Invasion 3F", queries)
+        self.assertIn("Grand Chase Classic Uno Void Invasion 3F", queries)
 
 
 if __name__ == "__main__":

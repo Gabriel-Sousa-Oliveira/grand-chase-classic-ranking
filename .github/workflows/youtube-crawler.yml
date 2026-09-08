@@ -3,8 +3,16 @@ name: YouTube crawler
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: Tipo de busca
+        required: true
+        default: recent
+        type: choice
+        options:
+          - recent
+          - fill-ranking
       days:
-        description: Dias recentes a pesquisar
+        description: Dias para a busca recente (o preenchimento usa 365)
         required: true
         default: "3"
   schedule:
@@ -54,6 +62,7 @@ jobs:
             --title "Lupus | Vazio (Apocalipse) 3F Solo Sem poções | Grand Chase Classic" > /dev/null
 
       - name: Search recent YouTube videos
+        if: ${{ (github.event_name == 'schedule') || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent') || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[fill-ranking]')) }}
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           CRAWL_DAYS: ${{ inputs.days || '3' }}
@@ -61,6 +70,15 @@ jobs:
           mkdir -p data
           cd backend
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 crawl --days "$CRAWL_DAYS" > ../data/last-run.json
+
+      - name: Fill Void Invasion 3F ranking
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'fill-ranking') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[fill-ranking]')) }}
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          mkdir -p data
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 fill-ranking --days 365 --max-results 25 > ../data/last-run.json
 
       - name: Add report to workflow summary
         run: |

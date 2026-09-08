@@ -21,6 +21,27 @@ DEFAULT_SEARCH_QUERIES = (
     "Grand Chase Classic Vazio Apocalipse",
 )
 
+CHARACTER_SEARCH_NAMES = (
+    ("Elesis", "Elesis"), ("Lire", "Lire"), ("Arme", "Arme"),
+    ("Lass", "Lass"), ("Ryan", "Ryan"), ("Ronan", "Ronan"),
+    ("Amy", "Amy"), ("Jin", "Jin"), ("Sieghart", "Sieghart"),
+    ("Mari", "Mari"), ("Dio", "Dio"), ("Zero", "Zero"),
+    ("Rey", "Ley"), ("Lupus", "Rufus"), ("Lin", "Rin"),
+    ("Azin", "Asin"), ("Holy", "Lime"), ("Edel", "Edel"),
+    ("Veigas", "Veigas"), ("Uno", "Uno"), ("Decane", "Decanee"),
+    ("Kallia", "Kallia"), ("Ai", "Ai"), ("Iris", "Iris"),
+    ("Ereb", "Ereb"),
+)
+
+
+def fill_ranking_queries() -> tuple[str, ...]:
+    """Build one Portuguese and one English Void Invasion 3F query per character."""
+    queries = []
+    for portuguese_name, english_name in CHARACTER_SEARCH_NAMES:
+        queries.append(f"Grand Chase Classic {portuguese_name} Vazio Invasão 3F")
+        queries.append(f"Grand Chase Classic {english_name} Void Invasion 3F")
+    return tuple(queries)
+
 
 def extract_video_id(value: str) -> str:
     if re.fullmatch(r"[A-Za-z0-9_-]{11}", value):

@@ -47,3 +47,13 @@ python -m gc_radar.cli --db gc_radar.sqlite3 crawl --days 3
 Cada consulta busca no máximo 50 vídeos e somente a primeira página, protegendo a cota. Resultados repetidos são mesclados pelo ID do YouTube; o banco também impede a reinserção em execuções futuras. Use `--query "texto"` uma ou mais vezes para substituir as consultas padrão.
 
 O workflow `.github/workflows/youtube-crawler.yml` executa o crawler duas vezes por dia, mantém o banco entre execuções e publica o banco e o relatório JSON como artefatos privados da execução.
+
+### Preencher um ranking
+
+O modo histórico faz 50 consultas: uma em português e uma em inglês para cada um dos 25 personagens. Ele aceita somente títulos identificados como Void Invasion 3F.
+
+~~~bash
+python -m gc_radar.cli --db gc_radar.sqlite3 fill-ranking --days 365 --max-results 25
+~~~
+
+No GitHub Actions, abra **YouTube crawler**, escolha **Run workflow** e selecione `fill-ranking` em **Tipo de busca**.
