@@ -28,6 +28,7 @@ jobs:
     timeout-minutes: 10
     env:
       SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
+      SITE_ACCESS_TOKEN: ${{ secrets.SITE_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,10 +56,11 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Send candidates to hosted queue
-        if: ${{ env.SITE_INGEST_TOKEN != '' }}
+        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
         run: |
           curl --fail-with-body --retry 2 \
             -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
+            -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
             -H "Content-Type: application/json" \
             --data-binary @data/last-run.json \
             https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates

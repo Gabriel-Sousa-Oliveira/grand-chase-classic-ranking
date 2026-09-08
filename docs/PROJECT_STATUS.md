@@ -58,7 +58,7 @@ Descobrir automaticamente vídeos recentes de speedrun de Grand Chase Classic no
 
 O MVP navegável e o núcleo local estão prontos. O projeto parou na fronteira entre **protótipo funcional** e **automação conectada**.
 
-O crawler periódico da YouTube Data API foi implementado com oito consultas amplas, deduplicação, filtro inicial, persistência em SQLite e execução pelo GitHub Actions. O painel agora possui API, banco D1, fila real e decisões persistentes. Falta apenas cadastrar `SITE_INGEST_TOKEN` nos segredos do GitHub para ativar o envio automático entre os dois ambientes.
+O crawler periódico da YouTube Data API foi implementado com oito consultas amplas, deduplicação, filtro inicial, persistência em SQLite e execução pelo GitHub Actions. O painel agora possui API, banco D1, fila real e decisões persistentes. Falta apenas cadastrar `SITE_INGEST_TOKEN` e `SITE_ACCESS_TOKEN` nos segredos do GitHub para ativar o envio automático ao painel privado.
 
 Depois disso, a sequência prevista é:
 

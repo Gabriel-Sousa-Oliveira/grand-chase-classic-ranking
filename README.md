@@ -47,7 +47,7 @@ As instruções completas de banco e ingestão estão em `backend/README.md`.
 
 ## Próximas integrações
 
-1. Ativar `SITE_INGEST_TOKEN` nos segredos do GitHub para liberar a ponte crawler → painel.
+1. Ativar `SITE_INGEST_TOKEN` e `SITE_ACCESS_TOKEN` nos segredos do GitHub para liberar a ponte crawler → painel privado.
 2. Sincronização automática do leaderboard de referência.
 3. OCR experimental para títulos sem tempo.
 
