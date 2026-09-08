@@ -12,6 +12,8 @@ MVP para descobrir, classificar, validar e ranquear vídeos de speedrun de Grand
 - proteção contra vídeo duplicado por `video_id`;
 - crawler da YouTube Data API v3 com consultas em português e inglês, sem chave no código;
 - execução automática duas vezes ao dia pelo GitHub Actions;
+- fila e rankings persistentes no painel hospedado com D1;
+- aprovação e rejeição gravadas pela API do painel;
 - testes automatizados dos três títulos fornecidos.
 
 ## Interface
@@ -45,7 +47,7 @@ As instruções completas de banco e ingestão estão em `backend/README.md`.
 
 ## Próximas integrações
 
-1. API entre o núcleo e o painel hospedado.
+1. Ativar `SITE_INGEST_TOKEN` nos segredos do GitHub para liberar a ponte crawler → painel.
 2. Sincronização automática do leaderboard de referência.
 3. OCR experimental para títulos sem tempo.
 

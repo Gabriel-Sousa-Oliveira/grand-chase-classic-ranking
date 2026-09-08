@@ -51,6 +51,7 @@ def main() -> None:
             duplicates = 0
             ignored = 0
             statuses: dict[str, int] = {}
+            exported: list[dict] = []
             for metadata in videos:
                 parsed = parse_title(metadata["title"])
                 # Broad YouTube queries can return unrelated videos. Keep only
@@ -66,11 +67,17 @@ def main() -> None:
                 created += int(was_created)
                 duplicates += int(not was_created)
                 statuses[candidate["status"]] = statuses.get(candidate["status"], 0) + 1
+                if was_created:
+                    exported.append({key: candidate[key] for key in (
+                        "video_id", "video_url", "title", "channel", "player_nick",
+                        "published_at", "character", "category", "floor", "time_ms",
+                        "confidence", "status", "era_key", "raw_metadata"
+                    )})
             print(json.dumps({
                 "queries": len(args.queries or DEFAULT_SEARCH_QUERIES),
                 "discovered_unique": len(videos), "created": created,
                 "duplicates": duplicates, "ignored": ignored, "statuses": statuses,
-                "queue_size": len(repo.queue()),
+                "queue_size": len(repo.queue()), "candidates": exported,
             }, ensure_ascii=False, indent=2))
         else:
             print(json.dumps(repo.queue(), ensure_ascii=False, indent=2))

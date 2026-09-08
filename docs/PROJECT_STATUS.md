@@ -58,15 +58,14 @@ Descobrir automaticamente vídeos recentes de speedrun de Grand Chase Classic no
 
 O MVP navegável e o núcleo local estão prontos. O projeto parou na fronteira entre **protótipo funcional** e **automação conectada**.
 
-O crawler periódico da YouTube Data API foi implementado com oito consultas amplas, deduplicação, filtro inicial, persistência em SQLite e execução pelo GitHub Actions. O próximo passo é expor o núcleo por uma API e conectar a fila real ao painel hospedado.
+O crawler periódico da YouTube Data API foi implementado com oito consultas amplas, deduplicação, filtro inicial, persistência em SQLite e execução pelo GitHub Actions. O painel agora possui API, banco D1, fila real e decisões persistentes. Falta apenas cadastrar `SITE_INGEST_TOKEN` nos segredos do GitHub para ativar o envio automático entre os dois ambientes.
 
 Depois disso, a sequência prevista é:
 
-1. expor o núcleo Python por uma API;
-2. conectar o painel hospedado à API e ao banco real;
-3. experimentar OCR para vídeos cujo título não informa o tempo;
-4. sincronizar ou comparar resultados com o leaderboard de referência;
-5. transformar eras em configuração administrável quando houver atualizações relevantes do jogo.
+1. ativar o segredo de ingestão no GitHub;
+2. experimentar OCR para vídeos cujo título não informa o tempo;
+3. sincronizar ou comparar resultados com o leaderboard de referência;
+4. transformar eras em configuração administrável quando houver atualizações relevantes do jogo.
 
 ## Fora deste repositório
 

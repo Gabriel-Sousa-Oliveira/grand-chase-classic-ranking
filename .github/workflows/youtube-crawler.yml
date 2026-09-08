@@ -26,6 +26,8 @@ jobs:
   discover:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -51,6 +53,15 @@ jobs:
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
           cat data/last-run.json >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Send candidates to hosted queue
+        if: ${{ env.SITE_INGEST_TOKEN != '' }}
+        run: |
+          curl --fail-with-body --retry 2 \
+            -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @data/last-run.json \
+            https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
 
       - name: Save crawler database
         uses: actions/cache/save@v4
