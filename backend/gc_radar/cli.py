@@ -67,12 +67,11 @@ def main() -> None:
                 created += int(was_created)
                 duplicates += int(not was_created)
                 statuses[candidate["status"]] = statuses.get(candidate["status"], 0) + 1
-                if was_created:
-                    exported.append({key: candidate[key] for key in (
-                        "video_id", "video_url", "title", "channel", "player_nick",
-                        "published_at", "character", "category", "floor", "time_ms",
-                        "confidence", "status", "era_key", "raw_metadata"
-                    )})
+                exported.append({key: candidate[key] for key in (
+                    "video_id", "video_url", "title", "channel", "player_nick",
+                    "published_at", "character", "category", "floor", "time_ms",
+                    "confidence", "status", "era_key", "raw_metadata"
+                )})
             print(json.dumps({
                 "queries": len(args.queries or DEFAULT_SEARCH_QUERIES),
                 "discovered_unique": len(videos), "created": created,
