@@ -1,5 +1,4 @@
 name: YouTube crawler
-# Integration verification trigger
 
 on:
   workflow_dispatch:
@@ -39,6 +38,20 @@ jobs:
           path: data/gc_radar.sqlite3
           key: gc-radar-db-${{ github.run_id }}
           restore-keys: gc-radar-db-
+
+      - name: Seed supplied reference videos
+        run: |
+          mkdir -p data
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 add \
+            https://youtu.be/WZeUJAw4pmU --channel Borkaz \
+            --title "Ereb | Vazio (Invasão) 3f (1'32) | Grand Chase Classic" > /dev/null
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 add \
+            https://youtu.be/V6O_9x6QTvw --channel Borkaz \
+            --title "Ereb | Vazio (Pesadelo) 4F | Grand Chase Classic" > /dev/null
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 add \
+            https://youtu.be/aTglQvuekIE --channel Borkaz \
+            --title "Lupus | Vazio (Apocalipse) 3F Solo Sem poções | Grand Chase Classic" > /dev/null
 
       - name: Search recent YouTube videos
         env:
