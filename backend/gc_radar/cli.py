@@ -5,6 +5,7 @@ import argparse
 import json
 
 from .database import CandidateRepository
+from .ocr import read_video_time
 from .parser import parse_title
 from .youtube import DEFAULT_SEARCH_QUERIES, discover_videos, extract_video_id, fetch_video, fill_ranking_queries
 
@@ -30,6 +31,8 @@ def main() -> None:
     fill_cmd.add_argument("--days", type=int, default=365)
     fill_cmd.add_argument("--max-results", type=int, default=25)
     fill_cmd.add_argument("--era", default="current")
+    ocr_cmd = commands.add_parser("ocr-queue")
+    ocr_cmd.add_argument("--limit", type=int, default=8)
     commands.add_parser("queue")
     args = parser.parse_args()
 
@@ -88,6 +91,38 @@ def main() -> None:
                 "duplicates": duplicates, "ignored": ignored, "statuses": statuses,
                 "queue_size": len(repo.queue()), "candidates": exported,
             }, ensure_ascii=False, indent=2))
+        elif args.command == "ocr-queue":
+            processed = matched = failed = 0
+            results = []
+            for candidate in repo.time_required(args.limit):
+                processed += 1
+                try:
+                    ocr = read_video_time(candidate["video_url"])
+                    if ocr is None:
+                        repo.record_ocr_attempt(candidate["id"], "no_consensus")
+                        results.append({"video_id": candidate["video_id"], "result": "no_consensus"})
+                        continue
+                    repo.set_ocr_time(candidate["id"], ocr.time_ms, ocr.confidence, {
+                        "engine": "tesseract", "matching_frames": ocr.matching_frames,
+                        "observations": ocr.observations,
+                    })
+                    matched += 1
+                    results.append({"video_id": candidate["video_id"], "result": "matched",
+                                    "time_ms": ocr.time_ms, "confidence": ocr.confidence})
+                except Exception as error:
+                    failed += 1
+                    repo.record_ocr_attempt(candidate["id"], "error")
+                    results.append({"video_id": candidate["video_id"], "result": "error",
+                                    "error": str(error)[:240]})
+            exported = [{key: candidate[key] for key in (
+                "video_id", "video_url", "title", "channel", "player_nick",
+                "published_at", "character", "category", "floor", "time_ms",
+                "confidence", "status", "era_key", "raw_metadata"
+            )} for candidate in repo.queue()]
+            print(json.dumps({"mode": "ocr", "processed": processed, "matched": matched,
+                              "failed": failed, "results": results,
+                              "queue_size": len(exported), "candidates": exported},
+                             ensure_ascii=False, indent=2))
         else:
             print(json.dumps(repo.queue(), ensure_ascii=False, indent=2))
     finally:

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -132,6 +133,45 @@ class CandidateRepository:
               THEN 'ready_for_review' ELSE 'classification_required' END,
               updated_at = CURRENT_TIMESTAMP WHERE id = ?
         """, (time_ms, candidate_id))
+        self.connection.commit()
+        return self.get(candidate_id)
+
+    def time_required(self, limit: int = 8) -> list[dict]:
+        rows = self.connection.execute("""
+            SELECT * FROM candidates WHERE status = 'time_required'
+            ORDER BY json_extract(raw_metadata, '$.ocr_attempted_at') IS NOT NULL,
+                     updated_at ASC LIMIT ?
+        """, (limit,)).fetchall()
+        return [dict(row) for row in rows]
+
+    def record_ocr_attempt(self, candidate_id: int, outcome: str) -> dict:
+        candidate = self.get(candidate_id)
+        metadata = json.loads(candidate["raw_metadata"] or "{}")
+        metadata["ocr_attempted_at"] = datetime.now(timezone.utc).isoformat()
+        metadata["ocr_outcome"] = outcome
+        self.connection.execute("""
+            UPDATE candidates SET raw_metadata = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (json.dumps(metadata, ensure_ascii=False), candidate_id))
+        self.connection.commit()
+        return self.get(candidate_id)
+
+    def set_ocr_time(self, candidate_id: int, time_ms: int, confidence: float,
+                     evidence: dict) -> dict:
+        if time_ms <= 0:
+            raise ValueError("time_ms must be positive")
+        candidate = self.get(candidate_id)
+        metadata = json.loads(candidate["raw_metadata"] or "{}")
+        metadata["ocr"] = evidence
+        metadata["ocr_attempted_at"] = datetime.now(timezone.utc).isoformat()
+        metadata["ocr_outcome"] = "matched"
+        self.connection.execute("""
+            UPDATE candidates SET time_ms = ?, confidence = ?, raw_metadata = ?,
+              status = CASE
+                WHEN character IS NOT NULL AND category IS NOT NULL AND floor IS NOT NULL
+                THEN 'ready_for_review' ELSE 'classification_required' END,
+              updated_at = CURRENT_TIMESTAMP WHERE id = ?
+        """, (time_ms, confidence, json.dumps(metadata, ensure_ascii=False), candidate_id))
         self.connection.commit()
         return self.get(candidate_id)
 

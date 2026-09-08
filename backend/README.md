@@ -34,7 +34,7 @@ Crie uma chave da YouTube Data API v3, defina a variável de ambiente `YOUTUBE_A
 python -m gc_radar.cli --db gc_radar.sqlite3 youtube "https://youtu.be/WZeUJAw4pmU"
 ~~~
 
-Nunca coloque a chave no repositório. Títulos sem tempo já entram como `time_required`; o OCR continua planejado para uma etapa futura.
+Nunca coloque a chave no repositório. Títulos sem tempo entram como `time_required` e seguem para o OCR automático.
 
 ## Buscar vídeos recentes
 
@@ -57,3 +57,13 @@ python -m gc_radar.cli --db gc_radar.sqlite3 fill-ranking --days 365 --max-resul
 ~~~
 
 No GitHub Actions, abra **YouTube crawler**, escolha **Run workflow** e selecione `fill-ranking` em **Tipo de busca**.
+
+## OCR dos vídeos pendentes
+
+O workflow baixa somente o trecho final de até oito vídeos por execução, extrai quadros e usa Tesseract para procurar o tempo de conclusão. Um valor só é aceito quando aparece em pelo menos dois quadros distintos e não há empate entre leituras. Mesmo após o OCR, o vídeo fica em `ready_for_review`: nenhuma entrada vai ao ranking sem validação humana.
+
+Para executar localmente, instale `yt-dlp`, `ffmpeg` e `tesseract`, e rode:
+
+~~~bash
+python -m gc_radar.cli --db gc_radar.sqlite3 ocr-queue --limit 8
+~~~

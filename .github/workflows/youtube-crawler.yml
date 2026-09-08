@@ -33,7 +33,7 @@ concurrency:
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 35
     env:
       SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
       SITE_ACCESS_TOKEN: ${{ secrets.SITE_ACCESS_TOKEN }}
@@ -79,6 +79,17 @@ jobs:
           mkdir -p data
           cd backend
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 fill-ranking --days 365 --max-results 25 > ../data/last-run.json
+
+      - name: Install OCR tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr
+          python -m pip install --disable-pip-version-check yt-dlp
+
+      - name: Read missing times from video frames
+        run: |
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue --limit 8 > ../data/last-run.json
 
       - name: Add report to workflow summary
         run: |

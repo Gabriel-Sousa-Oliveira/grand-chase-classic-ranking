@@ -16,7 +16,7 @@ Descobrir automaticamente vídeos recentes de speedrun de Grand Chase Classic no
 - Uma nova era deve acompanhar uma atualização grande e impactante de balanceamento do Grand Chase Classic, em vez de reiniciar todo mês. Isso preserva comparabilidade entre runs feitas sob as mesmas regras do jogo.
 - A descoberta é automática, mas a aprovação final continua humana.
 - Vídeos duplicados são bloqueados pelo `video_id` do YouTube.
-- Títulos sem tempo detectável entram na fila `time_required` para confirmação manual ou OCR futuro.
+- Títulos sem tempo detectável entram na fila `time_required` para OCR ou confirmação manual.
 - A interface reconhece a inspiração no Grand Chase Leaderboards criado por Syntaxii.
 
 ## Referências fornecidas
@@ -47,6 +47,10 @@ Descobrir automaticamente vídeos recentes de speedrun de Grand Chase Classic no
 - Aprovação impedida enquanto campos obrigatórios estiverem ausentes.
 - Top 4 por personagem e era, mantendo o melhor tempo de cada nick.
 - Cliente da YouTube Data API v3 para consultar metadados de uma URL quando `YOUTUBE_API_KEY` estiver configurada.
+- Modo histórico `fill-ranking`, com pesquisas em português e inglês para os 25 personagens.
+- OCR conservador com `yt-dlp`, FFmpeg e Tesseract para analisar o trecho final dos vídeos.
+- Consenso entre quadros: o OCR só aceita um tempo repetido em pelo menos dois quadros distintos.
+- Rotação da fila de OCR em lotes de oito para evitar que vídeos sem leitura bloqueiem os seguintes.
 
 ### Verificação
 
@@ -54,18 +58,20 @@ Descobrir automaticamente vídeos recentes de speedrun de Grand Chase Classic no
 - Testes do parser com os três títulos de referência.
 - Testes de banco, duplicidade, campos pendentes, top 4 por nick e separação por eras.
 
-## Etapa em que paramos
+## Etapa atual
 
-O MVP navegável e o núcleo local estão prontos. O projeto parou na fronteira entre **protótipo funcional** e **automação conectada**.
+O MVP navegável, a automação conectada e a primeira versão do OCR estão prontos.
 
 O crawler periódico da YouTube Data API foi implementado com oito consultas amplas, deduplicação, filtro inicial, persistência em SQLite e execução pelo GitHub Actions. O painel possui API, banco D1, fila real e decisões persistentes. O revisor pode informar ou corrigir tempos no formato `mm:ss` ou `mm:ss.mmm` antes de aprovar uma run.
 
 O workflow também oferece o modo manual `fill-ranking`: ele pesquisa os 25 personagens em português e inglês durante 365 dias e só aceita Void Invasion 3F. A rodada usa 50 chamadas de pesquisa, sem paginação adicional.
 
+O OCR roda após a descoberta, processa até oito vídeos pendentes por execução e mantém toda leitura em `ready_for_review`; a aprovação final nunca é automática. A próxima rodada real deve medir quantos vídeos do YouTube podem ser baixados no ambiente do GitHub Actions e quantos cronômetros alcançam consenso.
+
 Depois disso, a sequência prevista é:
 
-1. ativar o segredo de ingestão no GitHub;
-2. experimentar OCR para vídeos cujo título não informa o tempo;
+1. calibrar regiões e formatos do OCR usando os vídeos reais que não obtiverem consenso;
+2. revisar e aprovar os candidatos com tempo detectado;
 3. sincronizar ou comparar resultados com o leaderboard de referência;
 4. transformar eras em configuração administrável quando houver atualizações relevantes do jogo.
 

@@ -67,6 +67,19 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(len(current), 1)
         self.assertEqual(current[0]["time_ms"], 60_000)
 
+    def test_ocr_attempt_rotates_queue_and_records_evidence(self):
+        first, _ = self.repo.add("first", "https://youtu.be/first",
+                                 parse_title("Ronan Void Invasion 3F"))
+        second, _ = self.repo.add("second", "https://youtu.be/second",
+                                  parse_title("Arme Void Invasion 3F"))
+        self.repo.record_ocr_attempt(first["id"], "no_consensus")
+        self.assertEqual(self.repo.time_required(1)[0]["id"], second["id"])
+        updated = self.repo.set_ocr_time(first["id"], 92_000, 0.82,
+                                         {"engine": "tesseract", "matching_frames": 3})
+        self.assertEqual(updated["status"], "ready_for_review")
+        self.assertEqual(updated["time_ms"], 92_000)
+        self.assertIn('"ocr"', updated["raw_metadata"])
+
 
 if __name__ == "__main__":
     unittest.main()
