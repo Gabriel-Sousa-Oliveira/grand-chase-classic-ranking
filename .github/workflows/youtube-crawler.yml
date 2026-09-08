@@ -62,7 +62,7 @@ jobs:
             --title "Lupus | Vazio (Apocalipse) 3F Solo Sem poções | Grand Chase Classic" > /dev/null
 
       - name: Search recent YouTube videos
-        if: ${{ (github.event_name == 'schedule') || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent') || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[fill-ranking]')) }}
+        if: ${{ (github.event_name == 'schedule') || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent') || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[fill-ranking]') && !contains(github.event.head_commit.message, '[ocr]')) }}
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           CRAWL_DAYS: ${{ inputs.days || '3' }}
