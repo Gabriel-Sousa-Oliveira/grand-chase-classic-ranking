@@ -58,7 +58,7 @@ Descobrir automaticamente vídeos recentes de speedrun de Grand Chase Classic no
 
 O MVP navegável e o núcleo local estão prontos. O projeto parou na fronteira entre **protótipo funcional** e **automação conectada**.
 
-O próximo passo é implementar a pesquisa periódica na YouTube Data API: gerar consultas por personagem/categoria, registrar os vídeos descobertos no SQLite e colocá-los automaticamente na fila de validação.
+O crawler periódico da YouTube Data API foi implementado com oito consultas amplas, deduplicação, filtro inicial, persistência em SQLite e execução pelo GitHub Actions. O próximo passo é expor o núcleo por uma API e conectar a fila real ao painel hospedado.
 
 Depois disso, a sequência prevista é:
 

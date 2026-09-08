@@ -10,7 +10,8 @@ MVP para descobrir, classificar, validar e ranquear vídeos de speedrun de Grand
 - persistência local SQLite com fila, decisões e top 4 por nick para cada personagem;
 - separação de recordes por eras de atualizações relevantes;
 - proteção contra vídeo duplicado por `video_id`;
-- cliente da YouTube Data API v3 preparado, sem chave no código;
+- crawler da YouTube Data API v3 com consultas em português e inglês, sem chave no código;
+- execução automática duas vezes ao dia pelo GitHub Actions;
 - testes automatizados dos três títulos fornecidos.
 
 ## Interface
@@ -44,10 +45,9 @@ As instruções completas de banco e ingestão estão em `backend/README.md`.
 
 ## Próximas integrações
 
-1. Pesquisa periódica com YouTube Data API.
+1. API entre o núcleo e o painel hospedado.
 2. Sincronização automática do leaderboard de referência.
 3. OCR experimental para títulos sem tempo.
-4. API entre o núcleo e o painel hospedado.
 
 A variável `YOUTUBE_API_KEY` deve ser configurada apenas no ambiente local ou de hospedagem. Nunca salve a chave no Git.
 

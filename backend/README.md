@@ -34,4 +34,16 @@ Crie uma chave da YouTube Data API v3, defina a variável de ambiente `YOUTUBE_A
 python -m gc_radar.cli --db gc_radar.sqlite3 youtube "https://youtu.be/WZeUJAw4pmU"
 ~~~
 
-Nunca coloque a chave no repositório. A busca automática e o OCR são as próximas integrações; títulos sem tempo já entram como `time_required`.
+Nunca coloque a chave no repositório. Títulos sem tempo já entram como `time_required`; o OCR continua planejado para uma etapa futura.
+
+## Buscar vídeos recentes
+
+Com `YOUTUBE_API_KEY` definida, execute as oito consultas padrão (Void em português e inglês):
+
+~~~bash
+python -m gc_radar.cli --db gc_radar.sqlite3 crawl --days 3
+~~~
+
+Cada consulta busca no máximo 50 vídeos e somente a primeira página, protegendo a cota. Resultados repetidos são mesclados pelo ID do YouTube; o banco também impede a reinserção em execuções futuras. Use `--query "texto"` uma ou mais vezes para substituir as consultas padrão.
+
+O workflow `.github/workflows/youtube-crawler.yml` executa o crawler duas vezes por dia, mantém o banco entre execuções e publica o banco e o relatório JSON como artefatos privados da execução.

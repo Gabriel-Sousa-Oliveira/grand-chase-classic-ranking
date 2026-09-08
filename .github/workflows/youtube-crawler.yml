@@ -1,0 +1,63 @@
+name: YouTube crawler
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Dias recentes a pesquisar
+        required: true
+        default: "3"
+  schedule:
+    - cron: "17 11,23 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: youtube-crawler
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore crawler database
+        uses: actions/cache/restore@v4
+        with:
+          path: data/gc_radar.sqlite3
+          key: gc-radar-db-${{ github.run_id }}
+          restore-keys: gc-radar-db-
+
+      - name: Search recent YouTube videos
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          CRAWL_DAYS: ${{ inputs.days || '3' }}
+        run: |
+          mkdir -p data
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 crawl --days "$CRAWL_DAYS" > ../data/last-run.json
+
+      - name: Add report to workflow summary
+        run: |
+          echo '## GC Run Radar — descoberta do YouTube' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat data/last-run.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save crawler database
+        uses: actions/cache/save@v4
+        with:
+          path: data/gc_radar.sqlite3
+          key: gc-radar-db-${{ github.run_id }}
+
+      - name: Upload validation data
+        uses: actions/upload-artifact@v4
+        with:
+          name: gc-radar-candidates-${{ github.run_number }}
+          path: |
+            data/gc_radar.sqlite3
+            data/last-run.json
+          retention-days: 30

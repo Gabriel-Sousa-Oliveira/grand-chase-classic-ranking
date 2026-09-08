@@ -6,7 +6,7 @@ import json
 
 from .database import CandidateRepository
 from .parser import parse_title
-from .youtube import extract_video_id, fetch_video
+from .youtube import DEFAULT_SEARCH_QUERIES, discover_videos, extract_video_id, fetch_video
 
 
 def main() -> None:
@@ -21,6 +21,11 @@ def main() -> None:
     add_cmd.add_argument("--channel")
     yt_cmd = commands.add_parser("youtube")
     yt_cmd.add_argument("url")
+    crawl_cmd = commands.add_parser("crawl")
+    crawl_cmd.add_argument("--days", type=int, default=3)
+    crawl_cmd.add_argument("--max-results", type=int, default=50)
+    crawl_cmd.add_argument("--query", action="append", dest="queries")
+    crawl_cmd.add_argument("--era", default="current")
     commands.add_parser("queue")
     args = parser.parse_args()
 
@@ -39,6 +44,34 @@ def main() -> None:
                                        parse_title(metadata["title"]), metadata["channel"],
                                        metadata["published_at"], metadata["raw"])
             print(json.dumps({"created": created, "candidate": result}, ensure_ascii=False, indent=2))
+        elif args.command == "crawl":
+            videos = discover_videos(args.queries or DEFAULT_SEARCH_QUERIES,
+                                     days=args.days, max_results=args.max_results)
+            created = 0
+            duplicates = 0
+            ignored = 0
+            statuses: dict[str, int] = {}
+            for metadata in videos:
+                parsed = parse_title(metadata["title"])
+                # Broad YouTube queries can return unrelated videos. Keep only
+                # titles where at least a character or supported category was found.
+                if parsed.character is None and parsed.category is None:
+                    ignored += 1
+                    continue
+                candidate, was_created = repo.add(
+                    metadata["video_id"], metadata["url"], parsed,
+                    metadata["channel"], metadata["published_at"], metadata["raw"],
+                    era_key=args.era,
+                )
+                created += int(was_created)
+                duplicates += int(not was_created)
+                statuses[candidate["status"]] = statuses.get(candidate["status"], 0) + 1
+            print(json.dumps({
+                "queries": len(args.queries or DEFAULT_SEARCH_QUERIES),
+                "discovered_unique": len(videos), "created": created,
+                "duplicates": duplicates, "ignored": ignored, "statuses": statuses,
+                "queue_size": len(repo.queue()),
+            }, ensure_ascii=False, indent=2))
         else:
             print(json.dumps(repo.queue(), ensure_ascii=False, indent=2))
     finally:
@@ -47,4 +80,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
