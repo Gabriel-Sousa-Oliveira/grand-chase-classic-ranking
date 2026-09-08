@@ -9,6 +9,11 @@ on:
         default: "3"
   schedule:
     - cron: "17 11,23 * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/youtube-crawler.yml"
+      - "backend/gc_radar/**"
 
 permissions:
   contents: read
