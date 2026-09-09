@@ -15,8 +15,31 @@ function db() {
   return env.DB;
 }
 
+async function backfillApprovedTitles() {
+  const database = db();
+  const eligible = `status = 'ready_for_review'
+    AND character IS NOT NULL AND category IS NOT NULL
+    AND floor IS NOT NULL AND floor >= 0
+    AND time_ms IS NOT NULL AND time_ms > 0
+    AND confidence >= 0.95`;
+  await database.batch([
+    database.prepare(`UPDATE candidates SET status = 'approved',
+      updated_at = CURRENT_TIMESTAMP WHERE ${eligible}`),
+    database.prepare(`INSERT OR IGNORE INTO rankings
+      (candidate_id, character, category, floor, time_ms, player_nick, era_key)
+      SELECT id, character, category, floor, time_ms,
+        COALESCE(player_nick, channel, 'Desconhecido'), era_key
+      FROM candidates WHERE status = 'approved'
+        AND character IS NOT NULL AND category IS NOT NULL
+        AND floor IS NOT NULL AND floor >= 0
+        AND time_ms IS NOT NULL AND time_ms > 0
+        AND confidence >= 0.95`),
+  ]);
+}
+
 export async function GET() {
   try {
+    await backfillApprovedTitles();
     const [queue, rankings] = await Promise.all([
       db().prepare(`SELECT id, video_id, video_url, title, channel, player_nick,
         published_at, character, category, floor, time_ms, confidence, status, era_key
