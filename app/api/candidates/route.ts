@@ -40,15 +40,15 @@ async function backfillApprovedTitles() {
 export async function GET() {
   try {
     await backfillApprovedTitles();
-    const [queue, rankings] = await Promise.all([
+    const [queue, rankings, history] = await Promise.all([
       db().prepare(`SELECT id, video_id, video_url, title, channel, player_nick,
         published_at, character, category, floor, time_ms, confidence, status, era_key
         FROM candidates WHERE status IN ('ready_for_review','time_required','classification_required')
         ORDER BY confidence DESC, created_at ASC LIMIT 500`).all(),
       db().prepare(`SELECT id, character, category, floor, time_ms,
-        player_nick, era_key, video_url, channel FROM (
+        player_nick, era_key, video_url, channel, published_at, approved_at FROM (
           SELECT r.id, r.character, r.category, r.floor, r.time_ms,
-            r.player_nick, r.era_key, c.video_url, c.channel,
+            r.player_nick, r.era_key, c.video_url, c.channel, c.published_at, r.approved_at,
             ROW_NUMBER() OVER (
               PARTITION BY r.era_key, r.category, r.floor, r.character, r.player_nick
               ORDER BY r.time_ms ASC, r.approved_at ASC, r.id ASC
@@ -56,8 +56,12 @@ export async function GET() {
           FROM rankings r JOIN candidates c ON c.id = r.candidate_id
         ) WHERE nick_position = 1
         ORDER BY category, floor, character, time_ms ASC, era_key DESC`).all(),
+      db().prepare(`SELECT r.id, r.character, r.category, r.floor, r.time_ms,
+        r.player_nick, r.era_key, c.video_url, c.channel, c.published_at, r.approved_at
+        FROM rankings r JOIN candidates c ON c.id = r.candidate_id
+        ORDER BY COALESCE(c.published_at, r.approved_at) ASC, r.id ASC`).all(),
     ]);
-    return Response.json({ candidates: queue.results, rankings: rankings.results });
+    return Response.json({ candidates: queue.results, rankings: rankings.results, history: history.results });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Database error" }, { status: 500 });
   }

@@ -17,6 +17,9 @@ MVP para descobrir, classificar, validar e ranquear vídeos de speedrun de Grand
 - fila e rankings persistentes no painel hospedado com D1;
 - aprovação e rejeição gravadas pela API do painel;
 - dashboard analítico com KPIs, cobertura por dungeon e matriz de lacunas por personagem;
+- histórico cronológico das melhorias de recorde por personagem e dungeon;
+- interface em português, inglês, coreano e tailandês;
+- parser multilíngue com aliases regionais, incluindo Azin/Asin, coreano e tailandês;
 - testes automatizados dos três títulos fornecidos.
 
 ## Interface
@@ -65,8 +68,9 @@ As instruções completas de banco e ingestão estão em `backend/README.md`.
 ## Próximas integrações
 
 1. Validar os candidatos importados das demais dungeons.
-2. Completar a modelagem de rankings por pontuação para LoJ Unlimited.
-3. Retomar o OCR quando uma sessão do YouTube puder ser configurada.
+2. Adicionar conectores experimentais para plataformas asiáticas com acesso público estável.
+3. Completar a modelagem de rankings por pontuação para LoJ Unlimited.
+4. Retomar o OCR quando uma sessão do YouTube puder ser configurada.
 
 A variável `YOUTUBE_API_KEY` deve ser configurada apenas no ambiente local ou de hospedagem. Nunca salve a chave no Git.
 

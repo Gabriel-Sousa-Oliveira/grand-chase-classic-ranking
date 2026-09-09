@@ -157,7 +157,7 @@ jobs:
           curl --fail-with-body --retry 2 \
             -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
             https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates \
-            | jq '{candidates: [], rankings: (.rankings // [])}' \
+            | jq '{candidates: [], rankings: (.rankings // []), history: (.history // [])}' \
             > vercel-app/public/candidates.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

@@ -20,3 +20,10 @@ test("routes titles without a time to manual/OCR review", () => {
   assert.equal(apocalypse.noPotions, true);
 });
 
+test("parses Korean and Thai titles plus the Azin alias", () => {
+  const korean = parseRunTitle("그랜드체이스 클래식 아신 공허 침공 3층 01:07");
+  assert.deepEqual([korean.character, korean.category, korean.floor, korean.timeMs], ["Asin", "void_invasion", 3, 67_000]);
+  const thai = parseRunTitle("แกรนด์เชส คลาสสิก อาซิน วอยด์ อินเวชัน 3ชั้น 01:08");
+  assert.deepEqual([thai.character, thai.category, thai.floor, thai.timeMs], ["Asin", "void_invasion", 3, 68_000]);
+  assert.equal(parseRunTitle("Azin Void Invasion 3F 01:09").character, "Asin");
+});

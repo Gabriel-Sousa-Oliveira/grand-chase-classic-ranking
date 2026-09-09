@@ -19,6 +19,14 @@ DEFAULT_SEARCH_QUERIES = (
     "Grand Chase Classic Vazio Pesadelo",
     "Grand Chase Classic Void Apocalypse",
     "Grand Chase Classic Vazio Apocalipse",
+    "그랜드체이스 클래식 공허 침공",
+    "그랜드체이스 클래식 공허 잠식",
+    "그랜드체이스 클래식 공허 악몽",
+    "그랜드체이스 클래식 공허 종말",
+    "แกรนด์เชส คลาสสิก วอยด์ อินเวชัน",
+    "แกรนด์เชส คลาสสิก วอยด์ เทนต์",
+    "แกรนด์เชส คลาสสิก วอยด์ ไนต์แมร์",
+    "แกรนด์เชส คลาสสิก วอยด์ อะพอคคาลิปส์",
 )
 
 CHARACTER_SEARCH_NAMES = (

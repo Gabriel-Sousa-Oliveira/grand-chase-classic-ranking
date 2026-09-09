@@ -60,7 +60,7 @@ CHARACTERS = {
     "sieghart": "Sieghart", "mari": "Mari", "dio": "Dio", "zero": "Zero",
     "ley/rey": "Ley/Rey", "rey/ley": "Ley/Rey", "rufus/lupus": "Rufus/Lupus",
     "lupus/rufus": "Rufus/Lupus", "rin/lin": "Rin/Lin", "l-rin": "Rin/Lin",
-    "d-rin": "Rin/Lin", "asin": "Asin", "lime/holy": "Lime/Holy",
+    "d-rin": "Rin/Lin", "asin": "Asin", "azin": "Asin", "lime/holy": "Lime/Holy",
     "holy/lime": "Lime/Holy", "edel": "Edel", "veigas": "Veigas", "uno": "Uno",
     "decanee": "Decanee", "kallia": "Kallia", "ai": "Ai", "iris": "Iris", "ereb": "Ereb",
 }

@@ -8,8 +8,12 @@ import unicodedata
 
 
 def _plain(value: str) -> str:
-    normalized = unicodedata.normalize("NFKD", unescape(value).casefold())
-    return " ".join("".join(c for c in normalized if not unicodedata.combining(c)).split())
+    normalized = unicodedata.normalize("NFKC", unescape(value).casefold())
+    plain = []
+    for character in normalized:
+        decomposed = unicodedata.normalize("NFD", character)
+        plain.append(decomposed[0] if decomposed[0].isascii() and decomposed[0].isalpha() else character)
+    return " ".join("".join(plain).split())
 
 
 CHARACTER_ALIASES = {
@@ -23,6 +27,20 @@ CHARACTER_ALIASES = {
     "decanee": "Decanee", "decane": "Decanee", "kallia": "Kallia", "ai": "Ai", "iris": "Iris",
     "azin": "Asin",
     "ereb": "Ereb",
+    "엘리시스": "Elesis", "리르": "Lire", "아르메": "Arme", "라스": "Lass",
+    "라이언": "Ryan", "로난": "Ronan", "에이미": "Amy", "진": "Jin",
+    "지크하트": "Sieghart", "마리": "Mari", "디오": "Dio", "제로": "Zero",
+    "레이": "Ley/Rey", "루퍼스": "Rufus/Lupus", "린": "Rin/Lin", "아신": "Asin",
+    "라임": "Lime/Holy", "에델": "Edel", "베이가스": "Veigas", "우노": "Uno",
+    "데카네": "Decanee", "칼리아": "Kallia", "아이": "Ai", "아이리스": "Iris",
+    "에레브": "Ereb",
+    "เอลิซิส": "Elesis", "ลีร์": "Lire", "อาร์เม": "Arme", "ลาส": "Lass",
+    "ไรอัน": "Ryan", "โรแนน": "Ronan", "เอมี่": "Amy", "จิน": "Jin",
+    "ซิกฮาร์ท": "Sieghart", "มารี": "Mari", "ดิโอ": "Dio", "ซีโร่": "Zero",
+    "เลย์": "Ley/Rey", "ลูฟัส": "Rufus/Lupus", "ริน": "Rin/Lin", "อาซิน": "Asin",
+    "ไลม์": "Lime/Holy", "เอเดล": "Edel", "เวกัส": "Veigas", "อูโน": "Uno",
+    "เดคานี": "Decanee", "คัลเลีย": "Kallia", "ไอ": "Ai", "ไอริส": "Iris",
+    "เอเรบ": "Ereb",
 }
 
 CATEGORY_ALIASES = {
@@ -39,6 +57,14 @@ CATEGORY_ALIASES = {
     "duel 4": "duel_4", "duelo 4": "duel_4",
     "loj unlimited": "loj_unlimited", "land of judgment unlimited": "loj_unlimited",
     "terra do julgamento ilimitada": "loj_unlimited",
+    "공허 침공": "void_invasion", "보이드 침공": "void_invasion",
+    "공허 잠식": "void_taint", "보이드 잠식": "void_taint",
+    "공허 악몽": "void_nightmare", "보이드 악몽": "void_nightmare",
+    "공허 종말": "void_apocalypse", "보이드 아포칼립스": "void_apocalypse",
+    "วอยด์ บุก": "void_invasion", "วอยด์ อินเวชัน": "void_invasion",
+    "วอยด์ ปนเปื้อน": "void_taint", "วอยด์ เทนต์": "void_taint",
+    "วอยด์ ฝันร้าย": "void_nightmare", "วอยด์ ไนต์แมร์": "void_nightmare",
+    "วอยด์ วันสิ้นโลก": "void_apocalypse", "วอยด์ อะพอคคาลิปส์": "void_apocalypse",
 }
 
 NUMBERED_VOID_FLOORS = {
@@ -76,7 +102,8 @@ class ParsedRun:
 
 def _match_alias(text: str, aliases: dict[str, str]) -> str | None:
     matches = [(alias, canonical) for alias, canonical in aliases.items()
-               if re.search(rf"(?<!\w){re.escape(alias)}(?!\w)", text)]
+               if ((not alias.isascii() and alias in text)
+                   or (alias.isascii() and re.search(rf"(?<!\w){re.escape(alias)}(?!\w)", text)))]
     if not matches:
         return None
     return max(matches, key=lambda item: len(item[0]))[1]
@@ -97,10 +124,10 @@ def _extract_time(title: str) -> int | None:
 
 def parse_title(title: str) -> ParsedRun:
     text = _plain(title)
-    words = " ".join(re.sub(r"[^\w]+", " ", text).split())
+    words = " ".join(re.sub(r"[^\w\u0E31-\u0E4E]+", " ", text).split())
     character = _match_alias(words, CHARACTER_ALIASES)
     category = _match_alias(words, CATEGORY_ALIASES)
-    floor_match = re.search(r"(?<!\d)([1-9])\s*(?:f|andar)(?!\w)", words)
+    floor_match = re.search(r"(?<!\d)([1-9])\s*(?:f|andar|층|ชั้น)(?!\w)", text)
     floor = int(floor_match.group(1)) if floor_match else None
     if floor is None:
         numbered_void = next((alias for alias in NUMBERED_VOID_FLOORS

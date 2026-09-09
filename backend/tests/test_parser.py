@@ -37,8 +37,21 @@ class ParserTests(unittest.TestCase):
 
     def test_regional_character_aliases(self):
         self.assertEqual(parse_title("Azin Vazio Invasão 3F 1:00").character, "Asin")
+        self.assertEqual(parse_title("Asin Void Invasion 3F 1:00").character, "Asin")
         self.assertEqual(parse_title("Decane Void Invasion 3F 1:00").character, "Decanee")
         self.assertEqual(parse_title("Uno Void Invasion 3F 1:00").character, "Uno")
+
+    def test_korean_title_is_parsed_without_romanization(self):
+        run = parse_title("그랜드체이스 클래식 아신 공허 침공 3층 01:07")
+        self.assertEqual((run.character, run.category, run.floor, run.time_ms),
+                         ("Asin", "void_invasion", 3, 67_000))
+        self.assertEqual(run.status, "ready_for_review")
+
+    def test_thai_title_is_parsed_without_romanization(self):
+        run = parse_title("แกรนด์เชส คลาสสิก อาซิน วอยด์ อินเวชัน 3ชั้น 01:08")
+        self.assertEqual((run.character, run.category, run.floor, run.time_ms),
+                         ("Asin", "void_invasion", 3, 68_000))
+        self.assertEqual(run.status, "ready_for_review")
 
     def test_numbered_void_title_from_youtube(self):
         run = parse_title("Grand Chase Classic - Void 1 Veigas Speedrun 1:27 (No Pots)")

@@ -33,6 +33,14 @@ class SyntaxiiImportTests(unittest.TestCase):
         )
         self.assertEqual(parse_sheet(source, DUNGEONS[0]), [])
 
+    def test_azin_and_asin_share_the_same_canonical_character(self):
+        template = (
+            "Position,Character,Player,Time,Time (array),Speedrun video:,Post date (dd/mm/yyyy)\n"
+            "1,{name},Player,01:00,60.00,https://www.youtube.com/watch?v=MKfOdv2dBjk,03/07/2026\n"
+        )
+        self.assertEqual(parse_sheet(template.format(name="Azin"), DUNGEONS[0])[0]["character"], "Asin")
+        self.assertEqual(parse_sheet(template.format(name="Asin"), DUNGEONS[0])[0]["character"], "Asin")
+
 
 if __name__ == "__main__":
     unittest.main()
