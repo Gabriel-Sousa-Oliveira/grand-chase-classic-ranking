@@ -97,7 +97,7 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 fill-ranking --days 365 --max-results 25 > ../data/last-run.json
 
       - name: Install OCR tools
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]')) }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr
@@ -105,7 +105,7 @@ jobs:
             "yt-dlp[default,curl-cffi]" "bgutil-ytdlp-pot-provider==2.0.0"
 
       - name: Start anonymous PO Token provider
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]')) }}
         run: |
           docker run --name bgutil-provider --detach --init \
             --publish 127.0.0.1:4416:4416 \
@@ -120,7 +120,7 @@ jobs:
           exit 1
 
       - name: Load YouTube session
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]')) }}
         env:
           YOUTUBE_COOKIES_B64: ${{ secrets.YOUTUBE_COOKIES_B64 }}
         run: |
@@ -131,7 +131,7 @@ jobs:
           fi
 
       - name: Read missing times from video frames
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]')) }}
         env:
           YOUTUBE_USE_PO_TOKEN: "1"
         run: |
@@ -139,7 +139,7 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue --limit 8 > ../data/last-run.json
 
       - name: Remove temporary YouTube session
-        if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' }}
+        if: ${{ always() && ((github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]'))) }}
         run: rm -f -- "$RUNNER_TEMP/youtube-cookies.txt"
 
       - name: Add report to workflow summary
