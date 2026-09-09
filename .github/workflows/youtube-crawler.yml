@@ -40,6 +40,7 @@ jobs:
     env:
       SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
       SITE_ACCESS_TOKEN: ${{ secrets.SITE_ACCESS_TOKEN }}
+      YOUTUBE_COOKIES_B64: ${{ secrets.YOUTUBE_COOKIES_B64 }}
     steps:
       - uses: actions/checkout@v4
 
@@ -98,9 +99,7 @@ jobs:
           python -m pip install --disable-pip-version-check --upgrade --pre "yt-dlp[default,curl-cffi]"
 
       - name: Load YouTube session
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' && secrets.YOUTUBE_COOKIES_B64 != '' }}
-        env:
-          YOUTUBE_COOKIES_B64: ${{ secrets.YOUTUBE_COOKIES_B64 }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' && env.YOUTUBE_COOKIES_B64 != '' }}
         run: |
           echo "$YOUTUBE_COOKIES_B64" | base64 --decode > "$RUNNER_TEMP/youtube-cookies.txt"
           chmod 600 "$RUNNER_TEMP/youtube-cookies.txt"
