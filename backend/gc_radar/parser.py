@@ -25,15 +25,26 @@ CHARACTER_ALIASES = {
 }
 
 CATEGORY_ALIASES = {
+    "void 1": "void_invasion", "vazio 1": "void_invasion",
     "void invasion": "void_invasion", "vazio invasao": "void_invasion",
+    "void 2": "void_taint", "vazio 2": "void_taint",
     "void taint": "void_taint", "vazio contaminacao": "void_taint",
+    "void 3": "void_nightmare", "vazio 3": "void_nightmare",
     "void nightmare": "void_nightmare", "vazio pesadelo": "void_nightmare",
+    "void 4": "void_apocalypse", "vazio 4": "void_apocalypse",
     "void apocalypse": "void_apocalypse", "vazio apocalipse": "void_apocalypse",
     "tower of disappearance": "tower_of_disappearance",
     "torre do desaparecimento": "tower_of_disappearance",
     "duel 4": "duel_4", "duelo 4": "duel_4",
     "loj unlimited": "loj_unlimited", "land of judgment unlimited": "loj_unlimited",
     "terra do julgamento ilimitada": "loj_unlimited",
+}
+
+NUMBERED_VOID_FLOORS = {
+    "void 1": 3, "vazio 1": 3,
+    "void 2": 3, "vazio 2": 3,
+    "void 3": 4, "vazio 3": 4,
+    "void 4": 3, "vazio 4": 3,
 }
 
 TIME_PATTERNS = (
@@ -90,6 +101,10 @@ def parse_title(title: str) -> ParsedRun:
     category = _match_alias(words, CATEGORY_ALIASES)
     floor_match = re.search(r"(?<!\d)([1-9])\s*(?:f|andar)(?!\w)", words)
     floor = int(floor_match.group(1)) if floor_match else None
+    if floor is None:
+        numbered_void = next((alias for alias in NUMBERED_VOID_FLOORS
+                              if re.search(rf"(?<!\w){re.escape(alias)}(?!\w)", words)), None)
+        floor = NUMBERED_VOID_FLOORS.get(numbered_void) if numbered_void else None
     time_ms = _extract_time(text)
     solo = True if re.search(r"(?<!\w)solo(?!\w)", text) else None
     no_potions = True if re.search(r"sem\s+pocoes|no\s+pot(?:ion)?s?", text) else None

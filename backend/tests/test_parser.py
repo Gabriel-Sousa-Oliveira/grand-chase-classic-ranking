@@ -35,6 +35,13 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(parse_title("Decane Void Invasion 3F 1:00").character, "Decanee")
         self.assertEqual(parse_title("Uno Void Invasion 3F 1:00").character, "Uno")
 
+    def test_numbered_void_title_from_youtube(self):
+        run = parse_title("Grand Chase Classic - Void 1 Veigas Speedrun 1:27 (No Pots)")
+        self.assertEqual((run.character, run.category, run.floor, run.time_ms),
+                         ("Veigas", "void_invasion", 3, 87_000))
+        self.assertTrue(run.no_potions)
+        self.assertEqual(run.status, "ready_for_review")
+
 
 if __name__ == "__main__":
     unittest.main()

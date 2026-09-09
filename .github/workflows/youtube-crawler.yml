@@ -64,6 +64,9 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 add \
             https://youtu.be/aTglQvuekIE --channel Borkaz \
             --title "Lupus | Vazio (Apocalipse) 3F Solo Sem poções | Grand Chase Classic" > /dev/null
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 add \
+            https://youtu.be/CD3mVzdsp0M --channel "Mira Lei" \
+            --title "Grand Chase Classic - Void 1 Veigas Speedrun 1:27 (No Pots)" > /dev/null
 
       - name: Sync public Syntaxii leaderboards
         if: ${{ github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'ocr-only') }}
