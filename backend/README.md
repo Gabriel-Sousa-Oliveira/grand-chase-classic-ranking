@@ -67,3 +67,5 @@ Para executar localmente, instale `yt-dlp`, `ffmpeg` e `tesseract`, e rode:
 ~~~bash
 python -m gc_radar.cli --db gc_radar.sqlite3 ocr-queue --limit 8
 ~~~
+
+Downloads executados em datacenters podem exigir login do YouTube. Nesse caso, exporte os cookies no formato Netscape, converta o arquivo para Base64 e salve o conteúdo no segredo `YOUTUBE_COOKIES_B64` do GitHub. O workflow reconstrói o arquivo somente durante a execução; ele não entra nos artefatos nem no repositório.

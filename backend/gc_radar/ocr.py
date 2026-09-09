@@ -1,6 +1,7 @@
 """Conservative OCR extraction for completion times shown inside YouTube videos."""
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
@@ -83,13 +84,18 @@ def _require_tools() -> None:
 
 def _download_excerpt(video_url: str, destination: Path) -> Path:
     output = destination / "video.%(ext)s"
-    _run([
+    command = [
         "yt-dlp", "--no-playlist", "--no-warnings", "--quiet",
         "--js-runtimes", "node", "--remote-components", "ejs:npm",
         "--impersonate", "chrome",
         "-f", "worstvideo[height>=360]/worstvideo/bestvideo",
-        "-o", str(output), video_url,
-    ], timeout=360)
+        "-o", str(output),
+    ]
+    cookies_file = os.environ.get("YOUTUBE_COOKIES_FILE")
+    if cookies_file:
+        command.extend(["--cookies", cookies_file])
+    command.append(video_url)
+    _run(command, timeout=360)
     videos = [path for path in destination.glob("video.*") if path.is_file()]
     if not videos:
         raise RuntimeError("yt-dlp did not create a video file")
