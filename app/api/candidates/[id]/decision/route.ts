@@ -14,7 +14,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const candidate = await database.prepare("SELECT * FROM candidates WHERE id = ?").bind(candidateId).first<Record<string, unknown>>();
   if (!candidate) return Response.json({ error: "Candidate not found" }, { status: 404 });
   const timeMs = payload.time_ms ?? candidate.time_ms as number | null;
-  if (payload.approved && (!candidate.character || !candidate.category || !candidate.floor || !timeMs)) {
+  if (payload.approved && (!candidate.character || !candidate.category
+    || candidate.floor === null || candidate.floor === undefined || !timeMs)) {
     return Response.json({ error: "Complete character, category, floor and time before approval" }, { status: 400 });
   }
   const status = payload.approved ? "approved" : "rejected";

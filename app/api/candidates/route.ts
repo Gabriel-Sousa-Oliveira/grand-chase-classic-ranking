@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import { shouldAutoApproveTitle } from "@/lib/candidate-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -21,10 +22,17 @@ export async function GET() {
         published_at, character, category, floor, time_ms, confidence, status, era_key
         FROM candidates WHERE status IN ('ready_for_review','time_required','classification_required')
         ORDER BY confidence DESC, created_at ASC LIMIT 500`).all(),
-      db().prepare(`SELECT r.id, r.character, r.category, r.floor, r.time_ms,
-        r.player_nick, r.era_key, c.video_url, c.channel
-        FROM rankings r JOIN candidates c ON c.id = r.candidate_id
-        ORDER BY r.era_key DESC, r.category, r.floor, r.character, r.time_ms`).all(),
+      db().prepare(`SELECT id, character, category, floor, time_ms,
+        player_nick, era_key, video_url, channel FROM (
+          SELECT r.id, r.character, r.category, r.floor, r.time_ms,
+            r.player_nick, r.era_key, c.video_url, c.channel,
+            ROW_NUMBER() OVER (
+              PARTITION BY r.era_key, r.category, r.floor, r.character, r.player_nick
+              ORDER BY r.time_ms ASC, r.approved_at ASC, r.id ASC
+            ) AS nick_position
+          FROM rankings r JOIN candidates c ON c.id = r.candidate_id
+        ) WHERE nick_position = 1
+        ORDER BY era_key DESC, category, floor, character, time_ms`).all(),
     ]);
     return Response.json({ candidates: queue.results, rankings: rankings.results });
   } catch (error) {
@@ -42,8 +50,11 @@ export async function POST(request: Request) {
   const items = Array.isArray(payload.candidates) ? payload.candidates.slice(0, 500) : [];
   let inserted = 0;
   let updated = 0;
+  let autoApproved = 0;
   for (const item of items) {
     if (!item.video_id || !item.video_url || !item.title || !item.status) continue;
+    const autoApprove = shouldAutoApproveTitle(item);
+    const effectiveStatus = autoApprove ? "approved" : item.status;
     const rawMetadata = typeof item.raw_metadata === "string"
       ? item.raw_metadata
       : JSON.stringify(item.raw_metadata ?? {});
@@ -54,27 +65,38 @@ export async function POST(request: Request) {
       .bind(item.video_id, item.video_url, item.title, item.channel ?? null,
         item.player_nick ?? item.channel ?? null, item.published_at ?? null,
         item.character ?? null, item.category ?? null, item.floor ?? null,
-        item.time_ms ?? null, item.confidence ?? 0, item.status,
+        item.time_ms ?? null, item.confidence ?? 0, effectiveStatus,
         item.era_key ?? "current", rawMetadata).run();
     if ((result.meta.changes ?? 0) > 0) {
       inserted += 1;
-      continue;
+    } else {
+      const update = await db().prepare(`UPDATE candidates SET
+          video_url = ?, title = ?, channel = COALESCE(?, channel),
+          player_nick = COALESCE(?, player_nick), published_at = COALESCE(?, published_at),
+          character = COALESCE(?, character), category = COALESCE(?, category),
+          floor = COALESCE(?, floor), time_ms = ?, confidence = ?, status = ?, raw_metadata = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE video_id = ?
+          AND ? IS NOT NULL
+          AND status IN ('ready_for_review','time_required','classification_required')`)
+        .bind(item.video_url, item.title, item.channel ?? null,
+          item.player_nick ?? item.channel ?? null, item.published_at ?? null,
+          item.character ?? null, item.category ?? null, item.floor ?? null,
+          item.time_ms ?? null, item.confidence ?? 0, effectiveStatus,
+          rawMetadata, item.video_id, item.time_ms ?? null).run();
+      updated += update.meta.changes ?? 0;
     }
-    const update = await db().prepare(`UPDATE candidates SET
-        video_url = ?, title = ?, channel = COALESCE(?, channel),
-        player_nick = COALESCE(?, player_nick), published_at = COALESCE(?, published_at),
-        character = COALESCE(?, character), category = COALESCE(?, category),
-        floor = COALESCE(?, floor), time_ms = ?, confidence = ?, status = ?, raw_metadata = ?,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE video_id = ?
-        AND ? IS NOT NULL
-        AND status IN ('ready_for_review','time_required','classification_required')`)
-      .bind(item.video_url, item.title, item.channel ?? null,
-        item.player_nick ?? item.channel ?? null, item.published_at ?? null,
-        item.character ?? null, item.category ?? null, item.floor ?? null,
-        item.time_ms ?? null, item.confidence ?? 0, item.status,
-        rawMetadata, item.video_id, item.time_ms ?? null).run();
-    updated += update.meta.changes ?? 0;
+    if (autoApprove) {
+      const ranking = await db().prepare(`INSERT OR IGNORE INTO rankings
+        (candidate_id, character, category, floor, time_ms, player_nick, era_key)
+        SELECT id, character, category, floor, time_ms,
+          COALESCE(player_nick, channel, 'Desconhecido'), era_key
+        FROM candidates
+        WHERE video_id = ? AND status = 'approved'
+          AND character IS NOT NULL AND category IS NOT NULL
+          AND floor IS NOT NULL AND time_ms IS NOT NULL`).bind(item.video_id).run();
+      autoApproved += ranking.meta.changes ?? 0;
+    }
   }
-  return Response.json({ received: items.length, inserted, updated });
+  return Response.json({ received: items.length, inserted, updated, auto_approved: autoApproved });
 }
