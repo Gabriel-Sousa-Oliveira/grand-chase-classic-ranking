@@ -41,8 +41,12 @@ export async function POST(request: Request) {
   const payload = await request.json() as { candidates?: IncomingCandidate[] };
   const items = Array.isArray(payload.candidates) ? payload.candidates.slice(0, 500) : [];
   let inserted = 0;
+  let updated = 0;
   for (const item of items) {
     if (!item.video_id || !item.video_url || !item.title || !item.status) continue;
+    const rawMetadata = typeof item.raw_metadata === "string"
+      ? item.raw_metadata
+      : JSON.stringify(item.raw_metadata ?? {});
     const result = await db().prepare(`INSERT OR IGNORE INTO candidates
       (video_id, video_url, title, channel, player_nick, published_at, character,
        category, floor, time_ms, confidence, status, era_key, raw_metadata)
@@ -51,8 +55,20 @@ export async function POST(request: Request) {
         item.player_nick ?? item.channel ?? null, item.published_at ?? null,
         item.character ?? null, item.category ?? null, item.floor ?? null,
         item.time_ms ?? null, item.confidence ?? 0, item.status,
-        item.era_key ?? "current", JSON.stringify(item.raw_metadata ?? {})).run();
-    inserted += result.meta.changes ?? 0;
+        item.era_key ?? "current", rawMetadata).run();
+    if ((result.meta.changes ?? 0) > 0) {
+      inserted += 1;
+      continue;
+    }
+    const update = await db().prepare(`UPDATE candidates SET
+        time_ms = ?, confidence = ?, status = ?, raw_metadata = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE video_id = ?
+        AND ? IS NOT NULL
+        AND status IN ('ready_for_review','time_required','classification_required')`)
+      .bind(item.time_ms ?? null, item.confidence ?? 0, item.status,
+        rawMetadata, item.video_id, item.time_ms ?? null).run();
+    updated += update.meta.changes ?? 0;
   }
-  return Response.json({ received: items.length, inserted });
+  return Response.json({ received: items.length, inserted, updated });
 }
