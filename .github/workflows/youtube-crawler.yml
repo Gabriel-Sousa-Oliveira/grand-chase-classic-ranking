@@ -67,6 +67,9 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 add \
             https://youtu.be/CD3mVzdsp0M --channel "Mira Lei" \
             --title "Grand Chase Classic - Void 1 Veigas Speedrun 1:27 (No Pots)" > /dev/null
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 add \
+            https://youtu.be/5D4_AfVl2eU --channel Falonso \
+            --title "Uno Void Invasion 3F Solo | Grand Chase Classic" > /dev/null
 
       - name: Sync public Syntaxii leaderboards
         if: ${{ github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'ocr-only') }}
