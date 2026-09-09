@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Prévia pública do ranking comunitário de speedruns do Grand Chase Classic.">
+  <title>GC Run Radar — Ranking Grand Chase Classic</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span>◎</span><div><strong>GC Run Radar</strong><small>Ranking comunitário</small></div></a>
+    <a class="github" href="https://github.com/Gabriel-Sousa-Oliveira/grand-chase-classic-ranking" target="_blank" rel="noreferrer">Ver projeto no GitHub ↗</a>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div>
+        <p class="eyebrow">GRAND CHASE CLASSIC · VOID INVASION 3F</p>
+        <h1>Os melhores tempos,<br><span>separados por personagem.</span></h1>
+        <p class="lead">Vídeos públicos são encontrados automaticamente. Cada resultado permanece como candidato até passar pela validação humana.</p>
+      </div>
+      <div class="radar" aria-hidden="true"><i></i><b>42</b><small>vídeos encontrados</small></div>
+    </section>
+
+    <section class="notice">
+      <span>PRÉVIA PÚBLICA</span>
+      <p>Os tempos abaixo são experimentais e ainda não representam recordes oficialmente aprovados.</p>
+    </section>
+
+    <section class="metrics" aria-label="Resumo da coleta">
+      <article><small>CANDIDATOS DA DUNGEON</small><strong>40</strong><span>Void Invasion · 3F</span></article>
+      <article><small>PERSONAGENS COBERTOS</small><strong>17<span>/25</span></strong><span>com ao menos um vídeo</span></article>
+      <article><small>TEMPOS DETECTADOS</small><strong>14</strong><span>aguardando revisão</span></article>
+    </section>
+
+    <section class="ranking">
+      <div class="section-title"><div><p class="eyebrow">RECORTE ATUAL</p><h2>Melhores candidatos detectados</h2></div><span>Atualizado em 09/09/2026</span></div>
+      <div class="boards" id="boards"></div>
+    </section>
+
+    <section class="pipeline">
+      <div><p class="eyebrow">COMO FUNCIONA</p><h2>Da busca até o ranking</h2></div>
+      <ol>
+        <li><b>01</b><strong>Descoberta</strong><span>O crawler procura vídeos públicos no YouTube.</span></li>
+        <li><b>02</b><strong>Extração</strong><span>Título e OCR identificam personagem, mapa e tempo.</span></li>
+        <li><b>03</b><strong>Validação</strong><span>Uma pessoa confere as regras diretamente no vídeo.</span></li>
+        <li><b>04</b><strong>Ranking</strong><span>O melhor tempo de cada nick disputa o top 4.</span></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer><span>Projeto em desenvolvimento</span><a href="https://syntax817.github.io/leaderboard/" target="_blank" rel="noreferrer">Inspirado no Grand Chase Leaderboards, de Syntaxii ↗</a></footer>
+  <script src="/app.js"></script>
+</body>
+</html>

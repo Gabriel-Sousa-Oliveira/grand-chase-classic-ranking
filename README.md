@@ -25,6 +25,18 @@ npm run dev
 
 Acesse o menu **Parser Lab** e cole um título. O resultado muda imediatamente.
 
+## Prévia pública na Vercel
+
+O repositório inclui uma versão pública, estática e somente leitura do ranking atual.
+Ela não expõe o painel administrativo, tokens, cookies ou controles de aprovação.
+
+1. Abra o [importador da Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FGabriel-Sousa-Oliveira%2Fgrand-chase-classic-ranking).
+2. Entre com o GitHub e escolha **Deploy**.
+
+O arquivo `vercel.json` já define o build e a pasta de saída. Nenhuma variável de
+ambiente é necessária para esta prévia. Novos pushes na branch `main` geram uma
+nova publicação automaticamente depois que o projeto é importado na Vercel.
+
 ## Núcleo Python
 
 ~~~bash

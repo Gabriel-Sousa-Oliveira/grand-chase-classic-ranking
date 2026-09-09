@@ -33,6 +33,7 @@ yarn-error.log*
 
 # vercel
 .vercel
+/vercel-dist/
 
 # typescript
 next-env.d.ts
