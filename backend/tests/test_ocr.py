@@ -1,6 +1,10 @@
+import os
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
-from gc_radar.ocr import choose_consensus, extract_times
+from gc_radar.ocr import _download_excerpt, choose_consensus, extract_times
 
 
 class OcrTextTests(unittest.TestCase):
@@ -25,6 +29,17 @@ class OcrTextTests(unittest.TestCase):
         self.assertIsNone(choose_consensus([
             ("001", 92), ("002", 92), ("003", 78), ("004", 78),
         ]))
+
+    def test_anonymous_po_token_uses_mweb_client(self):
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch.dict(os.environ, {"YOUTUBE_USE_PO_TOKEN": "1"}, clear=True), \
+                patch("gc_radar.ocr._run") as run:
+            video = Path(temporary) / "video.mp4"
+            video.touch()
+            self.assertEqual(_download_excerpt("https://youtu.be/example", Path(temporary)), video)
+            command = run.call_args.args[0]
+            self.assertIn("youtube:player_client=mweb", command)
+            self.assertNotIn("--cookies", command)
 
 
 if __name__ == "__main__":

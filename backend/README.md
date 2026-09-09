@@ -68,4 +68,4 @@ Para executar localmente, instale `yt-dlp`, `ffmpeg` e `tesseract`, e rode:
 python -m gc_radar.cli --db gc_radar.sqlite3 ocr-queue --limit 8
 ~~~
 
-Downloads executados em datacenters podem exigir login do YouTube. Nesse caso, exporte os cookies no formato Netscape, converta o arquivo para Base64 e salve o conteúdo no segredo `YOUTUBE_COOKIES_B64` do GitHub. O workflow reconstrói o arquivo somente durante a execução; ele não entra nos artefatos nem no repositório.
+No GitHub Actions, o modo OCR inicia um provedor BgUtils 2.0.0 em `localhost` e usa o cliente `mweb` para obter PO Tokens anonimamente. Cookies não são obrigatórios. Se o YouTube ainda bloquear o IP do runner, um arquivo Netscape pode ser convertido para Base64 e salvo no segredo opcional `YOUTUBE_COOKIES_B64`. O segredo fica disponível somente na etapa que reconstrói o arquivo temporário, removido após o OCR; ele não entra nos artefatos nem no repositório.

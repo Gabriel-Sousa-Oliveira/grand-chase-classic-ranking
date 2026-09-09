@@ -91,6 +91,8 @@ def _download_excerpt(video_url: str, destination: Path) -> Path:
         "-f", "worstvideo[height>=360]/worstvideo/bestvideo",
         "-o", str(output),
     ]
+    if os.environ.get("YOUTUBE_USE_PO_TOKEN") == "1":
+        command.extend(["--extractor-args", "youtube:player_client=mweb"])
     cookies_file = os.environ.get("YOUTUBE_COOKIES_FILE")
     if cookies_file:
         command.extend(["--cookies", cookies_file])
