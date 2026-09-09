@@ -68,7 +68,11 @@ def choose_consensus(observations: list[tuple[str, int]]) -> OcrResult | None:
 
 
 def _run(command: list[str], timeout: int = 240) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, check=True, capture_output=True, text=True, timeout=timeout)
+    try:
+        return subprocess.run(command, check=True, capture_output=True, text=True, timeout=timeout)
+    except subprocess.CalledProcessError as error:
+        detail = (error.stderr or error.stdout or str(error)).strip()
+        raise RuntimeError(detail[-1200:]) from error
 
 
 def _require_tools() -> None:
@@ -81,6 +85,8 @@ def _download_excerpt(video_url: str, destination: Path) -> Path:
     output = destination / "video.%(ext)s"
     _run([
         "yt-dlp", "--no-playlist", "--no-warnings", "--quiet",
+        "--js-runtimes", "node", "--remote-components", "ejs:npm",
+        "--impersonate", "chrome",
         "-f", "worstvideo[height>=360]/worstvideo/bestvideo",
         "-o", str(output), video_url,
     ], timeout=360)

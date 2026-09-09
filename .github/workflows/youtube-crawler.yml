@@ -85,7 +85,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr
-          python -m pip install --disable-pip-version-check yt-dlp
+          python -m pip install --disable-pip-version-check --upgrade --pre "yt-dlp[default,curl-cffi]"
 
       - name: Read missing times from video frames
         run: |
