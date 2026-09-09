@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from html import unescape
 import re
 import unicodedata
 
 
 def _plain(value: str) -> str:
-    normalized = unicodedata.normalize("NFKD", value.casefold())
+    normalized = unicodedata.normalize("NFKD", unescape(value).casefold())
     return " ".join("".join(c for c in normalized if not unicodedata.combining(c)).split())
 
 

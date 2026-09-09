@@ -30,6 +30,11 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(parse_title("Ronan Void Invasion 3F 01:02.345").time_ms, 62_345)
         self.assertEqual(parse_title("Ronan Void Invasion 3F 1m 02s").time_ms, 62_000)
 
+    def test_decodes_youtube_html_entities_before_parsing(self):
+        run = parse_title("Rin | Vazio Invasão 3F 2&#39;08")
+        self.assertEqual(run.time_ms, 128_000)
+        self.assertEqual(run.status, "ready_for_review")
+
     def test_regional_character_aliases(self):
         self.assertEqual(parse_title("Azin Vazio Invasão 3F 1:00").character, "Asin")
         self.assertEqual(parse_title("Decane Void Invasion 3F 1:00").character, "Decanee")

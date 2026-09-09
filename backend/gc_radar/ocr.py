@@ -93,6 +93,9 @@ def _download_excerpt(video_url: str, destination: Path) -> Path:
     ]
     if os.environ.get("YOUTUBE_USE_PO_TOKEN") == "1":
         command.extend(["--extractor-args", "youtube:player_client=mweb"])
+        browser_path = os.environ.get("YOUTUBE_PO_BROWSER_PATH")
+        if browser_path:
+            command.extend(["--extractor-args", f"youtubepot-wpc:browser_path={browser_path}"])
     cookies_file = os.environ.get("YOUTUBE_COOKIES_FILE")
     if cookies_file:
         command.extend(["--cookies", cookies_file])

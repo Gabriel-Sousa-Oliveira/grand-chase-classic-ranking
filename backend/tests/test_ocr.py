@@ -41,6 +41,20 @@ class OcrTextTests(unittest.TestCase):
             self.assertIn("youtube:player_client=mweb", command)
             self.assertNotIn("--cookies", command)
 
+    def test_browser_po_token_uses_configured_chrome(self):
+        environment = {
+            "YOUTUBE_USE_PO_TOKEN": "1",
+            "YOUTUBE_PO_BROWSER_PATH": "/usr/bin/google-chrome",
+        }
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch.dict(os.environ, environment, clear=True), \
+                patch("gc_radar.ocr._run") as run:
+            video = Path(temporary) / "video.mp4"
+            video.touch()
+            _download_excerpt("https://youtu.be/example", Path(temporary))
+            command = run.call_args.args[0]
+            self.assertIn("youtubepot-wpc:browser_path=/usr/bin/google-chrome", command)
+
 
 if __name__ == "__main__":
     unittest.main()
