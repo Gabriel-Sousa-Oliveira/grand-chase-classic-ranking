@@ -16,6 +16,7 @@ MVP para descobrir, classificar, validar e ranquear vídeos de speedrun de Grand
 - carga histórica de 2026 preservada em uma era separada;
 - fila e rankings persistentes no painel hospedado com D1;
 - aprovação e rejeição gravadas pela API do painel;
+- dashboard analítico com KPIs, cobertura por dungeon e matriz de lacunas por personagem;
 - testes automatizados dos três títulos fornecidos.
 
 ## Interface
