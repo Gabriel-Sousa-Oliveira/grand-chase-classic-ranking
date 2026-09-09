@@ -93,6 +93,7 @@ def _download_excerpt(video_url: str, destination: Path) -> Path:
     ]
     if os.environ.get("YOUTUBE_USE_PO_TOKEN") == "1":
         command.extend(["--extractor-args", "youtube:player_client=mweb"])
+        # Browser-based providers can mint one video-bound token per download.
         browser_path = os.environ.get("YOUTUBE_PO_BROWSER_PATH")
         if browser_path:
             command.extend(["--extractor-args", f"youtubepot-wpc:browser_path={browser_path}"])
