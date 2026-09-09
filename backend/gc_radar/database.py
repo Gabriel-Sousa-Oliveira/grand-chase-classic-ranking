@@ -85,7 +85,7 @@ class CandidateRepository:
     def add(self, video_id: str, video_url: str, parsed: ParsedRun,
             channel: str | None = None, published_at: str | None = None,
             metadata: dict | None = None, player_nick: str | None = None,
-            era_key: str = "current") -> tuple[dict, bool]:
+            era_key: str = "current", enrich_existing: bool = False) -> tuple[dict, bool]:
         values = (video_id, video_url, parsed.title, channel, player_nick or channel,
                   published_at,
                   parsed.character, parsed.category, parsed.floor, parsed.time_ms,
@@ -103,6 +103,19 @@ class CandidateRepository:
             self.connection.commit()
             return self.get(cursor.lastrowid), True
         except sqlite3.IntegrityError:
+            if enrich_existing:
+                self.connection.execute("""UPDATE candidates SET
+                    video_url = ?, title = ?, channel = COALESCE(?, channel),
+                    player_nick = COALESCE(?, player_nick),
+                    published_at = COALESCE(?, published_at), character = ?, category = ?,
+                    floor = ?, time_ms = ?, confidence = ?, status = ?, era_key = ?,
+                    raw_metadata = ?, updated_at = CURRENT_TIMESTAMP
+                  WHERE video_id = ? AND status NOT IN ('approved', 'rejected')""",
+                  (video_url, parsed.title, channel, player_nick or channel, published_at,
+                   parsed.character, parsed.category, parsed.floor, parsed.time_ms,
+                   parsed.confidence, parsed.status, era_key,
+                   json.dumps(metadata or {}, ensure_ascii=False), video_id))
+                self.connection.commit()
             row = self.connection.execute(
                 "SELECT * FROM candidates WHERE video_id = ?", (video_id,)
             ).fetchone()

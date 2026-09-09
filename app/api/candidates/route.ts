@@ -20,7 +20,7 @@ export async function GET() {
       db().prepare(`SELECT id, video_id, video_url, title, channel, player_nick,
         published_at, character, category, floor, time_ms, confidence, status, era_key
         FROM candidates WHERE status IN ('ready_for_review','time_required','classification_required')
-        ORDER BY confidence DESC, created_at ASC LIMIT 100`).all(),
+        ORDER BY confidence DESC, created_at ASC LIMIT 500`).all(),
       db().prepare(`SELECT r.id, r.character, r.category, r.floor, r.time_ms,
         r.player_nick, r.era_key, c.video_url, c.channel
         FROM rankings r JOIN candidates c ON c.id = r.candidate_id
@@ -61,12 +61,18 @@ export async function POST(request: Request) {
       continue;
     }
     const update = await db().prepare(`UPDATE candidates SET
-        time_ms = ?, confidence = ?, status = ?, raw_metadata = ?,
+        video_url = ?, title = ?, channel = COALESCE(?, channel),
+        player_nick = COALESCE(?, player_nick), published_at = COALESCE(?, published_at),
+        character = COALESCE(?, character), category = COALESCE(?, category),
+        floor = COALESCE(?, floor), time_ms = ?, confidence = ?, status = ?, raw_metadata = ?,
         updated_at = CURRENT_TIMESTAMP
       WHERE video_id = ?
         AND ? IS NOT NULL
         AND status IN ('ready_for_review','time_required','classification_required')`)
-      .bind(item.time_ms ?? null, item.confidence ?? 0, item.status,
+      .bind(item.video_url, item.title, item.channel ?? null,
+        item.player_nick ?? item.channel ?? null, item.published_at ?? null,
+        item.character ?? null, item.category ?? null, item.floor ?? null,
+        item.time_ms ?? null, item.confidence ?? 0, item.status,
         rawMetadata, item.video_id, item.time_ms ?? null).run();
     updated += update.meta.changes ?? 0;
   }

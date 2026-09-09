@@ -12,6 +12,8 @@ MVP para descobrir, classificar, validar e ranquear vídeos de speedrun de Grand
 - proteção contra vídeo duplicado por `video_id`;
 - crawler da YouTube Data API v3 com consultas em português e inglês, sem chave no código;
 - execução automática duas vezes ao dia pelo GitHub Actions;
+- sincronização sem cookies das sete categorias públicas do Syntaxii;
+- carga histórica de 2026 preservada em uma era separada;
 - fila e rankings persistentes no painel hospedado com D1;
 - aprovação e rejeição gravadas pela API do painel;
 - testes automatizados dos três títulos fornecidos.
@@ -59,9 +61,9 @@ As instruções completas de banco e ingestão estão em `backend/README.md`.
 
 ## Próximas integrações
 
-1. Ativar `SITE_INGEST_TOKEN` e `SITE_ACCESS_TOKEN` nos segredos do GitHub para liberar a ponte crawler → painel privado.
-2. Sincronização automática do leaderboard de referência.
-3. OCR experimental para títulos sem tempo.
+1. Validar os candidatos importados das demais dungeons.
+2. Completar a modelagem de rankings por pontuação para LoJ Unlimited.
+3. Retomar o OCR quando uma sessão do YouTube puder ser configurada.
 
 A variável `YOUTUBE_API_KEY` deve ser configurada apenas no ambiente local ou de hospedagem. Nunca salve a chave no Git.
 

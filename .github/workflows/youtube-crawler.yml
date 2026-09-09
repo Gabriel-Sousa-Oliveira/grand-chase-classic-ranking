@@ -11,6 +11,7 @@ on:
         options:
           - recent
           - fill-ranking
+          - sync-syntaxii
           - ocr-only
       days:
         description: Dias para a busca recente (o preenchimento usa 365)
@@ -63,8 +64,15 @@ jobs:
             https://youtu.be/aTglQvuekIE --channel Borkaz \
             --title "Lupus | Vazio (Apocalipse) 3F Solo Sem poções | Grand Chase Classic" > /dev/null
 
+      - name: Sync public Syntaxii leaderboards
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'ocr-only') }}
+        run: |
+          mkdir -p data
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 import-syntaxii > ../data/last-run.json
+
       - name: Search recent YouTube videos
-        if: ${{ (github.event_name == 'schedule') || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent') || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[fill-ranking]') && !contains(github.event.head_commit.message, '[ocr]')) }}
+        if: ${{ (github.event_name == 'schedule') || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent') || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[fill-ranking]') && !contains(github.event.head_commit.message, '[ocr]') && !contains(github.event.head_commit.message, '[sync-syntaxii]')) }}
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           CRAWL_DAYS: ${{ inputs.days || '3' }}
@@ -83,13 +91,14 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 fill-ranking --days 365 --max-results 25 > ../data/last-run.json
 
       - name: Install OCR tools
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr
           python -m pip install --disable-pip-version-check --upgrade --pre "yt-dlp[default,curl-cffi]"
 
       - name: Load YouTube session
-        if: ${{ secrets.YOUTUBE_COOKIES_B64 != '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' && secrets.YOUTUBE_COOKIES_B64 != '' }}
         env:
           YOUTUBE_COOKIES_B64: ${{ secrets.YOUTUBE_COOKIES_B64 }}
         run: |
@@ -98,6 +107,7 @@ jobs:
           echo "YOUTUBE_COOKIES_FILE=$RUNNER_TEMP/youtube-cookies.txt" >> "$GITHUB_ENV"
 
       - name: Read missing times from video frames
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only' }}
         run: |
           cd backend
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue --limit 8 > ../data/last-run.json

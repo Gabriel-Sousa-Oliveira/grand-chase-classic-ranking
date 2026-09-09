@@ -7,6 +7,7 @@ import json
 from .database import CandidateRepository
 from .ocr import read_video_time
 from .parser import parse_title
+from .syntaxii import import_syntaxii
 from .youtube import DEFAULT_SEARCH_QUERIES, discover_videos, extract_video_id, fetch_video, fill_ranking_queries
 
 
@@ -31,6 +32,8 @@ def main() -> None:
     fill_cmd.add_argument("--days", type=int, default=365)
     fill_cmd.add_argument("--max-results", type=int, default=25)
     fill_cmd.add_argument("--era", default="current")
+    syntaxii_cmd = commands.add_parser("import-syntaxii")
+    syntaxii_cmd.add_argument("--era", default="current")
     ocr_cmd = commands.add_parser("ocr-queue")
     ocr_cmd.add_argument("--limit", type=int, default=8)
     commands.add_parser("queue")
@@ -51,6 +54,15 @@ def main() -> None:
                                        parse_title(metadata["title"]), metadata["channel"],
                                        metadata["published_at"], metadata["raw"])
             print(json.dumps({"created": created, "candidate": result}, ensure_ascii=False, indent=2))
+        elif args.command == "import-syntaxii":
+            summary = import_syntaxii(repo, era_key=args.era)
+            exported = [{key: candidate[key] for key in (
+                "video_id", "video_url", "title", "channel", "player_nick",
+                "published_at", "character", "category", "floor", "time_ms",
+                "confidence", "status", "era_key", "raw_metadata"
+            )} for candidate in repo.queue()]
+            print(json.dumps({**summary, "queue_size": len(exported), "candidates": exported},
+                             ensure_ascii=False, indent=2))
         elif args.command in {"crawl", "fill-ranking"}:
             ranking_mode = args.command == "fill-ranking"
             queries = fill_ranking_queries() if ranking_mode else (args.queries or DEFAULT_SEARCH_QUERIES)
