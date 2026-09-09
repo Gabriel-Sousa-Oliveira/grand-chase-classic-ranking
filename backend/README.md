@@ -69,3 +69,5 @@ python -m gc_radar.cli --db gc_radar.sqlite3 ocr-queue --limit 8
 ~~~
 
 No GitHub Actions, o modo OCR usa o provedor WebPoClient com o Chrome do runner e o cliente `mweb` para obter PO Tokens anonimamente. Cookies não são obrigatórios. Se o YouTube ainda bloquear o IP do runner, um arquivo Netscape pode ser convertido para Base64 e salvo no segredo opcional `YOUTUBE_COOKIES_B64`. O segredo fica disponível somente na etapa que reconstrói o arquivo temporário, removido após o OCR; ele não entra nos artefatos nem no repositório.
+
+A execução manual continua disponível em **YouTube crawler → Run workflow → `ocr-only`**.
