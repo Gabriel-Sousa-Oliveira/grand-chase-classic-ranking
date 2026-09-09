@@ -55,7 +55,7 @@ export async function GET() {
             ) AS nick_position
           FROM rankings r JOIN candidates c ON c.id = r.candidate_id
         ) WHERE nick_position = 1
-        ORDER BY era_key DESC, category, floor, character, time_ms`).all(),
+        ORDER BY category, floor, character, time_ms ASC, era_key DESC`).all(),
     ]);
     return Response.json({ candidates: queue.results, rankings: rankings.results });
   } catch (error) {

@@ -26,7 +26,7 @@ on:
       - "backend/gc_radar/**"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: youtube-crawler
@@ -150,6 +150,22 @@ jobs:
             -H "Content-Type: application/json" \
             --data-binary @data/last-run.json \
             https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
+
+      - name: Refresh public Vercel rankings
+        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
+        run: |
+          curl --fail-with-body --retry 2 \
+            -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
+            https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates \
+            | jq '{candidates: [], rankings: (.rankings // [])}' \
+            > vercel-app/public/candidates.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vercel-app/public/candidates.json
+          if ! git diff --cached --quiet; then
+            git commit -m "[skip-run] Refresh public rankings"
+            git push
+          fi
 
       - name: Save crawler database
         uses: actions/cache/save@v4

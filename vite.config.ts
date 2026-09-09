@@ -44,6 +44,7 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    define: { __PUBLIC_READ_ONLY__: "false" },
     server: {
       host: "0.0.0.0",
       allowedHosts: ["terminal.local"],

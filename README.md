@@ -38,6 +38,8 @@ Ela não expõe o painel administrativo, tokens, cookies ou controles de aprova�
 O arquivo `vercel.json` já define o build e a pasta de saída. Nenhuma variável de
 ambiente é necessária para esta prévia. Novos pushes na branch `main` geram uma
 nova publicação automaticamente depois que o projeto é importado na Vercel.
+Quando o crawler atualiza os dados, ele também publica um novo snapshot do ranking
+na interface pública.
 
 ## Núcleo Python
 
