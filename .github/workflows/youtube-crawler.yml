@@ -11,6 +11,7 @@ on:
         options:
           - recent
           - fill-ranking
+          - ocr-only
       days:
         description: Dias para a busca recente (o preenchimento usa 365)
         required: true
