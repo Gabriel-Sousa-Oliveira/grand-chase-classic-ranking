@@ -17,6 +17,7 @@ export function shouldAutoApproveTitle(candidate: ApprovalCandidate): boolean {
   return candidate.status === "ready_for_review"
     && Boolean(candidate.character)
     && Boolean(candidate.category)
+    // Some supported categories have no floor and are represented by zero.
     && Number.isInteger(candidate.floor)
     && (candidate.floor ?? -1) >= 0
     && Number.isInteger(candidate.time_ms)
