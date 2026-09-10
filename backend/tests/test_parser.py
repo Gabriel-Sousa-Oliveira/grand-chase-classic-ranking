@@ -12,6 +12,14 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(run.status, "ready_for_review")
         self.assertEqual(run.confidence, 0.95)
 
+    def test_parses_borkaz_infinity_cloister_title(self):
+        run = parse_title("Ereb | Infinity Cloister Stage 4 Duell | Grand Chase Classic")
+        self.assertEqual(run.character, "Ereb")
+        self.assertEqual(run.category, "duel_4")
+        self.assertEqual(run.floor, 0)
+        self.assertIsNone(run.time_ms)
+        self.assertEqual(run.status, "time_required")
+
     def test_ereb_invasion_with_time(self):
         run = parse_title("Ereb | Vazio (Invasão) 3f (1'32) | Grand Chase Classic")
         self.assertEqual((run.character, run.category, run.floor, run.time_ms),
