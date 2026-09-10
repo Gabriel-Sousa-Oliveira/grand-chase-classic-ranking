@@ -27,3 +27,11 @@ test("parses Korean and Thai titles plus the Azin alias", () => {
   assert.deepEqual([thai.character, thai.category, thai.floor, thai.timeMs], ["Asin", "void_invasion", 3, 68_000]);
   assert.equal(parseRunTitle("Azin Void Invasion 3F 01:09").character, "Asin");
 });
+
+test("parses Duel Lv.4 as a complete zero-floor category", () => {
+  const result = parseRunTitle("Grand Chase Classic Ereb Duel Lv.4 01:05");
+  assert.deepEqual(
+    {character:result.character, category:result.category, floor:result.floor, timeMs:result.timeMs, status:result.status, confidence:result.confidence},
+    {character:"Ereb", category:"duel_4", floor:0, timeMs:65_000, status:"ready_for_review", confidence:95},
+  );
+});
