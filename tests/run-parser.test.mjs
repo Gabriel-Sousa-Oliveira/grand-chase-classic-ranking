@@ -35,3 +35,11 @@ test("parses Duel Lv.4 as a complete zero-floor category", () => {
     {character:"Ereb", category:"duel_4", floor:0, timeMs:65_000, status:"ready_for_review", confidence:95},
   );
 });
+
+test("recognizes the Borkaz Infinity Cloister title as Duel 4", () => {
+  const result = parseRunTitle("Ereb | Infinity Cloister Stage 4 Duell | Grand Chase Classic");
+  assert.deepEqual(
+    {character:result.character, category:result.category, floor:result.floor, timeMs:result.timeMs, status:result.status},
+    {character:"Ereb", category:"duel_4", floor:0, timeMs:null, status:"time_required"},
+  );
+});
