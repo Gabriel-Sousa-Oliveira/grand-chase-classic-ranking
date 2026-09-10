@@ -52,7 +52,8 @@ def main() -> None:
         if args.command == "add":
             video_id = extract_video_id(args.url)
             result, created = repo.add(video_id, args.url, parse_title(args.title), args.channel)
-            print(json.dumps({"created": created, "candidate": result}, ensure_ascii=False, indent=2))
+            print(json.dumps({"created": created, "candidate": result, "queue_size": 1,
+                              "candidates": [result]}, ensure_ascii=False, indent=2))
         elif args.command == "youtube":
             metadata = fetch_video(args.url)
             # Directly supplied URLs must refresh pending rows after parser aliases evolve.
@@ -60,7 +61,8 @@ def main() -> None:
                                        parse_title(metadata["title"]), metadata["channel"],
                                        metadata["published_at"], metadata["raw"],
                                        enrich_existing=True)
-            print(json.dumps({"created": created, "candidate": result}, ensure_ascii=False, indent=2))
+            print(json.dumps({"created": created, "candidate": result, "queue_size": 1,
+                              "candidates": [result]}, ensure_ascii=False, indent=2))
         elif args.command == "channel-archive":
             videos = channel_archive(args.reference_video, max_results=args.max_results)
             created = duplicates = ignored = 0

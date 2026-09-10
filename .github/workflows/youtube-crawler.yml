@@ -25,9 +25,12 @@ on:
     paths:
       - ".github/workflows/youtube-crawler.yml"
       - "backend/gc_radar/**"
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
+  issues: read
 
 concurrency:
   group: youtube-crawler
@@ -35,7 +38,7 @@ concurrency:
 
 jobs:
   discover:
-    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip-run]') }}
+    if: ${{ (github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip-run]')) && (github.event_name != 'issues' || startsWith(github.event.issue.title, '[Run submission]')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
@@ -52,6 +55,7 @@ jobs:
           restore-keys: gc-radar-db-
 
       - name: Seed supplied reference videos
+        if: ${{ github.event_name != 'issues' }}
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
@@ -74,6 +78,26 @@ jobs:
             --title "Uno Void Invasion 3F Solo | Grand Chase Classic" > /dev/null
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 youtube \
             https://youtu.be/Q2TUPeiTmPI > /dev/null
+
+      - name: Import community submission
+        if: ${{ github.event_name == 'issues' }}
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          video_url="$(python - <<'PY'
+          import os
+          import re
+
+          body = os.environ.get("ISSUE_BODY", "")
+          match = re.search(r"https?://(?:www\.|m\.)?(?:youtu\.be|youtube\.com)/[^\s<>)]+", body)
+          if not match:
+              raise SystemExit("No YouTube URL found in the submission")
+          print(match.group(0))
+          PY
+          )"
+          mkdir -p data
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 youtube "$video_url" > ../data/last-run.json
 
       - name: Sync public Syntaxii leaderboards
         if: ${{ github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'ocr-only') }}
