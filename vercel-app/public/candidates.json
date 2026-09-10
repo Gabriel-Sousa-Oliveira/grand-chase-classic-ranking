@@ -145,6 +145,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2275,
+      "character": "Arme",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 108000,
+      "player_nick": "Bryan",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=209tV2ghiks",
+      "channel": "Bryan",
+      "published_at": "2026-03-26T07:04:15Z",
+      "approved_at": "2026-09-10 01:22:32"
+    },
+    {
       "id": 1729,
       "character": "Asin",
       "category": "void_invasion",
@@ -312,6 +325,19 @@
       "channel": "Borkaz",
       "published_at": "2026-08-14T09:07:25Z",
       "approved_at": "2026-09-10 00:59:12"
+    },
+    {
+      "id": 2274,
+      "character": "Ereb",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 153000,
+      "player_nick": "LinDarkness",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=5F2G_WuNP50",
+      "channel": "LinDarkness",
+      "published_at": "2026-09-05T01:09:15Z",
+      "approved_at": "2026-09-10 01:21:45"
     },
     {
       "id": 2114,
@@ -574,6 +600,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2273,
+      "character": "Ryan",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 423000,
+      "player_nick": "SOMBRA DO JOGO",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=CHe16OZXqY8",
+      "channel": "SOMBRA DO JOGO",
+      "published_at": "2025-10-26T03:15:00Z",
+      "approved_at": "2026-09-10 01:21:09"
+    },
+    {
       "id": 67,
       "character": "Sieghart",
       "category": "void_invasion",
@@ -587,6 +626,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2269,
+      "character": "Sieghart",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 85000,
+      "player_nick": "Hatane",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=WWLMU1_wvig",
+      "channel": "Hatane",
+      "published_at": "2026-04-11T15:56:37Z",
+      "approved_at": "2026-09-10 01:18:49"
+    },
+    {
       "id": 69,
       "character": "Sieghart",
       "category": "void_invasion",
@@ -598,6 +650,19 @@
       "channel": "Prolapsador",
       "published_at": "2025-10-24",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 2268,
+      "character": "Sieghart",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 450000,
+      "player_nick": "Imortal98",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=tBguR59xbBU",
+      "channel": "Imortal98",
+      "published_at": "2026-06-07T22:51:29Z",
+      "approved_at": "2026-09-10 01:18:20"
     },
     {
       "id": 72,
@@ -624,6 +689,32 @@
       "channel": "P1ke",
       "published_at": "2026-03-05",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 2271,
+      "character": "Zero",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 72000,
+      "player_nick": "P1Ke",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=EliVy0XsXGM",
+      "channel": "P1Ke",
+      "published_at": "2025-09-16T08:34:36Z",
+      "approved_at": "2026-09-10 01:20:03"
+    },
+    {
+      "id": 2270,
+      "character": "Zero",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 128000,
+      "player_nick": "Kyururu1",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Y3T_Lnu46y8",
+      "channel": "Kyururu1",
+      "published_at": "2026-04-16T21:29:12Z",
+      "approved_at": "2026-09-10 01:19:31"
     },
     {
       "id": 3,
@@ -1135,6 +1226,19 @@
       "approved_at": "2026-09-10 01:00:19"
     },
     {
+      "id": 2271,
+      "character": "Zero",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 72000,
+      "player_nick": "P1Ke",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=EliVy0XsXGM",
+      "channel": "P1Ke",
+      "published_at": "2025-09-16T08:34:36Z",
+      "approved_at": "2026-09-10 01:20:03"
+    },
+    {
       "id": 31,
       "character": "Iris",
       "category": "void_invasion",
@@ -1237,6 +1341,19 @@
       "channel": "Prolapsador",
       "published_at": "2025-10-25",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 2273,
+      "character": "Ryan",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 423000,
+      "player_nick": "SOMBRA DO JOGO",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=CHe16OZXqY8",
+      "channel": "SOMBRA DO JOGO",
+      "published_at": "2025-10-26T03:15:00Z",
+      "approved_at": "2026-09-10 01:21:09"
     },
     {
       "id": 2112,
@@ -1603,6 +1720,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2275,
+      "character": "Arme",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 108000,
+      "player_nick": "Bryan",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=209tV2ghiks",
+      "channel": "Bryan",
+      "published_at": "2026-03-26T07:04:15Z",
+      "approved_at": "2026-09-10 01:22:32"
+    },
+    {
       "id": 27,
       "character": "Elesis",
       "category": "void_taint",
@@ -1837,6 +1967,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2269,
+      "character": "Sieghart",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 85000,
+      "player_nick": "Hatane",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=WWLMU1_wvig",
+      "channel": "Hatane",
+      "published_at": "2026-04-11T15:56:37Z",
+      "approved_at": "2026-09-10 01:18:49"
+    },
+    {
       "id": 7,
       "character": "Asin",
       "category": "void_invasion",
@@ -1848,6 +1991,19 @@
       "channel": "Grunkar Totohondry",
       "published_at": "2026-04-16T15:41:25Z",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 2270,
+      "character": "Zero",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 128000,
+      "player_nick": "Kyururu1",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Y3T_Lnu46y8",
+      "channel": "Kyururu1",
+      "published_at": "2026-04-16T21:29:12Z",
+      "approved_at": "2026-09-10 01:19:31"
     },
     {
       "id": 56,
@@ -1889,6 +2045,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2272,
+      "character": "Zero",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 95000,
+      "player_nick": "P1Ke",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=P3dmFg4Uehw",
+      "channel": "P1Ke",
+      "published_at": "2026-05-23T23:05:35Z",
+      "approved_at": "2026-09-10 01:20:22"
+    },
+    {
       "id": 1729,
       "character": "Asin",
       "category": "void_invasion",
@@ -1900,6 +2069,19 @@
       "channel": "AF Magic",
       "published_at": "2026-05-27T09:30:03Z",
       "approved_at": "2026-09-09 20:52:06"
+    },
+    {
+      "id": 2268,
+      "character": "Sieghart",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 450000,
+      "player_nick": "Imortal98",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=tBguR59xbBU",
+      "channel": "Imortal98",
+      "published_at": "2026-06-07T22:51:29Z",
+      "approved_at": "2026-09-10 01:18:20"
     },
     {
       "id": 67,
@@ -2134,6 +2316,19 @@
       "channel": "Bork",
       "published_at": "2026-09-03",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 2274,
+      "character": "Ereb",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 153000,
+      "player_nick": "LinDarkness",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=5F2G_WuNP50",
+      "channel": "LinDarkness",
+      "published_at": "2026-09-05T01:09:15Z",
+      "approved_at": "2026-09-10 01:21:45"
     },
     {
       "id": 72,
