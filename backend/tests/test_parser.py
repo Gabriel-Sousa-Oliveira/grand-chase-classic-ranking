@@ -20,6 +20,14 @@ class ParserTests(unittest.TestCase):
         self.assertIsNone(run.time_ms)
         self.assertEqual(run.status, "time_required")
 
+    def test_does_not_treat_stage_three_as_duel_four(self):
+        run = parse_title(
+            "Dio - Infinity Cloister Stage 3 (no potions) - Grand Chase Classic"
+        )
+        self.assertEqual(run.character, "Dio")
+        self.assertIsNone(run.category)
+        self.assertEqual(run.status, "classification_required")
+
     def test_ereb_invasion_with_time(self):
         run = parse_title("Ereb | Vazio (Invasão) 3f (1'32) | Grand Chase Classic")
         self.assertEqual((run.character, run.category, run.floor, run.time_ms),
