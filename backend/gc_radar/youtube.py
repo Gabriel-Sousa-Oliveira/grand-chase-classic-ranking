@@ -71,13 +71,13 @@ def extract_video_id(value: str) -> str:
     return candidate
 
 
-def fetch_video(value: str, api_key: str | None = None) -> dict:
+def fetch_video(value: str, api_key: str | None = None, opener: Callable = urlopen) -> dict:
     key = api_key or os.getenv("YOUTUBE_API_KEY")
     if not key:
         raise RuntimeError("Set YOUTUBE_API_KEY before fetching YouTube metadata")
     video_id = extract_video_id(value)
     query = urlencode({"part": "snippet,contentDetails", "id": video_id, "key": key})
-    with urlopen("https://www.googleapis.com/youtube/v3/videos?" + query, timeout=20) as response:
+    with opener("https://www.googleapis.com/youtube/v3/videos?" + query, timeout=20) as response:
         payload = json.load(response)
     if not payload.get("items"):
         raise LookupError(f"YouTube video not found: {video_id}")
@@ -87,6 +87,64 @@ def fetch_video(value: str, api_key: str | None = None) -> dict:
             "title": snippet["title"], "channel": snippet["channelTitle"],
             "published_at": snippet["publishedAt"], "duration": item["contentDetails"]["duration"],
             "raw": item}
+
+
+def channel_archive(reference_video: str, *, api_key: str | None = None,
+                    max_results: int = 500, opener: Callable = urlopen) -> list[dict]:
+    """Read a channel's uploads playlist, starting from one known video URL."""
+    if not 1 <= max_results <= 500:
+        raise ValueError("max_results must be between 1 and 500")
+    key = _api_key(api_key)
+    reference = fetch_video(reference_video, api_key=key, opener=opener)
+    channel_id = reference.get("raw", {}).get("snippet", {}).get("channelId")
+    if not channel_id:
+        raise LookupError("YouTube channel not found in reference video")
+
+    query = urlencode({"part": "contentDetails", "id": channel_id, "key": key})
+    with opener("https://www.googleapis.com/youtube/v3/channels?" + query,
+                timeout=20) as response:
+        payload = json.load(response)
+    items = payload.get("items", [])
+    if not items:
+        raise LookupError(f"YouTube channel not found: {channel_id}")
+    uploads_id = items[0].get("contentDetails", {}).get(
+        "relatedPlaylists", {}).get("uploads")
+    if not uploads_id:
+        raise LookupError(f"Uploads playlist not found: {channel_id}")
+
+    videos: list[dict] = []
+    page_token = None
+    while len(videos) < max_results:
+        page_size = min(50, max_results - len(videos))
+        params = {"part": "snippet", "playlistId": uploads_id,
+                  "maxResults": page_size, "key": key}
+        if page_token:
+            params["pageToken"] = page_token
+        with opener("https://www.googleapis.com/youtube/v3/playlistItems?" +
+                    urlencode(params), timeout=20) as response:
+            page = json.load(response)
+        for item in page.get("items", []):
+            snippet = item.get("snippet", {})
+            video_id = snippet.get("resourceId", {}).get("videoId")
+            title = snippet.get("title", "")
+            if not video_id or title in {"Deleted video", "Private video"}:
+                continue
+            videos.append({
+                "video_id": video_id,
+                "url": f"https://www.youtube.com/watch?v={video_id}",
+                "title": title,
+                "channel": snippet.get("videoOwnerChannelTitle") or
+                           snippet.get("channelTitle") or reference["channel"],
+                "published_at": snippet.get("publishedAt"),
+                "raw": item,
+                "query": f"channel:{channel_id}",
+            })
+            if len(videos) >= max_results:
+                break
+        page_token = page.get("nextPageToken")
+        if not page_token:
+            break
+    return videos
 
 
 def _api_key(api_key: str | None) -> str:
