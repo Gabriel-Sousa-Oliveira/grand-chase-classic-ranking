@@ -8,7 +8,8 @@ from .database import CandidateRepository
 from .ocr import read_video_time
 from .parser import parse_title
 from .syntaxii import import_syntaxii
-from .youtube import DEFAULT_SEARCH_QUERIES, discover_videos, extract_video_id, fetch_video, fill_ranking_queries
+from .youtube import (DEFAULT_SEARCH_QUERIES, channel_archive, discover_videos,
+                      extract_video_id, fetch_video, fill_ranking_queries)
 
 
 def main() -> None:
@@ -23,6 +24,10 @@ def main() -> None:
     add_cmd.add_argument("--channel")
     yt_cmd = commands.add_parser("youtube")
     yt_cmd.add_argument("url")
+    channel_cmd = commands.add_parser("channel-archive")
+    channel_cmd.add_argument("reference_video")
+    channel_cmd.add_argument("--max-results", type=int, default=500)
+    channel_cmd.add_argument("--era", default="current")
     crawl_cmd = commands.add_parser("crawl")
     crawl_cmd.add_argument("--days", type=int, default=3)
     crawl_cmd.add_argument("--max-results", type=int, default=50)
@@ -56,6 +61,34 @@ def main() -> None:
                                        metadata["published_at"], metadata["raw"],
                                        enrich_existing=True)
             print(json.dumps({"created": created, "candidate": result}, ensure_ascii=False, indent=2))
+        elif args.command == "channel-archive":
+            videos = channel_archive(args.reference_video, max_results=args.max_results)
+            created = duplicates = ignored = 0
+            statuses: dict[str, int] = {}
+            for metadata in videos:
+                parsed = parse_title(metadata["title"])
+                if parsed.character is None and parsed.category is None:
+                    ignored += 1
+                    continue
+                candidate, was_created = repo.add(
+                    metadata["video_id"], metadata["url"], parsed,
+                    metadata["channel"], metadata["published_at"], metadata["raw"],
+                    era_key=args.era, enrich_existing=True,
+                )
+                created += int(was_created)
+                duplicates += int(not was_created)
+                statuses[candidate["status"]] = statuses.get(candidate["status"], 0) + 1
+            exported = [{key: candidate[key] for key in (
+                "video_id", "video_url", "title", "channel", "player_nick",
+                "published_at", "character", "category", "floor", "time_ms",
+                "confidence", "status", "era_key", "raw_metadata"
+            )} for candidate in repo.queue()]
+            print(json.dumps({
+                "mode": "channel_archive", "reference_video": args.reference_video,
+                "scanned": len(videos), "created": created, "duplicates": duplicates,
+                "ignored": ignored, "statuses": statuses,
+                "queue_size": len(exported), "candidates": exported,
+            }, ensure_ascii=False, indent=2))
         elif args.command == "import-syntaxii":
             summary = import_syntaxii(repo, era_key=args.era)
             exported = [{key: candidate[key] for key in (
