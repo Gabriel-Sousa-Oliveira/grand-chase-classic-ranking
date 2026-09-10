@@ -54,7 +54,8 @@ CATEGORY_ALIASES = {
     "void apocalypse": "void_apocalypse", "vazio apocalipse": "void_apocalypse",
     "tower of disappearance": "tower_of_disappearance",
     "torre do desaparecimento": "tower_of_disappearance",
-    "duel 4": "duel_4", "duelo 4": "duel_4",
+    "duel 4": "duel_4", "duel lv 4": "duel_4", "duel lvl 4": "duel_4",
+    "duelo 4": "duel_4", "duelo lv 4": "duel_4",
     "loj unlimited": "loj_unlimited", "land of judgment unlimited": "loj_unlimited",
     "terra do julgamento ilimitada": "loj_unlimited",
     "공허 침공": "void_invasion", "보이드 침공": "void_invasion",
@@ -133,6 +134,8 @@ def parse_title(title: str) -> ParsedRun:
         numbered_void = next((alias for alias in NUMBERED_VOID_FLOORS
                               if re.search(rf"(?<!\w){re.escape(alias)}(?!\w)", words)), None)
         floor = NUMBERED_VOID_FLOORS.get(numbered_void) if numbered_void else None
+    if floor is None and category in {"tower_of_disappearance", "duel_4", "loj_unlimited"}:
+        floor = 0
     time_ms = _extract_time(text)
     solo = True if re.search(r"(?<!\w)solo(?!\w)", text) else None
     no_potions = True if re.search(r"sem\s+pocoes|no\s+pot(?:ion)?s?", text) else None
@@ -141,11 +144,11 @@ def parse_title(title: str) -> ParsedRun:
     required = {"character": character, "category": category, "floor": floor, "time": time_ms}
     missing = tuple(key for key, value in required.items() if value is None)
     score = sum((0.30 if character else 0, 0.30 if category else 0,
-                 0.10 if floor else 0, 0.25 if time_ms is not None else 0,
+                 0.10 if floor is not None else 0, 0.25 if time_ms is not None else 0,
                  0.05 if any(flag is True for flag in (solo, no_potions, no_quotes)) else 0))
-    if character and category and floor and time_ms is not None:
+    if character and category and floor is not None and time_ms is not None:
         status = "ready_for_review"
-    elif character and category and floor:
+    elif character and category and floor is not None:
         status = "time_required"
     else:
         status = "classification_required"
