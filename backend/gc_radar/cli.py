@@ -97,7 +97,7 @@ def main() -> None:
             )} for candidate in repo.queue()]
             print(json.dumps({
                 "mode": "fill-ranking" if ranking_mode else "recent",
-                "target": "void_invasion_3f" if ranking_mode else "all_supported_void",
+                "target": "void_invasion_3f" if ranking_mode else "all_supported_dungeons",
                 "queries": len(queries),
                 "discovered_unique": len(videos), "created": created,
                 "duplicates": duplicates, "ignored": ignored, "statuses": statuses,
