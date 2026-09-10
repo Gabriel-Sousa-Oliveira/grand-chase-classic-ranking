@@ -64,6 +64,11 @@ class YouTubeSearchTests(unittest.TestCase):
         self.assertIn("그랜드체이스 클래식 공허 침공", DEFAULT_SEARCH_QUERIES)
         self.assertIn("แกรนด์เชส คลาสสิก วอยด์ อินเวชัน", DEFAULT_SEARCH_QUERIES)
 
+    def test_recent_search_includes_non_void_dungeons(self):
+        self.assertIn("Grand Chase Classic Duel 4", DEFAULT_SEARCH_QUERIES)
+        self.assertIn("Grand Chase Classic Tower of Disappearance", DEFAULT_SEARCH_QUERIES)
+        self.assertIn("Grand Chase Classic LoJ Unlimited", DEFAULT_SEARCH_QUERIES)
+
 
 if __name__ == "__main__":
     unittest.main()
