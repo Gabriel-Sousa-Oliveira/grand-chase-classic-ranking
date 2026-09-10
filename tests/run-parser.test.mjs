@@ -44,9 +44,27 @@ test("recognizes the Borkaz Infinity Cloister title as Duel 4", () => {
   );
 });
 
-test("does not treat Infinity Cloister Stage 3 as Duel 4", () => {
+test("keeps Infinity Cloister Stage 3 separate from Duel 4", () => {
   const result = parseRunTitle("Dio - Infinity Cloister Stage 3 (no potions) - Grand Chase Classic");
   assert.equal(result.character, "Dio");
-  assert.equal(result.category, null);
-  assert.equal(result.status, "classification_required");
+  assert.equal(result.category, "infinity_cloister_3");
+  assert.equal(result.status, "time_required");
+});
+
+test("classifies Borkaz archive dungeons and seconds-only times", () => {
+  const cases = [
+    ["Dio - Infinity Cloister Stage 3 (no potions)","infinity_cloister_3"],
+    ["Lire | Land of Judgement (no potions)","land_of_judgement"],
+    ["Kallia - Renak's Core (Champion) 1:14","renaks_core_champion"],
+    ["Rufus - Wizard's Labyrinth stage 30 (1:43)","wizards_labyrinth_30"],
+    ["Ai | Sanctuary of Divine Beast (Master Mode) Solo","sanctuary_divine_beast_master"],
+    ["Rin - Berkas' Lair 32s (NO POTIONS)","berkas_lair"],
+    ["Kallia - Angry Boss (Archimedia) 2:34","angry_boss_archimedia"],
+  ];
+  for(const [title,category] of cases){
+    const result=parseRunTitle(title);
+    assert.equal(result.category,category);
+    assert.equal(result.floor,0);
+  }
+  assert.equal(parseRunTitle("Rin - Berkas' Lair 32s (NO POTIONS)").timeMs,32_000);
 });
