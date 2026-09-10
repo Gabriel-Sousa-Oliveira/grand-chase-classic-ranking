@@ -43,3 +43,10 @@ test("recognizes the Borkaz Infinity Cloister title as Duel 4", () => {
     {character:"Ereb", category:"duel_4", floor:0, timeMs:null, status:"time_required"},
   );
 });
+
+test("does not treat Infinity Cloister Stage 3 as Duel 4", () => {
+  const result = parseRunTitle("Dio - Infinity Cloister Stage 3 (no potions) - Grand Chase Classic");
+  assert.equal(result.character, "Dio");
+  assert.equal(result.category, null);
+  assert.equal(result.status, "classification_required");
+});
