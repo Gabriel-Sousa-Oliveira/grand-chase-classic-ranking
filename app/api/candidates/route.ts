@@ -104,13 +104,12 @@ export async function POST(request: Request) {
           floor = COALESCE(?, floor), time_ms = ?, confidence = ?, status = ?, raw_metadata = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE video_id = ?
-          AND ? IS NOT NULL
           AND status IN ('ready_for_review','time_required','classification_required')`)
         .bind(item.video_url, item.title, item.channel ?? null,
           item.player_nick ?? item.channel ?? null, item.published_at ?? null,
           item.character ?? null, item.category ?? null, item.floor ?? null,
           item.time_ms ?? null, item.confidence ?? 0, effectiveStatus,
-          rawMetadata, item.video_id, item.time_ms ?? null).run();
+          rawMetadata, item.video_id).run();
       updated += update.meta.changes ?? 0;
     }
     if (autoApprove) {
