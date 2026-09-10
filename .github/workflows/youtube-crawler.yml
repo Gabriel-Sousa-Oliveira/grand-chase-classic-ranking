@@ -108,6 +108,7 @@ jobs:
         run: |
           mkdir -p data
           cd backend
+          # Revisit pending rows so corrected aliases replace old classifications.
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 channel-archive \
             https://youtu.be/Q2TUPeiTmPI --max-results 500 > ../data/last-run.json
 
