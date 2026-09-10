@@ -59,6 +59,21 @@ CATEGORY_ALIASES = {
     "duelo 4": "duel_4", "duelo lv 4": "duel_4",
     "loj unlimited": "loj_unlimited", "land of judgment unlimited": "loj_unlimited",
     "terra do julgamento ilimitada": "loj_unlimited",
+    "infinity cloister stage 3": "infinity_cloister_3",
+    "land of judgement": "land_of_judgement", "land of judgment": "land_of_judgement",
+    "renak s core champion": "renaks_core_champion",
+    "great explosion of kounat": "great_explosion_of_kounat",
+    "wizard s labyrinth stage 30": "wizards_labyrinth_30",
+    "moonlight village": "moonlight_village", "temple of time": "temple_of_time",
+    "sanctuary of divine beast master mode": "sanctuary_divine_beast_master",
+    "sanctuary of divine beast master": "sanctuary_divine_beast_master",
+    "hall of harmony master mode": "hall_of_harmony_master",
+    "hall of harmony master": "hall_of_harmony_master",
+    "chapel of eternity master": "chapel_of_eternity_master",
+    "path shrouded in darkness master": "path_shrouded_darkness_master",
+    "apocalypse vortex master": "apocalypse_vortex_master",
+    "apocalypse vortex": "apocalypse_vortex_master",
+    "berkas lair": "berkas_lair",
     "공허 침공": "void_invasion", "보이드 침공": "void_invasion",
     "공허 잠식": "void_taint", "보이드 잠식": "void_taint",
     "공허 악몽": "void_nightmare", "보이드 악몽": "void_nightmare",
@@ -121,6 +136,9 @@ def _extract_time(title: str) -> int | None:
                 continue
             millis = 0 if not fraction else int(fraction.ljust(3, "0")[:3])
             return (minutes * 60 + seconds) * 1000 + millis
+    seconds_only = re.search(r"(?<!\d)(\d{1,3})\s*s(?:ec(?:ond)?s?)?(?!\w)", title, re.I)
+    if seconds_only:
+        return int(seconds_only.group(1)) * 1000
     return None
 
 
@@ -129,13 +147,25 @@ def parse_title(title: str) -> ParsedRun:
     words = " ".join(re.sub(r"[^\w\u0E31-\u0E4E]+", " ", text).split())
     character = _match_alias(words, CHARACTER_ALIASES)
     category = _match_alias(words, CATEGORY_ALIASES)
+    if "angry boss" in words and "archimedia" in words:
+        category = "angry_boss_archimedia"
+    elif "angry boss" in words and "alcubra" in words:
+        category = "angry_boss_alcubra"
     floor_match = re.search(r"(?<!\d)([1-9])\s*(?:f|andar|층|ชั้น)(?!\w)", text)
     floor = int(floor_match.group(1)) if floor_match else None
     if floor is None:
         numbered_void = next((alias for alias in NUMBERED_VOID_FLOORS
                               if re.search(rf"(?<!\w){re.escape(alias)}(?!\w)", words)), None)
         floor = NUMBERED_VOID_FLOORS.get(numbered_void) if numbered_void else None
-    if floor is None and category in {"tower_of_disappearance", "duel_4", "loj_unlimited"}:
+    if floor is None and category in {
+        "tower_of_disappearance", "duel_4", "loj_unlimited", "infinity_cloister_3",
+        "land_of_judgement", "renaks_core_champion", "great_explosion_of_kounat",
+        "wizards_labyrinth_30", "moonlight_village", "temple_of_time",
+        "sanctuary_divine_beast_master", "hall_of_harmony_master",
+        "chapel_of_eternity_master", "path_shrouded_darkness_master",
+        "apocalypse_vortex_master", "berkas_lair", "angry_boss_archimedia",
+        "angry_boss_alcubra",
+    }:
         floor = 0
     time_ms = _extract_time(text)
     solo = True if re.search(r"(?<!\w)solo(?!\w)", text) else None
