@@ -82,7 +82,7 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 import-syntaxii > ../data/last-run.json
 
       - name: Search recent YouTube videos
-        if: ${{ (github.event_name == 'schedule') || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent') || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[fill-ranking]') && !contains(github.event.head_commit.message, '[ocr]') && !contains(github.event.head_commit.message, '[sync-syntaxii]')) }}
+        if: ${{ (github.event_name == 'schedule') || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent') || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[fill-ranking]') && !contains(github.event.head_commit.message, '[ocr]') && !contains(github.event.head_commit.message, '[sync-syntaxii]') && !contains(github.event.head_commit.message, '[supplied]')) }}
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           CRAWL_DAYS: ${{ inputs.days || '3' }}
