@@ -3,6 +3,15 @@ from gc_radar.parser import parse_title
 
 
 class ParserTests(unittest.TestCase):
+    def test_parses_duel_without_a_floor(self):
+        run = parse_title("Grand Chase Classic Ereb Duel Lv.4 01:05")
+        self.assertEqual(run.character, "Ereb")
+        self.assertEqual(run.category, "duel_4")
+        self.assertEqual(run.floor, 0)
+        self.assertEqual(run.time_ms, 65_000)
+        self.assertEqual(run.status, "ready_for_review")
+        self.assertEqual(run.confidence, 0.95)
+
     def test_ereb_invasion_with_time(self):
         run = parse_title("Ereb | Vazio (Invasão) 3f (1'32) | Grand Chase Classic")
         self.assertEqual((run.character, run.category, run.floor, run.time_ms),
