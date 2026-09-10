@@ -93,6 +93,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 1727,
+      "character": "Rufus/Lupus",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 266000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://youtu.be/aTglQvuekIE",
+      "channel": "Borkaz",
+      "published_at": null,
+      "approved_at": "2026-09-09 20:49:02"
+    },
+    {
       "id": 1,
       "character": "Ai",
       "category": "void_invasion",
@@ -130,6 +143,19 @@
       "channel": "GCLabs",
       "published_at": "2026-03-29",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 1729,
+      "character": "Asin",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 81000,
+      "player_nick": "AF Magic",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=u41uO0US3p4",
+      "channel": "AF Magic",
+      "published_at": "2026-05-27T09:30:03Z",
+      "approved_at": "2026-09-09 20:52:06"
     },
     {
       "id": 8,
@@ -184,6 +210,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2111,
+      "character": "Dio",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 334000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=AnsbMfum1ZI",
+      "channel": "Falonso",
+      "published_at": "2026-08-27T14:10:11Z",
+      "approved_at": "2026-09-10 00:58:00"
+    },
+    {
       "id": 21,
       "character": "Edel",
       "category": "void_invasion",
@@ -223,6 +262,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2112,
+      "character": "Elesis",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 348000,
+      "player_nick": "AF Magic",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=1U05bsgx5bk",
+      "channel": "AF Magic",
+      "published_at": "2025-10-29T09:00:04Z",
+      "approved_at": "2026-09-10 00:58:46"
+    },
+    {
       "id": 28,
       "character": "Ereb",
       "category": "void_invasion",
@@ -247,6 +299,32 @@
       "channel": "Syntaxii",
       "published_at": "2026-08-12T15:07:24Z",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 2113,
+      "character": "Ereb",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 115000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=iAeZqls2ZYE",
+      "channel": "Borkaz",
+      "published_at": "2026-08-14T09:07:25Z",
+      "approved_at": "2026-09-10 00:59:12"
+    },
+    {
+      "id": 2114,
+      "character": "Ereb",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 160000,
+      "player_nick": "Hatane",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=vET9_1crXmE",
+      "channel": "Hatane",
+      "published_at": "2026-08-13T06:25:39Z",
+      "approved_at": "2026-09-10 00:59:51"
     },
     {
       "id": 30,
@@ -286,6 +364,19 @@
       "channel": "Rosa",
       "published_at": "2026-04-02",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 2116,
+      "character": "Kallia",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 339000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=l_kGpAFGjik",
+      "channel": "Falonso",
+      "published_at": "2025-12-09T14:04:21Z",
+      "approved_at": "2026-09-10 01:02:08"
     },
     {
       "id": 38,
@@ -340,6 +431,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2117,
+      "character": "Ley/Rey",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 331000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Mya9v5GlMhs",
+      "channel": "Falonso",
+      "published_at": "2026-04-24T14:00:39Z",
+      "approved_at": "2026-09-10 01:02:44"
+    },
+    {
       "id": 45,
       "character": "Lime/Holy",
       "category": "void_invasion",
@@ -351,6 +455,19 @@
       "channel": "LimeLimonada",
       "published_at": "2026-03-25",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 1734,
+      "character": "Lime/Holy",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 129000,
+      "player_nick": "Hatane",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=fjOlqn_HGDk",
+      "channel": "Hatane",
+      "published_at": "2026-02-27T09:00:21Z",
+      "approved_at": "2026-09-09 21:03:24"
     },
     {
       "id": 48,
@@ -598,6 +715,19 @@
       "channel": "sangpill",
       "published_at": "2026-03-30",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 1732,
+      "character": "Ereb",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 264000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://youtu.be/V6O_9x6QTvw",
+      "channel": "Borkaz",
+      "published_at": null,
+      "approved_at": "2026-09-09 20:59:07"
     },
     {
       "id": 40,
@@ -992,6 +1122,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2115,
+      "character": "Iris",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 121000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=AEErxbd1d_Y",
+      "channel": "Borkaz",
+      "published_at": "2025-09-11T10:15:38Z",
+      "approved_at": "2026-09-10 01:00:19"
+    },
+    {
       "id": 31,
       "character": "Iris",
       "category": "void_invasion",
@@ -1096,6 +1239,32 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2112,
+      "character": "Elesis",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 348000,
+      "player_nick": "AF Magic",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=1U05bsgx5bk",
+      "channel": "AF Magic",
+      "published_at": "2025-10-29T09:00:04Z",
+      "approved_at": "2026-09-10 00:58:46"
+    },
+    {
+      "id": 1731,
+      "character": "Rin/Lin",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 161000,
+      "player_nick": "LinDarkness",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=v4b4yZph2vE",
+      "channel": "LinDarkness",
+      "published_at": "2025-10-30T12:28:23Z",
+      "approved_at": "2026-09-09 20:55:06"
+    },
+    {
       "id": 44,
       "character": "Ley/Rey",
       "category": "void_nightmare",
@@ -1120,6 +1289,19 @@
       "channel": "lethegc",
       "published_at": "2025-11-24",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 2116,
+      "character": "Kallia",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 339000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=l_kGpAFGjik",
+      "channel": "Falonso",
+      "published_at": "2025-12-09T14:04:21Z",
+      "approved_at": "2026-09-10 01:02:08"
     },
     {
       "id": 68,
@@ -1250,6 +1432,19 @@
       "channel": "soup",
       "published_at": "2026-02-18",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 1734,
+      "character": "Lime/Holy",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 129000,
+      "player_nick": "Hatane",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=fjOlqn_HGDk",
+      "channel": "Hatane",
+      "published_at": "2026-02-27T09:00:21Z",
+      "approved_at": "2026-09-09 21:03:24"
     },
     {
       "id": 73,
@@ -1668,6 +1863,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2117,
+      "character": "Ley/Rey",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 331000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Mya9v5GlMhs",
+      "channel": "Falonso",
+      "published_at": "2026-04-24T14:00:39Z",
+      "approved_at": "2026-09-10 01:02:44"
+    },
+    {
       "id": 53,
       "character": "Rin/Lin",
       "category": "void_invasion",
@@ -1679,6 +1887,19 @@
       "channel": "Borkaz",
       "published_at": "2026-05-08T09:06:26Z",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 1729,
+      "character": "Asin",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 81000,
+      "player_nick": "AF Magic",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=u41uO0US3p4",
+      "channel": "AF Magic",
+      "published_at": "2026-05-27T09:30:03Z",
+      "approved_at": "2026-09-09 20:52:06"
     },
     {
       "id": 67,
@@ -1837,6 +2058,45 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 2114,
+      "character": "Ereb",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 160000,
+      "player_nick": "Hatane",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=vET9_1crXmE",
+      "channel": "Hatane",
+      "published_at": "2026-08-13T06:25:39Z",
+      "approved_at": "2026-09-10 00:59:51"
+    },
+    {
+      "id": 2113,
+      "character": "Ereb",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 115000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=iAeZqls2ZYE",
+      "channel": "Borkaz",
+      "published_at": "2026-08-14T09:07:25Z",
+      "approved_at": "2026-09-10 00:59:12"
+    },
+    {
+      "id": 2111,
+      "character": "Dio",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 334000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=AnsbMfum1ZI",
+      "channel": "Falonso",
+      "published_at": "2026-08-27T14:10:11Z",
+      "approved_at": "2026-09-10 00:58:00"
+    },
+    {
       "id": 23,
       "character": "Edel",
       "category": "void_nightmare",
@@ -1887,6 +2147,32 @@
       "channel": "Mira Lei",
       "published_at": null,
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 1727,
+      "character": "Rufus/Lupus",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 266000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://youtu.be/aTglQvuekIE",
+      "channel": "Borkaz",
+      "published_at": null,
+      "approved_at": "2026-09-09 20:49:02"
+    },
+    {
+      "id": 1732,
+      "character": "Ereb",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 264000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://youtu.be/V6O_9x6QTvw",
+      "channel": "Borkaz",
+      "published_at": null,
+      "approved_at": "2026-09-09 20:59:07"
     }
   ]
 }
