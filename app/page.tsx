@@ -8,6 +8,7 @@ import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, A
 import {buildAnalytics, gameCharacters} from "@/lib/analytics";
 import {localeNames, translator, type Locale, type MessageKey} from "@/lib/i18n";
 import {buildRecordProgression, topRankingsByCharacter, type RankingRow} from "@/lib/ranking";
+import {canonicalizePlayerNick} from "@/lib/player-nick";
 import {buildGitHubSubmissionUrl, isYouTubeUrl} from "@/lib/submission";
 import {buildPerformanceTiers} from "@/lib/tier-list";
 import {digitsOnly,parseTimeParts,splitTimeLabel} from "@/lib/time-input";
@@ -58,7 +59,7 @@ export default function Home(){
   const[locale,setLocale]=useState<Locale>("pt"),[tab,setTab]=useState<Tab>(publicReadOnly?"overview":"queue"),[runs,setRuns]=useState<Run[]>(publicReadOnly?[]:demoData),[sel,setSel]=useState<Run|null>(publicReadOnly?null:demoData[0]),[rankings,setRankings]=useState<RankingRow[]>([]),[history,setHistory]=useState<RankingRow[]>([]),[connected,setConnected]=useState(false),[msg,setMsg]=useState("");
   const t=translator(locale),tabs:Tab[]=publicReadOnly?["overview","rankings","tiers","history","submit"]:["overview","queue","rankings","tiers","parser","history"],dataUrl=publicReadOnly?"/candidates.json":"/api/candidates";
   useEffect(()=>{const stored=localStorage.getItem("gc-radar-locale") as Locale|null,detected=navigator.language.startsWith("ko")?"ko":navigator.language.startsWith("th")?"th":navigator.language.startsWith("en")?"en":"pt",next=stored&&stored in localeNames?stored:detected;setLocale(next);document.documentElement.lang=next},[]);
-  useEffect(()=>{fetch(dataUrl,{cache:"no-store"}).then(async response=>{if(!response.ok)throw new Error();const body=await response.json();const liveRuns=(body.candidates??[] as ApiCandidate[]).map(toRun);setRuns(liveRuns);setSel(liveRuns[0]??null);setRankings(body.rankings??[]);setHistory(body.history??body.rankings??[]);setConnected(true)}).catch(()=>setConnected(false))},[dataUrl]);
+  useEffect(()=>{fetch(dataUrl,{cache:"no-store"}).then(async response=>{if(!response.ok)throw new Error();const body=await response.json();const liveRuns=(body.candidates??[] as ApiCandidate[]).map(toRun),normalize=(row:RankingRow)=>({...row,player_nick:canonicalizePlayerNick(row.player_nick)??row.player_nick});setRuns(liveRuns);setSel(liveRuns[0]??null);setRankings((body.rankings??[] as RankingRow[]).map(normalize));setHistory((body.history??body.rankings??[] as RankingRow[]).map(normalize));setConnected(true)}).catch(()=>setConnected(false))},[dataUrl]);
   const changeLocale=(next:Locale)=>{setLocale(next);localStorage.setItem("gc-radar-locale",next);document.documentElement.lang=next};
   const flash=(x:string)=>{setMsg(x);setTimeout(()=>setMsg(""),2500)};
   const decide=async(ok:boolean,timeMs?:number)=>{if(!sel)return;try{const response=await fetch(`/api/candidates/${sel.id}/decision`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({approved:ok,time_ms:timeMs})});if(!response.ok)throw new Error((await response.json()).error);setRuns(current=>current.filter(x=>x.id!==sel.id));setSel(null);flash(ok?t("approve"):t("reject"))}catch(error){flash(error instanceof Error?error.message:t("unavailable"))}};

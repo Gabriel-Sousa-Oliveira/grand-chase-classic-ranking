@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { shouldAutoApproveTitle } from "@/lib/candidate-policy";
+import { canonicalizePlayerNick } from "@/lib/player-nick";
 
 export const dynamic = "force-dynamic";
 
@@ -80,6 +81,7 @@ export async function POST(request: Request) {
   let autoApproved = 0;
   for (const item of items) {
     if (!item.video_id || !item.video_url || !item.title || !item.status) continue;
+    const playerNick = canonicalizePlayerNick(item.player_nick ?? item.channel) ?? null;
     const autoApprove = shouldAutoApproveTitle(item);
     const effectiveStatus = autoApprove ? "approved" : item.status;
     const rawMetadata = typeof item.raw_metadata === "string"
@@ -90,7 +92,7 @@ export async function POST(request: Request) {
        category, floor, time_ms, confidence, status, era_key, raw_metadata)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
       .bind(item.video_id, item.video_url, item.title, item.channel ?? null,
-        item.player_nick ?? item.channel ?? null, item.published_at ?? null,
+        playerNick, item.published_at ?? null,
         item.character ?? null, item.category ?? null, item.floor ?? null,
         item.time_ms ?? null, item.confidence ?? 0, effectiveStatus,
         item.era_key ?? "current", rawMetadata).run();
@@ -105,7 +107,7 @@ export async function POST(request: Request) {
         WHERE video_id = ?
           AND status IN ('ready_for_review','time_required','classification_required')`)
         .bind(item.video_url, item.title, item.channel ?? null,
-          item.player_nick ?? item.channel ?? null, item.published_at ?? null,
+          playerNick, item.published_at ?? null,
           item.character ?? null, item.category ?? null, item.floor ?? null,
           item.time_ms ?? null, item.confidence ?? 0, effectiveStatus,
           rawMetadata, item.video_id).run();

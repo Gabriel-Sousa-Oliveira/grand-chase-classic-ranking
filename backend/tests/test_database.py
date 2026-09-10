@@ -2,11 +2,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from gc_radar.database import CandidateRepository
+from gc_radar.database import CandidateRepository, canonical_player_nick
 from gc_radar.parser import parse_title
 
 
 class DatabaseTests(unittest.TestCase):
+    def test_bork_alias_is_canonicalized_as_borkaz(self):
+        self.assertEqual(canonical_player_nick("Bork"), "Borkaz")
+        self.assertEqual(canonical_player_nick(" bOrK "), "Borkaz")
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.repo = CandidateRepository(Path(self.tmp.name) / "test.sqlite3")

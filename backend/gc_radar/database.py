@@ -62,6 +62,13 @@ def _bit(value: bool | None) -> int | None:
     return None if value is None else int(value)
 
 
+def canonical_player_nick(value: str | None) -> str | None:
+    if value is None:
+        return None
+    cleaned = value.strip()
+    return "Borkaz" if cleaned.casefold() == "bork" else cleaned
+
+
 class CandidateRepository:
     def __init__(self, path: str | Path = "gc_radar.sqlite3") -> None:
         self.path = str(path)
@@ -75,6 +82,10 @@ class CandidateRepository:
         self.connection.execute("""UPDATE rankings SET player_nick = COALESCE(
             player_nick, (SELECT COALESCE(c.player_nick, c.channel, 'Desconhecido')
             FROM candidates c WHERE c.id = rankings.candidate_id))""")
+        self.connection.execute("""UPDATE candidates SET player_nick = 'Borkaz'
+            WHERE lower(trim(player_nick)) = 'bork'""")
+        self.connection.execute("""UPDATE rankings SET player_nick = 'Borkaz'
+            WHERE lower(trim(player_nick)) = 'bork'""")
         self.connection.execute("""CREATE INDEX IF NOT EXISTS idx_rankings_character
             ON rankings(era_key, category, floor, character, time_ms)""")
         self.connection.commit()
@@ -86,7 +97,8 @@ class CandidateRepository:
             channel: str | None = None, published_at: str | None = None,
             metadata: dict | None = None, player_nick: str | None = None,
             era_key: str = "current", enrich_existing: bool = False) -> tuple[dict, bool]:
-        values = (video_id, video_url, parsed.title, channel, player_nick or channel,
+        values = (video_id, video_url, parsed.title, channel,
+                  canonical_player_nick(player_nick or channel),
                   published_at,
                   parsed.character, parsed.category, parsed.floor, parsed.time_ms,
                   _bit(parsed.solo), _bit(parsed.no_potions), _bit(parsed.no_quotes),
@@ -111,7 +123,8 @@ class CandidateRepository:
                     floor = ?, time_ms = ?, confidence = ?, status = ?, era_key = ?,
                     raw_metadata = ?, updated_at = CURRENT_TIMESTAMP
                   WHERE video_id = ? AND status NOT IN ('approved', 'rejected')""",
-                  (video_url, parsed.title, channel, player_nick or channel, published_at,
+                  (video_url, parsed.title, channel,
+                   canonical_player_nick(player_nick or channel), published_at,
                    parsed.character, parsed.category, parsed.floor, parsed.time_ms,
                    parsed.confidence, parsed.status, era_key,
                    json.dumps(metadata or {}, ensure_ascii=False), video_id))
