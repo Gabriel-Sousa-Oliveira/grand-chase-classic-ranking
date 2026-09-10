@@ -51,6 +51,8 @@ jobs:
           restore-keys: gc-radar-db-
 
       - name: Seed supplied reference videos
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
           mkdir -p data
           cd backend
@@ -69,6 +71,8 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 add \
             https://youtu.be/5D4_AfVl2eU --channel Falonso \
             --title "Uno Void Invasion 3F Solo | Grand Chase Classic" > /dev/null
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 youtube \
+            https://youtu.be/Q2TUPeiTmPI > /dev/null
 
       - name: Sync public Syntaxii leaderboards
         if: ${{ github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'ocr-only') }}
