@@ -21,6 +21,7 @@ DEFAULT_SEARCH_QUERIES = (
     "Grand Chase Classic Vazio Apocalipse",
     "Grand Chase Classic Duel 4",
     "Grand Chase Classic Duelo 4",
+    "Grand Chase Classic Infinity Cloister",
     "Grand Chase Classic Tower of Disappearance",
     "Grand Chase Classic Torre do Desaparecimento",
     "Grand Chase Classic LoJ Unlimited",
