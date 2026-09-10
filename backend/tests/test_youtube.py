@@ -4,7 +4,8 @@ import unittest
 from datetime import datetime, timezone
 from urllib.parse import parse_qs, urlparse
 
-from gc_radar.youtube import DEFAULT_SEARCH_QUERIES, discover_videos, fill_ranking_queries, search_videos
+from gc_radar.youtube import (DEFAULT_SEARCH_QUERIES, channel_archive,
+                              discover_videos, fill_ranking_queries, search_videos)
 
 
 class FakeResponse(io.BytesIO):
@@ -68,6 +69,44 @@ class YouTubeSearchTests(unittest.TestCase):
         self.assertIn("Grand Chase Classic Duel 4", DEFAULT_SEARCH_QUERIES)
         self.assertIn("Grand Chase Classic Tower of Disappearance", DEFAULT_SEARCH_QUERIES)
         self.assertIn("Grand Chase Classic LoJ Unlimited", DEFAULT_SEARCH_QUERIES)
+
+    def test_channel_archive_resolves_uploads_from_a_reference_video(self):
+        requested_paths = []
+
+        def opener(url, timeout):
+            parsed = urlparse(url)
+            requested_paths.append(parsed.path)
+            query = parse_qs(parsed.query)
+            if parsed.path.endswith("/videos"):
+                payload = {"items": [{
+                    "snippet": {"title": "Ereb Duel", "channelTitle": "Borkaz",
+                                "channelId": "UC-borkaz",
+                                "publishedAt": "2026-09-07T09:08:41Z"},
+                    "contentDetails": {"duration": "PT2M"},
+                }]}
+            elif parsed.path.endswith("/channels"):
+                payload = {"items": [{"contentDetails": {
+                    "relatedPlaylists": {"uploads": "UU-borkaz"}
+                }}]}
+            else:
+                self.assertEqual(query["playlistId"], ["UU-borkaz"])
+                payload = {"items": [
+                    {"snippet": {"title": "Ereb | Infinity Cloister Stage 4 Duell",
+                                  "publishedAt": "2026-09-07T09:08:41Z",
+                                  "videoOwnerChannelTitle": "Borkaz",
+                                  "resourceId": {"videoId": "Q2TUPeiTmPI"}}},
+                    {"snippet": {"title": "Private video",
+                                  "resourceId": {"videoId": "private0001"}}},
+                ]}
+            return FakeResponse(json.dumps(payload).encode())
+
+        videos = channel_archive("Q2TUPeiTmPI", api_key="test-key", opener=opener)
+        self.assertEqual(requested_paths,
+                         ["/youtube/v3/videos", "/youtube/v3/channels",
+                          "/youtube/v3/playlistItems"])
+        self.assertEqual(len(videos), 1)
+        self.assertEqual(videos[0]["video_id"], "Q2TUPeiTmPI")
+        self.assertEqual(videos[0]["channel"], "Borkaz")
 
 
 if __name__ == "__main__":
