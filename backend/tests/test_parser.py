@@ -20,13 +20,13 @@ class ParserTests(unittest.TestCase):
         self.assertIsNone(run.time_ms)
         self.assertEqual(run.status, "time_required")
 
-    def test_does_not_treat_stage_three_as_duel_four(self):
+    def test_keeps_stage_three_separate_from_duel_four(self):
         run = parse_title(
             "Dio - Infinity Cloister Stage 3 (no potions) - Grand Chase Classic"
         )
         self.assertEqual(run.character, "Dio")
-        self.assertIsNone(run.category)
-        self.assertEqual(run.status, "classification_required")
+        self.assertEqual(run.category, "infinity_cloister_3")
+        self.assertEqual(run.status, "time_required")
 
     def test_ereb_invasion_with_time(self):
         run = parse_title("Ereb | Vazio (Invasão) 3f (1'32) | Grand Chase Classic")
@@ -54,6 +54,31 @@ class ParserTests(unittest.TestCase):
     def test_other_time_formats(self):
         self.assertEqual(parse_title("Ronan Void Invasion 3F 01:02.345").time_ms, 62_345)
         self.assertEqual(parse_title("Ronan Void Invasion 3F 1m 02s").time_ms, 62_000)
+        self.assertEqual(parse_title("Rin Berkas' Lair 32s no potions").time_ms, 32_000)
+
+    def test_borkaz_archive_dungeon_aliases(self):
+        cases = {
+            "Dio - Infinity Cloister Stage 3 (no potions)": "infinity_cloister_3",
+            "Lire | Land of Judgement (no potions)": "land_of_judgement",
+            "Kallia - Renak's Core (Champion) 1:14": "renaks_core_champion",
+            "Uno - The Great Explosion of Kounat 1:15": "great_explosion_of_kounat",
+            "Rufus - Wizard's Labyrinth stage 30 (1:43)": "wizards_labyrinth_30",
+            "Sieghart - Moonlight Village 1:21": "moonlight_village",
+            "Sieghart - Temple of Time 1:21": "temple_of_time",
+            "Ai | Sanctuary of Divine Beast (Master Mode) Solo": "sanctuary_divine_beast_master",
+            "Elesis | Hall of Harmony (Master Mode) Solo": "hall_of_harmony_master",
+            "Edel | Chapel of Eternity (Master) Solo": "chapel_of_eternity_master",
+            "Iris | Path Shrouded in Darkness (Master) 1:19": "path_shrouded_darkness_master",
+            "Rin (Light) Apocalypse Vortex (Master) 1:37": "apocalypse_vortex_master",
+            "Rin - Berkas' Lair 32s (NO POTIONS)": "berkas_lair",
+            "Kallia - Angry Boss (Archimedia) 2:34": "angry_boss_archimedia",
+            "Kallia - Angry Boss 2:18 (Alcubra)": "angry_boss_alcubra",
+        }
+        for title, category in cases.items():
+            with self.subTest(title=title):
+                run = parse_title(title)
+                self.assertEqual(run.category, category)
+                self.assertEqual(run.floor, 0)
 
     def test_decodes_youtube_html_entities_before_parsing(self):
         run = parse_title("Rin | Vazio Invasão 3F 2&#39;08")
