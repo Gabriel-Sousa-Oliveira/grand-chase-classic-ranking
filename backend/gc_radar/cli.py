@@ -52,7 +52,8 @@ def main() -> None:
             metadata = fetch_video(args.url)
             result, created = repo.add(metadata["video_id"], metadata["url"],
                                        parse_title(metadata["title"]), metadata["channel"],
-                                       metadata["published_at"], metadata["raw"])
+                                       metadata["published_at"], metadata["raw"],
+                                       enrich_existing=True)
             print(json.dumps({"created": created, "candidate": result}, ensure_ascii=False, indent=2))
         elif args.command == "import-syntaxii":
             summary = import_syntaxii(repo, era_key=args.era)
