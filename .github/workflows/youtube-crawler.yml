@@ -12,6 +12,7 @@ on:
           - recent
           - fill-ranking
           - sync-syntaxii
+          - sync-borkaz
           - ocr-only
       days:
         description: Dias para a busca recente (o preenchimento usa 365)
@@ -99,6 +100,16 @@ jobs:
           mkdir -p data
           cd backend
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 fill-ranking --days 365 --max-results 25 > ../data/last-run.json
+
+      - name: Sync Borkaz channel archive
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'sync-borkaz') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[borkaz]')) }}
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          mkdir -p data
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 channel-archive \
+            https://youtu.be/Q2TUPeiTmPI --max-results 500 > ../data/last-run.json
 
       - name: Install OCR tools
         if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]')) }}
