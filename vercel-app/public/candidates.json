@@ -15,6 +15,84 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4256,
+      "character": "Iris",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 76000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=RcWxjIkM1h0",
+      "channel": "Borkaz",
+      "published_at": "2026-04-18T09:43:19Z",
+      "approved_at": "2026-09-10 02:51:28"
+    },
+    {
+      "id": 4162,
+      "character": "Kallia",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 116000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=P_XMi8LNYwE",
+      "channel": "Borkaz",
+      "published_at": "2025-04-30T09:01:12Z",
+      "approved_at": "2026-09-10 02:51:17"
+    },
+    {
+      "id": 4257,
+      "character": "Rin/Lin",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 62000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=qb_MeuQSM1s",
+      "channel": "Borkaz",
+      "published_at": "2026-07-10T09:26:31Z",
+      "approved_at": "2026-09-10 02:51:28"
+    },
+    {
+      "id": 4165,
+      "character": "Rufus/Lupus",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 119000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=-onuDtU32Pk",
+      "channel": "Borkaz",
+      "published_at": "2025-04-02T09:00:32Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4166,
+      "character": "Sieghart",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 118000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=B8phWgnjSrk",
+      "channel": "Borkaz",
+      "published_at": "2025-03-03T10:00:32Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4259,
+      "character": "Ai",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 246000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=C2hdy2I_QFo",
+      "channel": "Borkaz",
+      "published_at": "2024-05-03T09:01:49Z",
+      "approved_at": "2026-09-10 02:51:28"
+    },
+    {
       "id": 14,
       "character": "Dio",
       "category": "tower_of_disappearance",
@@ -41,6 +119,32 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4169,
+      "character": "Iris",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 161000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=OAQJO_uxGMU",
+      "channel": "Borkaz",
+      "published_at": "2025-10-20T10:57:25Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4260,
+      "character": "Rin/Lin",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 86000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=rHudrDdfL64",
+      "channel": "Borkaz",
+      "published_at": "2026-05-28T09:17:50Z",
+      "approved_at": "2026-09-10 02:51:28"
+    },
+    {
       "id": 61,
       "character": "Rufus/Lupus",
       "category": "tower_of_disappearance",
@@ -54,6 +158,32 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4170,
+      "character": "Rufus/Lupus",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 166000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ulTjTfOWcQQ",
+      "channel": "Borkaz",
+      "published_at": "2025-10-27T12:11:30Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4173,
+      "character": "Sieghart",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 460000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=GLncPP2BpDA",
+      "channel": "Borkaz",
+      "published_at": "2024-01-09T10:17:01Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
       "id": 19,
       "character": "Edel",
       "category": "void_apocalypse",
@@ -65,6 +195,19 @@
       "channel": "vanzcake",
       "published_at": "2026-09-01",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4262,
+      "character": "Ereb",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 203000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=vfsOLLsxYFw",
+      "channel": "Borkaz",
+      "published_at": "2026-09-05T09:04:15Z",
+      "approved_at": "2026-09-10 02:51:28"
     },
     {
       "id": 35,
@@ -392,6 +535,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4174,
+      "character": "Kallia",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 130000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=aySZjdbV0Hg",
+      "channel": "Borkaz",
+      "published_at": "2025-05-02T09:13:31Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
       "id": 2116,
       "character": "Kallia",
       "category": "void_invasion",
@@ -587,6 +743,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4177,
+      "character": "Rufus/Lupus",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 160000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=3gLVKyQnbfw",
+      "channel": "Borkaz",
+      "published_at": "2025-03-10T11:30:40Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
       "id": 64,
       "character": "Ryan",
       "category": "void_invasion",
@@ -650,6 +819,19 @@
       "channel": "Prolapsador",
       "published_at": "2025-10-24",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4178,
+      "character": "Sieghart",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 145000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=-Mkxw_08km4",
+      "channel": "Borkaz",
+      "published_at": "2025-02-24T09:59:57Z",
+      "approved_at": "2026-09-10 02:51:19"
     },
     {
       "id": 2268,
@@ -821,6 +1003,19 @@
       "approved_at": "2026-09-09 20:59:07"
     },
     {
+      "id": 4179,
+      "character": "Iris",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 211000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Gnyn_Hhz2aU",
+      "channel": "Borkaz",
+      "published_at": "2026-04-06T09:23:09Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
       "id": 40,
       "character": "Lass",
       "category": "void_nightmare",
@@ -871,6 +1066,19 @@
       "channel": "LimeLimonada",
       "published_at": "2026-03-31",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4181,
+      "character": "Rin/Lin",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 208000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=89HH0WYIjUY",
+      "channel": "Borkaz",
+      "published_at": "2026-05-15T09:08:26Z",
+      "approved_at": "2026-09-10 02:51:19"
     },
     {
       "id": 59,
@@ -1003,6 +1211,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4183,
+      "character": "Iris",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 155000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=J0d_G_jQj7s",
+      "channel": "Borkaz",
+      "published_at": "2026-04-09T09:48:46Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
       "id": 33,
       "character": "Jin",
       "category": "void_taint",
@@ -1014,6 +1235,19 @@
       "channel": "azathoth",
       "published_at": "2025-10-19",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4185,
+      "character": "Kallia",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 238000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=6LklyfAwcCs",
+      "channel": "Borkaz",
+      "published_at": "2025-05-05T09:00:56Z",
+      "approved_at": "2026-09-10 02:51:19"
     },
     {
       "id": 42,
@@ -1068,6 +1302,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4186,
+      "character": "Rin/Lin",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 166000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Uj0oBZ4Zd2k",
+      "channel": "Borkaz",
+      "published_at": "2026-05-11T09:03:24Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
       "id": 60,
       "character": "Ronan",
       "category": "void_taint",
@@ -1092,6 +1339,19 @@
       "channel": "XX",
       "published_at": "2026-01-19",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4189,
+      "character": "Rufus/Lupus",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 265000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=LWWeWNY7l9c",
+      "channel": "Borkaz",
+      "published_at": "2025-03-31T09:21:47Z",
+      "approved_at": "2026-09-10 02:51:20"
     },
     {
       "id": 66,
@@ -1120,6 +1380,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4190,
+      "character": "Sieghart",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 247000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Yuvgc-PELG8",
+      "channel": "Borkaz",
+      "published_at": "2025-02-26T09:57:35Z",
+      "approved_at": "2026-09-10 02:51:20"
+    },
+    {
       "id": 75,
       "character": "Zero",
       "category": "void_taint",
@@ -1135,6 +1408,110 @@
   ],
   "history": [
     {
+      "id": 4173,
+      "character": "Sieghart",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 460000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=GLncPP2BpDA",
+      "channel": "Borkaz",
+      "published_at": "2024-01-09T10:17:01Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4172,
+      "character": "Rufus/Lupus",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 351000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=K301ZLe9uCM",
+      "channel": "Borkaz",
+      "published_at": "2024-01-23T10:13:18Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4261,
+      "character": "Rin/Lin",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 433000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=HdhAH2okh8g",
+      "channel": "Borkaz",
+      "published_at": "2024-03-15T09:01:11Z",
+      "approved_at": "2026-09-10 02:51:28"
+    },
+    {
+      "id": 4259,
+      "character": "Ai",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 246000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=C2hdy2I_QFo",
+      "channel": "Borkaz",
+      "published_at": "2024-05-03T09:01:49Z",
+      "approved_at": "2026-09-10 02:51:28"
+    },
+    {
+      "id": 4168,
+      "character": "Sieghart",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 182000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=QN3s4oHS78E",
+      "channel": "Borkaz",
+      "published_at": "2024-07-26T09:15:36Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4167,
+      "character": "Sieghart",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 147000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=nE1KfG1MZcw",
+      "channel": "Borkaz",
+      "published_at": "2024-12-04T10:00:41Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4163,
+      "character": "Kallia",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 137000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=uDjqbCy3HZY",
+      "channel": "Borkaz",
+      "published_at": "2024-12-11T11:46:26Z",
+      "approved_at": "2026-09-10 02:51:17"
+    },
+    {
+      "id": 4175,
+      "character": "Kallia",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 155000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=27vok-Zsmy4",
+      "channel": "Borkaz",
+      "published_at": "2024-12-18T13:06:39Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
       "id": 6,
       "character": "Arme",
       "category": "void_taint",
@@ -1146,6 +1523,32 @@
       "channel": "GCLabs",
       "published_at": "2025-02-24",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4178,
+      "character": "Sieghart",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 145000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=-Mkxw_08km4",
+      "channel": "Borkaz",
+      "published_at": "2025-02-24T09:59:57Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
+      "id": 4190,
+      "character": "Sieghart",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 247000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Yuvgc-PELG8",
+      "channel": "Borkaz",
+      "published_at": "2025-02-26T09:57:35Z",
+      "approved_at": "2026-09-10 02:51:20"
     },
     {
       "id": 3,
@@ -1161,6 +1564,97 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4166,
+      "character": "Sieghart",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 118000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=B8phWgnjSrk",
+      "channel": "Borkaz",
+      "published_at": "2025-03-03T10:00:32Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4177,
+      "character": "Rufus/Lupus",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 160000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=3gLVKyQnbfw",
+      "channel": "Borkaz",
+      "published_at": "2025-03-10T11:30:40Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
+      "id": 4171,
+      "character": "Rufus/Lupus",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 187000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=_ShM68FJcjY",
+      "channel": "Borkaz",
+      "published_at": "2025-03-19T09:04:09Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4189,
+      "character": "Rufus/Lupus",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 265000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=LWWeWNY7l9c",
+      "channel": "Borkaz",
+      "published_at": "2025-03-31T09:21:47Z",
+      "approved_at": "2026-09-10 02:51:20"
+    },
+    {
+      "id": 4165,
+      "character": "Rufus/Lupus",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 119000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=-onuDtU32Pk",
+      "channel": "Borkaz",
+      "published_at": "2025-04-02T09:00:32Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4162,
+      "character": "Kallia",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 116000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=P_XMi8LNYwE",
+      "channel": "Borkaz",
+      "published_at": "2025-04-30T09:01:12Z",
+      "approved_at": "2026-09-10 02:51:17"
+    },
+    {
+      "id": 4174,
+      "character": "Kallia",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 130000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=aySZjdbV0Hg",
+      "channel": "Borkaz",
+      "published_at": "2025-05-02T09:13:31Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
       "id": 49,
       "character": "Mari",
       "category": "void_invasion",
@@ -1172,6 +1666,45 @@
       "channel": "Thehighest",
       "published_at": "2025-05-04",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4185,
+      "character": "Kallia",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 238000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=6LklyfAwcCs",
+      "channel": "Borkaz",
+      "published_at": "2025-05-05T09:00:56Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
+      "id": 4176,
+      "character": "Rin/Lin",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 129000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=jsIVV-gYu5s",
+      "channel": "Borkaz",
+      "published_at": "2025-05-10T09:20:34Z",
+      "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 4188,
+      "character": "Rin/Lin",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 237000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=XDu_XdDREkY",
+      "channel": "Borkaz",
+      "published_at": "2025-05-12T09:17:07Z",
+      "approved_at": "2026-09-10 02:51:19"
     },
     {
       "id": 75,
@@ -1198,6 +1731,19 @@
       "channel": "P1ke",
       "published_at": "2025-05-23",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4164,
+      "character": "Rin/Lin",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 107000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=C5MCH7RYtEU",
+      "channel": "Borkaz",
+      "published_at": "2025-05-23T10:08:39Z",
+      "approved_at": "2026-09-10 02:51:17"
     },
     {
       "id": 5,
@@ -1265,6 +1811,32 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4161,
+      "character": "Iris",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 237000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=nwyHCE9XFS0",
+      "channel": "Borkaz",
+      "published_at": "2025-10-11T09:02:01Z",
+      "approved_at": "2026-09-10 02:51:17"
+    },
+    {
+      "id": 4184,
+      "character": "Iris",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 183000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=_UxDXd3MhDI",
+      "channel": "Borkaz",
+      "published_at": "2025-10-17T09:01:37Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
       "id": 32,
       "character": "Jin",
       "category": "void_invasion",
@@ -1289,6 +1861,19 @@
       "channel": "azathoth",
       "published_at": "2025-10-19",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4169,
+      "character": "Iris",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 161000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=OAQJO_uxGMU",
+      "channel": "Borkaz",
+      "published_at": "2025-10-20T10:57:25Z",
+      "approved_at": "2026-09-10 02:51:18"
     },
     {
       "id": 55,
@@ -1330,6 +1915,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4180,
+      "character": "Iris",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 237000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=CnyAJugiL00",
+      "channel": "Borkaz",
+      "published_at": "2025-10-24T09:44:08Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
       "id": 70,
       "character": "Sieghart",
       "category": "void_nightmare",
@@ -1354,6 +1952,19 @@
       "channel": "SOMBRA DO JOGO",
       "published_at": "2025-10-26T03:15:00Z",
       "approved_at": "2026-09-10 01:21:09"
+    },
+    {
+      "id": 4170,
+      "character": "Rufus/Lupus",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 166000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ulTjTfOWcQQ",
+      "channel": "Borkaz",
+      "published_at": "2025-10-27T12:11:30Z",
+      "approved_at": "2026-09-10 02:51:18"
     },
     {
       "id": 2112,
@@ -1967,6 +2578,45 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 4182,
+      "character": "Rin/Lin",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 241000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=xzOoc-J8IsA",
+      "channel": "Borkaz",
+      "published_at": "2026-04-04T09:15:19Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
+      "id": 4179,
+      "character": "Iris",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 211000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Gnyn_Hhz2aU",
+      "channel": "Borkaz",
+      "published_at": "2026-04-06T09:23:09Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
+      "id": 4183,
+      "character": "Iris",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 155000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=J0d_G_jQj7s",
+      "channel": "Borkaz",
+      "published_at": "2026-04-09T09:48:46Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
       "id": 2269,
       "character": "Sieghart",
       "category": "void_invasion",
@@ -1978,6 +2628,19 @@
       "channel": "Hatane",
       "published_at": "2026-04-11T15:56:37Z",
       "approved_at": "2026-09-10 01:18:49"
+    },
+    {
+      "id": 4187,
+      "character": "Rin/Lin",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 182000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=UKuF9tKCGGk",
+      "channel": "Borkaz",
+      "published_at": "2026-04-12T09:01:16Z",
+      "approved_at": "2026-09-10 02:51:19"
     },
     {
       "id": 7,
@@ -2006,6 +2669,19 @@
       "approved_at": "2026-09-10 01:19:31"
     },
     {
+      "id": 4256,
+      "character": "Iris",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 76000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=RcWxjIkM1h0",
+      "channel": "Borkaz",
+      "published_at": "2026-04-18T09:43:19Z",
+      "approved_at": "2026-09-10 02:51:28"
+    },
+    {
       "id": 56,
       "character": "Ronan",
       "category": "void_invasion",
@@ -2032,6 +2708,19 @@
       "approved_at": "2026-09-10 01:02:44"
     },
     {
+      "id": 4258,
+      "character": "Rin/Lin",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 80000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=tB608H52C5c",
+      "channel": "Borkaz",
+      "published_at": "2026-04-26T09:01:29Z",
+      "approved_at": "2026-09-10 02:51:28"
+    },
+    {
       "id": 53,
       "character": "Rin/Lin",
       "category": "void_invasion",
@@ -2043,6 +2732,32 @@
       "channel": "Borkaz",
       "published_at": "2026-05-08T09:06:26Z",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4186,
+      "character": "Rin/Lin",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 166000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Uj0oBZ4Zd2k",
+      "channel": "Borkaz",
+      "published_at": "2026-05-11T09:03:24Z",
+      "approved_at": "2026-09-10 02:51:19"
+    },
+    {
+      "id": 4181,
+      "character": "Rin/Lin",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 208000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=89HH0WYIjUY",
+      "channel": "Borkaz",
+      "published_at": "2026-05-15T09:08:26Z",
+      "approved_at": "2026-09-10 02:51:19"
     },
     {
       "id": 2272,
@@ -2069,6 +2784,19 @@
       "channel": "AF Magic",
       "published_at": "2026-05-27T09:30:03Z",
       "approved_at": "2026-09-09 20:52:06"
+    },
+    {
+      "id": 4260,
+      "character": "Rin/Lin",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 86000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=rHudrDdfL64",
+      "channel": "Borkaz",
+      "published_at": "2026-05-28T09:17:50Z",
+      "approved_at": "2026-09-10 02:51:28"
     },
     {
       "id": 2268,
@@ -2121,6 +2849,19 @@
       "channel": "Syntaxii",
       "published_at": "2026-07-03",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 4257,
+      "character": "Rin/Lin",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 62000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=qb_MeuQSM1s",
+      "channel": "Borkaz",
+      "published_at": "2026-07-10T09:26:31Z",
+      "approved_at": "2026-09-10 02:51:28"
     },
     {
       "id": 14,
@@ -2329,6 +3070,19 @@
       "channel": "LinDarkness",
       "published_at": "2026-09-05T01:09:15Z",
       "approved_at": "2026-09-10 01:21:45"
+    },
+    {
+      "id": 4262,
+      "character": "Ereb",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 203000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=vfsOLLsxYFw",
+      "channel": "Borkaz",
+      "published_at": "2026-09-05T09:04:15Z",
+      "approved_at": "2026-09-10 02:51:28"
     },
     {
       "id": 72,
