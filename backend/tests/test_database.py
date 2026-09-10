@@ -24,6 +24,28 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(first["id"], second["id"])
         self.assertEqual(len(self.repo.queue()), 1)
 
+    def test_direct_refresh_reclassifies_an_existing_pending_video(self):
+        old = parse_title("Ereb | Grand Chase Classic")
+        first, created = self.repo.add(
+            "Q2TUPeiTmPI", "https://youtu.be/Q2TUPeiTmPI", old,
+            channel="Borkaz"
+        )
+        self.assertTrue(created)
+        self.assertEqual(first["status"], "classification_required")
+
+        refreshed = parse_title(
+            "Ereb | Infinity Cloister Stage 4 Duell | Grand Chase Classic"
+        )
+        updated, created_again = self.repo.add(
+            "Q2TUPeiTmPI", "https://youtu.be/Q2TUPeiTmPI", refreshed,
+            channel="Borkaz", enrich_existing=True
+        )
+        self.assertFalse(created_again)
+        self.assertEqual(updated["character"], "Ereb")
+        self.assertEqual(updated["category"], "duel_4")
+        self.assertEqual(updated["floor"], 0)
+        self.assertEqual(updated["status"], "time_required")
+
     def test_missing_time_blocks_approval_until_filled(self):
         parsed = parse_title("Lupus | Vazio (Apocalipse) 3F Solo Sem poções")
         candidate, _ = self.repo.add("aTglQvuekIE", "https://youtu.be/aTglQvuekIE", parsed)
