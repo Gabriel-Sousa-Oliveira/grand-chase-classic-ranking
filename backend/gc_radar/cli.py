@@ -50,6 +50,7 @@ def main() -> None:
             print(json.dumps({"created": created, "candidate": result}, ensure_ascii=False, indent=2))
         elif args.command == "youtube":
             metadata = fetch_video(args.url)
+            # Directly supplied URLs must refresh pending rows after parser aliases evolve.
             result, created = repo.add(metadata["video_id"], metadata["url"],
                                        parse_title(metadata["title"]), metadata["channel"],
                                        metadata["published_at"], metadata["raw"],
