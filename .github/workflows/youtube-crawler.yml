@@ -41,7 +41,7 @@ jobs:
   discover:
     if: ${{ (github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip-run]')) && (github.event_name != 'issues' || startsWith(github.event.issue.title, '[Run submission]')) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 330
     env:
       SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
       SITE_ACCESS_TOKEN: ${{ secrets.SITE_ACCESS_TOKEN }}
@@ -169,7 +169,13 @@ jobs:
           YOUTUBE_USE_PO_TOKEN: "1"
         run: |
           cd backend
-          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue --limit 8 > ../data/last-run.json
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sweep]"* ]]; then
+            python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
+              --limit 0 --workers 4 --all-missing > ../data/last-run.json
+          else
+            python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
+              --limit 8 --workers 1 > ../data/last-run.json
+          fi
 
       - name: Remove temporary YouTube session
         if: ${{ always() && ((github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]'))) }}
