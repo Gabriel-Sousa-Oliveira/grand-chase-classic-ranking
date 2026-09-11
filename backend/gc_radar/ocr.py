@@ -94,6 +94,7 @@ def _download_excerpt(video_url: str, destination: Path) -> Path:
         # source file.
         "-f", "bv*",
         "-S", "+res:360,+size,+br",
+        "--download-sections", "*-75-inf",
         "-o", str(output),
     ]
     if os.environ.get("YOUTUBE_USE_PO_TOKEN") == "1":
