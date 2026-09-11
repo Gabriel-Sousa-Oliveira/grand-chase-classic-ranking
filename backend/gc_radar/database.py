@@ -170,11 +170,49 @@ class CandidateRepository:
         """, (limit,)).fetchall()
         return [dict(row) for row in rows]
 
+    def ocr_candidates(self, limit: int = 8,
+                       include_classification: bool = False) -> list[dict]:
+        """Return missing-time videos that have not produced a final OCR result.
+
+        A previous ``no_consensus`` is final and belongs in the manual queue.
+        Technical errors remain eligible for a later retry.
+        """
+        statuses = ("time_required", "classification_required") \
+            if include_classification else ("time_required",)
+        placeholders = ",".join("?" for _ in statuses)
+        query = f"""
+            SELECT * FROM candidates
+            WHERE time_ms IS NULL AND status IN ({placeholders})
+              AND COALESCE(json_extract(raw_metadata, '$.ocr_outcome'), '')
+                  != 'no_consensus'
+            ORDER BY json_extract(raw_metadata, '$.ocr_outcome') = 'error',
+                     updated_at ASC
+        """
+        parameters: list[object] = list(statuses)
+        if limit > 0:
+            query += " LIMIT ?"
+            parameters.append(limit)
+        rows = self.connection.execute(query, parameters).fetchall()
+        return [dict(row) for row in rows]
+
+    def ocr_remaining(self, include_classification: bool = False) -> int:
+        statuses = ("time_required", "classification_required") \
+            if include_classification else ("time_required",)
+        placeholders = ",".join("?" for _ in statuses)
+        row = self.connection.execute(f"""
+            SELECT COUNT(*) FROM candidates
+            WHERE time_ms IS NULL AND status IN ({placeholders})
+              AND COALESCE(json_extract(raw_metadata, '$.ocr_outcome'), '')
+                  != 'no_consensus'
+        """, statuses).fetchone()
+        return int(row[0])
+
     def record_ocr_attempt(self, candidate_id: int, outcome: str) -> dict:
         candidate = self.get(candidate_id)
         metadata = json.loads(candidate["raw_metadata"] or "{}")
         metadata["ocr_attempted_at"] = datetime.now(timezone.utc).isoformat()
         metadata["ocr_outcome"] = outcome
+        metadata["ocr_attempts"] = int(metadata.get("ocr_attempts", 0)) + 1
         self.connection.execute("""
             UPDATE candidates SET raw_metadata = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
@@ -191,6 +229,7 @@ class CandidateRepository:
         metadata["ocr"] = evidence
         metadata["ocr_attempted_at"] = datetime.now(timezone.utc).isoformat()
         metadata["ocr_outcome"] = "matched"
+        metadata["ocr_attempts"] = int(metadata.get("ocr_attempts", 0)) + 1
         self.connection.execute("""
             UPDATE candidates SET time_ms = ?, confidence = ?, raw_metadata = ?,
               status = CASE
