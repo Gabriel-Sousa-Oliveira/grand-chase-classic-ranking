@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from concurrent.futures import ThreadPoolExecutor
 
 from .database import CandidateRepository
 from .ocr import read_video_time
@@ -41,6 +42,8 @@ def main() -> None:
     syntaxii_cmd.add_argument("--era", default="current")
     ocr_cmd = commands.add_parser("ocr-queue")
     ocr_cmd.add_argument("--limit", type=int, default=8)
+    ocr_cmd.add_argument("--workers", type=int, default=1)
+    ocr_cmd.add_argument("--all-missing", action="store_true")
     commands.add_parser("queue")
     args = parser.parse_args()
 
@@ -143,10 +146,25 @@ def main() -> None:
         elif args.command == "ocr-queue":
             processed = matched = failed = 0
             results = []
-            for candidate in repo.time_required(args.limit):
-                processed += 1
+            candidates = repo.ocr_candidates(args.limit, args.all_missing)
+
+            def inspect(candidate: dict) -> tuple[dict, object | None, Exception | None]:
                 try:
-                    ocr = read_video_time(candidate["video_url"])
+                    return candidate, read_video_time(candidate["video_url"]), None
+                except Exception as error:
+                    return candidate, None, error
+
+            workers = max(1, min(args.workers, 8))
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                inspections = executor.map(inspect, candidates)
+                for candidate, ocr, error in inspections:
+                    processed += 1
+                    if error is not None:
+                        failed += 1
+                        repo.record_ocr_attempt(candidate["id"], "error")
+                        results.append({"video_id": candidate["video_id"], "result": "error",
+                                        "error": str(error)[:240]})
+                        continue
                     if ocr is None:
                         repo.record_ocr_attempt(candidate["id"], "no_consensus")
                         results.append({"video_id": candidate["video_id"], "result": "no_consensus"})
@@ -158,11 +176,6 @@ def main() -> None:
                     matched += 1
                     results.append({"video_id": candidate["video_id"], "result": "matched",
                                     "time_ms": ocr.time_ms, "confidence": ocr.confidence})
-                except Exception as error:
-                    failed += 1
-                    repo.record_ocr_attempt(candidate["id"], "error")
-                    results.append({"video_id": candidate["video_id"], "result": "error",
-                                    "error": str(error)[:240]})
             exported = [{key: candidate[key] for key in (
                 "video_id", "video_url", "title", "channel", "player_nick",
                 "published_at", "character", "category", "floor", "time_ms",
@@ -170,6 +183,7 @@ def main() -> None:
             )} for candidate in repo.queue()]
             print(json.dumps({"mode": "ocr", "processed": processed, "matched": matched,
                               "failed": failed, "results": results,
+                              "remaining_ocr": repo.ocr_remaining(args.all_missing),
                               "queue_size": len(exported), "candidates": exported},
                              ensure_ascii=False, indent=2))
         else:
