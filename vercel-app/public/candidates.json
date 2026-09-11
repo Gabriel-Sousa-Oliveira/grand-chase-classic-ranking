@@ -366,6 +366,19 @@
       "approved_at": "2026-09-10 02:51:18"
     },
     {
+      "id": 9794,
+      "character": "Arme",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 206000,
+      "player_nick": "GCLabs",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=IwiEmX22hQg",
+      "channel": "GCLabs",
+      "published_at": "2026-08-26",
+      "approved_at": "2026-09-11 05:50:20"
+    },
+    {
       "id": 19,
       "character": "Edel",
       "category": "void_apocalypse",
@@ -3538,6 +3551,19 @@
       "channel": "Borkaz",
       "published_at": "2026-08-14T09:07:25Z",
       "approved_at": "2026-09-10 00:59:12"
+    },
+    {
+      "id": 9794,
+      "character": "Arme",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 206000,
+      "player_nick": "GCLabs",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=IwiEmX22hQg",
+      "channel": "GCLabs",
+      "published_at": "2026-08-26",
+      "approved_at": "2026-09-11 05:50:20"
     },
     {
       "id": 2111,
