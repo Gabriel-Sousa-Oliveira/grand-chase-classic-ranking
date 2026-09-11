@@ -106,6 +106,25 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(updated["time_ms"], 92_000)
         self.assertIn('"ocr"', updated["raw_metadata"])
 
+    def test_ocr_candidates_include_unresolved_rows_and_skip_no_consensus(self):
+        ordinary, _ = self.repo.add("ordinary", "https://youtu.be/ordinary",
+                                    parse_title("Ronan Void Invasion 3F"))
+        incomplete, _ = self.repo.add("incomplete", "https://youtu.be/incomplete",
+                                      parse_title("Ronan Grand Chase Classic"))
+        retriable, _ = self.repo.add("retriable", "https://youtu.be/retriable",
+                                     parse_title("Arme Void Invasion 3F"))
+        finished, _ = self.repo.add("finished", "https://youtu.be/finished",
+                                    parse_title("Lire Void Invasion 3F"))
+        self.repo.record_ocr_attempt(retriable["id"], "error")
+        self.repo.record_ocr_attempt(finished["id"], "no_consensus")
+
+        normal_ids = {row["video_id"] for row in self.repo.ocr_candidates(0)}
+        all_ids = {row["video_id"] for row in self.repo.ocr_candidates(0, True)}
+        self.assertEqual(normal_ids, {ordinary["video_id"], retriable["video_id"]})
+        self.assertEqual(all_ids, {ordinary["video_id"], incomplete["video_id"],
+                                  retriable["video_id"]})
+        self.assertEqual(self.repo.ocr_remaining(True), 3)
+
 
 if __name__ == "__main__":
     unittest.main()
