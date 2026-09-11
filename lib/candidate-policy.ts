@@ -5,15 +5,28 @@ export type ApprovalCandidate = {
   floor?: number | null;
   time_ms?: number | null;
   confidence?: number | null;
+  raw_metadata?: unknown;
 };
 
 const TITLE_APPROVAL_CONFIDENCE = 0.95;
 
 /**
- * Automatically approve only complete, high-confidence title parses.
- * OCR tops out below this threshold, so video-derived times remain manual.
+ * Automatically approve complete title parses or OCR times backed by consensus
+ * from at least two distinct frames.
  */
 export function shouldAutoApproveTitle(candidate: ApprovalCandidate): boolean {
+  let metadata: Record<string, unknown> = {};
+  try {
+    const value = typeof candidate.raw_metadata === "string"
+      ? JSON.parse(candidate.raw_metadata) : candidate.raw_metadata;
+    if (value && typeof value === "object") metadata = value as Record<string, unknown>;
+  } catch {
+    metadata = {};
+  }
+  const ocr = metadata.ocr && typeof metadata.ocr === "object"
+    ? metadata.ocr as Record<string, unknown> : {};
+  const ocrConsensus = metadata.ocr_outcome === "matched"
+    && typeof ocr.matching_frames === "number" && ocr.matching_frames >= 2;
   return candidate.status === "ready_for_review"
     && Boolean(candidate.character)
     && Boolean(candidate.category)
@@ -23,5 +36,5 @@ export function shouldAutoApproveTitle(candidate: ApprovalCandidate): boolean {
     && Number.isInteger(candidate.time_ms)
     && (candidate.time_ms ?? 0) > 0
     && typeof candidate.confidence === "number"
-    && candidate.confidence >= TITLE_APPROVAL_CONFIDENCE;
+    && (candidate.confidence >= TITLE_APPROVAL_CONFIDENCE || ocrConsensus);
 }
