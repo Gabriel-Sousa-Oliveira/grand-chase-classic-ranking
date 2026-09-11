@@ -51,6 +51,7 @@ class OcrTextTests(unittest.TestCase):
             command = run.call_args.args[0]
             self.assertEqual(command[command.index("-f") + 1], "bv*")
             self.assertEqual(command[command.index("-S") + 1], "+res:360,+size,+br")
+            self.assertEqual(command[command.index("--download-sections") + 1], "*-75-inf")
 
     def test_browser_po_token_uses_configured_chrome(self):
         environment = {
