@@ -88,7 +88,12 @@ def _download_excerpt(video_url: str, destination: Path) -> Path:
         "yt-dlp", "--no-playlist", "--no-warnings", "--quiet",
         "--js-runtimes", "node", "--remote-components", "ejs:npm",
         "--impersonate", "chrome",
-        "-f", "worstvideo[height>=360]/worstvideo/bestvideo",
+        # mweb may expose only combined audio/video formats.  ``bv*`` accepts
+        # both combined and video-only streams, while the sort keeps OCR
+        # downloads close to 360p instead of fetching an unnecessarily large
+        # source file.
+        "-f", "bv*",
+        "-S", "+res:360,+size,+br",
         "-o", str(output),
     ]
     if os.environ.get("YOUTUBE_USE_PO_TOKEN") == "1":
