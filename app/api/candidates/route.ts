@@ -41,11 +41,31 @@ async function backfillApprovedTitles() {
 export async function GET() {
   try {
     await backfillApprovedTitles();
-    const [queue, rankings, history] = await Promise.all([
-      db().prepare(`SELECT id, video_id, video_url, title, channel, player_nick,
-        published_at, character, category, floor, time_ms, confidence, status, era_key
-        FROM candidates WHERE status IN ('ready_for_review','time_required','classification_required')
-        ORDER BY confidence DESC, created_at ASC LIMIT 500`).all(),
+    const [queue, rankings, history, processing] = await Promise.all([
+      db().prepare(`SELECT c.id, c.video_id, c.video_url, c.title, c.channel, c.player_nick,
+        c.published_at, c.created_at, c.character, c.category, c.floor, c.time_ms,
+        c.confidence, c.status, c.era_key,
+        json_extract(c.raw_metadata, '$.ocr_outcome') AS ocr_outcome,
+        EXISTS(SELECT 1 FROM candidates duplicate
+          WHERE duplicate.id <> c.id AND c.time_ms IS NOT NULL
+            AND duplicate.time_ms = c.time_ms
+            AND duplicate.character = c.character
+            AND duplicate.category = c.category
+            AND duplicate.floor = c.floor
+            AND lower(COALESCE(duplicate.player_nick, duplicate.channel, '')) =
+              lower(COALESCE(c.player_nick, c.channel, ''))
+        ) AS possible_duplicate,
+        benchmark.avg_time AS benchmark_ms,
+        benchmark.sample_size AS benchmark_count
+        FROM candidates c
+        LEFT JOIN (
+          SELECT character, category, floor, AVG(time_ms) AS avg_time,
+            COUNT(*) AS sample_size
+          FROM rankings GROUP BY character, category, floor
+        ) benchmark ON benchmark.character = c.character
+          AND benchmark.category = c.category AND benchmark.floor = c.floor
+        WHERE c.status IN ('ready_for_review','time_required','classification_required')
+        ORDER BY c.confidence DESC, c.created_at ASC LIMIT 500`).all(),
       db().prepare(`SELECT id, character, category, floor, time_ms,
         player_nick, era_key, video_url, channel, published_at, approved_at FROM (
           SELECT r.id, r.character, r.category, r.floor, r.time_ms,
@@ -61,8 +81,39 @@ export async function GET() {
         r.player_nick, r.era_key, c.video_url, c.channel, c.published_at, r.approved_at
         FROM rankings r JOIN candidates c ON c.id = r.candidate_id
         ORDER BY COALESCE(c.published_at, r.approved_at) ASC, r.id ASC`).all(),
+      db().prepare(`SELECT
+        COUNT(*) AS discovered,
+        COALESCE(SUM(CASE WHEN character IS NOT NULL AND category IS NOT NULL
+          AND floor IS NOT NULL THEN 1 ELSE 0 END), 0) AS classified,
+        COALESCE(SUM(CASE WHEN character IS NOT NULL AND category IS NOT NULL
+          AND floor IS NOT NULL AND time_ms IS NOT NULL AND time_ms > 0
+          THEN 1 ELSE 0 END), 0) AS timed,
+        COALESCE(SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END), 0) AS approved,
+        (SELECT COUNT(*) FROM rankings) AS ranked,
+        COALESCE(SUM(CASE WHEN status IN
+          ('ready_for_review','time_required','classification_required')
+          THEN 1 ELSE 0 END), 0) AS pending_manual,
+        COALESCE(SUM(CASE WHEN COALESCE(json_extract(raw_metadata, '$.ocr_outcome'), '')
+          <> '' THEN 1 ELSE 0 END), 0) AS ocr_attempted,
+        COALESCE(SUM(CASE WHEN json_extract(raw_metadata, '$.ocr_outcome') = 'matched'
+          THEN 1 ELSE 0 END), 0) AS ocr_matched,
+        COALESCE(SUM(CASE WHEN json_extract(raw_metadata, '$.ocr_outcome')
+          IN ('no_consensus','error') THEN 1 ELSE 0 END), 0) AS ocr_unresolved,
+        COALESCE(SUM(CASE WHEN time_ms IS NOT NULL
+          AND COALESCE(json_extract(raw_metadata, '$.ocr_outcome'), '') <> 'matched'
+          AND confidence >= 0.95 THEN 1 ELSE 0 END), 0) AS title_times,
+        COALESCE(SUM(CASE WHEN time_ms IS NOT NULL
+          AND COALESCE(json_extract(raw_metadata, '$.ocr_outcome'), '') <> 'matched'
+          AND confidence < 0.95 THEN 1 ELSE 0 END), 0) AS human_times,
+        MAX(updated_at) AS last_updated
+        FROM candidates`).first(),
     ]);
-    return Response.json({ candidates: queue.results, rankings: rankings.results, history: history.results });
+    return Response.json({
+      candidates: queue.results,
+      rankings: rankings.results,
+      history: history.results,
+      processing,
+    });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Database error" }, { status: 500 });
   }
