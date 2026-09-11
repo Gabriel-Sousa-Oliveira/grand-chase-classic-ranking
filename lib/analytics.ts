@@ -7,6 +7,25 @@ export type DungeonDefinition = {
   label: string;
 };
 
+export type ProcessingMetrics = {
+  discovered: number;
+  classified: number;
+  timed: number;
+  approved: number;
+  ranked: number;
+  pending_manual: number;
+  ocr_attempted: number;
+  ocr_matched: number;
+  ocr_unresolved: number;
+  title_times: number;
+  human_times: number;
+  last_updated: string | null;
+};
+
+export function processingRate(value: number, total: number) {
+  return total > 0 ? Math.round((value / total) * 100) : 0;
+}
+
 export const gameCharacters = [
   "Elesis", "Lire", "Arme", "Lass", "Ryan", "Ronan", "Amy", "Jin",
   "Sieghart", "Mari", "Dio", "Zero", "Ley/Rey", "Rufus/Lupus", "Rin/Lin",
