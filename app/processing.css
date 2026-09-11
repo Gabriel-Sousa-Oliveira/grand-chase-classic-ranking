@@ -1,0 +1,79 @@
+.processingPanel {
+  margin-bottom: 14px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: radial-gradient(circle at 85% 0, #59e1d90b, transparent 38%), linear-gradient(150deg, #121722, #0d121a);
+}
+
+.processingLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, .6fr);
+  gap: 24px;
+}
+
+.funnel { display: grid; gap: 11px; }
+.funnel > div {
+  display: grid;
+  grid-template-columns: minmax(118px, .45fr) minmax(120px, 1fr) 46px;
+  align-items: center;
+  gap: 12px;
+}
+.funnel span { display: flex; justify-content: space-between; gap: 8px; }
+.funnel strong { font-size: 12px; }
+.funnel small { color: #697386; font-size: 10px; }
+.funnel > div > i, .sourceBreakdown i {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #222b38;
+}
+.funnel > div > i > b, .sourceBreakdown i > b {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #28777c, var(--cyan));
+}
+.funnel em {
+  color: var(--cyan);
+  font-size: 13px;
+  font-weight: 900;
+  font-style: normal;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.processingAside { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ocrScore, .sourceBreakdown {
+  padding: 14px;
+  border: 1px solid #273241;
+  border-radius: 12px;
+  background: #0b1119;
+}
+.ocrScore > span { display: flex; align-items: end; justify-content: space-between; gap: 10px; }
+.ocrScore small, .sourceBreakdown > small { color: #697386; font-size: 9px; font-weight: 900; letter-spacing: .11em; }
+.ocrScore strong { color: var(--cyan); font-size: 27px; }
+.ocrScore p { margin: 10px 0; color: #98a3b4; font-size: 11px; line-height: 1.45; }
+.ocrScore em { display: block; color: #f6b44c; font-size: 10px; font-style: normal; }
+.sourceBreakdown { display: grid; gap: 8px; }
+.sourceBreakdown > div { display: grid; grid-template-columns: 7px 1fr auto; gap: 6px; align-items: center; }
+.sourceBreakdown > div > span { width: 7px; height: 7px; border-radius: 50%; }
+.sourceBreakdown > div > b { font-size: 10px; }
+.sourceBreakdown > div > em { color: #aab3c2; font-size: 10px; font-style: normal; }
+.sourceBreakdown > div > i { grid-column: 2 / -1; height: 4px; }
+.sourceBreakdown .title, .sourceBreakdown i > b.title { background: #7aa2f7; }
+.sourceBreakdown .ocr, .sourceBreakdown i > b.ocr { background: var(--cyan); }
+.sourceBreakdown .human, .sourceBreakdown i > b.human { background: #f6b44c; }
+.processingNote { margin: 15px 0 0; color: #697386; font-size: 10px; line-height: 1.5; }
+
+@media (max-width: 1050px) {
+  .processingLayout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 650px) {
+  .processingPanel { padding: 16px; }
+  .funnel > div { grid-template-columns: 100px 1fr 35px; gap: 8px; }
+  .funnel span small { display: none; }
+  .processingAside { grid-template-columns: 1fr; }
+}
