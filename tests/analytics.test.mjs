@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {buildAnalytics, gameCharacters} from "../lib/analytics.ts";
+import {buildAnalytics, gameCharacters, processingRate} from "../lib/analytics.ts";
 
 const dungeons=[
   {key:"void_invasion:3",category:"void_invasion",floor:3,label:"Invasion"},
@@ -31,4 +31,10 @@ test("analytics period filter excludes other eras",()=>{
   ],dungeons,"current");
   assert.equal(data.verifiedRuns,1);
   assert.equal(data.boards[0].filledSlots,1);
+});
+
+test("processing rate is safe for an empty dataset",()=>{
+  assert.equal(processingRate(7,10),70);
+  assert.equal(processingRate(1,3),33);
+  assert.equal(processingRate(0,0),0);
 });
