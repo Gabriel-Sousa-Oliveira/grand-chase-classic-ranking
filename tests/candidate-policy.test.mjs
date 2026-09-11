@@ -17,8 +17,21 @@ test("auto-approves complete high-confidence title parses", () => {
   assert.equal(shouldAutoApproveTitle({ ...complete, floor: 0 }), true);
 });
 
-test("keeps incomplete, ambiguous, and OCR-derived candidates manual", () => {
+test("keeps incomplete and ambiguous candidates manual", () => {
   assert.equal(shouldAutoApproveTitle({ ...complete, time_ms: null, status: "time_required" }), false);
   assert.equal(shouldAutoApproveTitle({ ...complete, character: null }), false);
   assert.equal(shouldAutoApproveTitle({ ...complete, confidence: 0.94 }), false);
+});
+
+test("auto-approves OCR times only with multi-frame consensus", () => {
+  const ocr = { ...complete, confidence: 0.72, raw_metadata: JSON.stringify({
+    ocr_outcome: "matched", ocr: { matching_frames: 2, observations: 2 },
+  }) };
+  assert.equal(shouldAutoApproveTitle(ocr), true);
+  assert.equal(shouldAutoApproveTitle({
+    ...ocr,
+    raw_metadata: JSON.stringify({
+      ocr_outcome: "matched", ocr: { matching_frames: 1, observations: 1 },
+    }),
+  }), false);
 });
