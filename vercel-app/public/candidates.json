@@ -106,6 +106,19 @@
       "approved_at": "2026-09-10 13:28:41"
     },
     {
+      "id": 11681,
+      "character": "Edel",
+      "category": "chapel_of_eternity_master",
+      "floor": 0,
+      "time_ms": 124000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=AzcjSW5FJH4",
+      "channel": "Borkaz",
+      "published_at": "2025-12-26T10:00:30Z",
+      "approved_at": "2026-09-11 15:56:16"
+    },
+    {
       "id": 18,
       "character": "Edel",
       "category": "duel_4",
@@ -143,6 +156,19 @@
       "channel": "Borkaz",
       "published_at": "2025-04-30T09:01:12Z",
       "approved_at": "2026-09-10 02:51:17"
+    },
+    {
+      "id": 11683,
+      "character": "Lire",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 304000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yPrT1gPMFSs",
+      "channel": "Borkaz",
+      "published_at": "2025-07-25T09:05:05Z",
+      "approved_at": "2026-09-11 15:56:17"
     },
     {
       "id": 4257,
@@ -195,6 +221,19 @@
       "channel": "Borkaz",
       "published_at": "2024-05-10T10:17:24Z",
       "approved_at": "2026-09-10 13:28:41"
+    },
+    {
+      "id": 11684,
+      "character": "Rin/Lin",
+      "category": "hall_of_harmony_master",
+      "floor": 0,
+      "time_ms": 420000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=KVM6GlOY8cc",
+      "channel": "Borkaz",
+      "published_at": "2026-01-21T08:28:33Z",
+      "approved_at": "2026-09-11 15:56:17"
     },
     {
       "id": 5949,
@@ -1380,6 +1419,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 11679,
+      "character": "Edel",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 223000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=1J_CtBPg-K4",
+      "channel": "Borkaz",
+      "published_at": "2024-09-09T09:30:13Z",
+      "approved_at": "2026-09-11 15:56:15"
+    },
+    {
       "id": 27,
       "character": "Elesis",
       "category": "void_taint",
@@ -1772,6 +1824,19 @@
       "approved_at": "2026-09-10 02:51:18"
     },
     {
+      "id": 11685,
+      "character": "Kallia",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 427000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=jdAgRUO5QTc",
+      "channel": "Borkaz",
+      "published_at": "2024-02-20T10:20:05Z",
+      "approved_at": "2026-09-11 15:56:17"
+    },
+    {
       "id": 6051,
       "character": "Kallia",
       "category": "wizards_labyrinth_30",
@@ -1952,6 +2017,19 @@
       "channel": "Borkaz",
       "published_at": "2024-08-23T08:57:32Z",
       "approved_at": "2026-09-10 13:28:42"
+    },
+    {
+      "id": 11679,
+      "character": "Edel",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 223000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=1J_CtBPg-K4",
+      "channel": "Borkaz",
+      "published_at": "2024-09-09T09:30:13Z",
+      "approved_at": "2026-09-11 15:56:15"
     },
     {
       "id": 6053,
@@ -2253,6 +2331,19 @@
       "approved_at": "2026-09-10 02:51:17"
     },
     {
+      "id": 11683,
+      "character": "Lire",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 304000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yPrT1gPMFSs",
+      "channel": "Borkaz",
+      "published_at": "2025-07-25T09:05:05Z",
+      "approved_at": "2026-09-11 15:56:17"
+    },
+    {
       "id": 5,
       "character": "Arme",
       "category": "void_nightmare",
@@ -2290,6 +2381,19 @@
       "channel": "P1Ke",
       "published_at": "2025-09-16T08:34:36Z",
       "approved_at": "2026-09-10 01:20:03"
+    },
+    {
+      "id": 11682,
+      "character": "Iris",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 122000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=bpaeFXCNH9E",
+      "channel": "Borkaz",
+      "published_at": "2025-09-19T09:00:09Z",
+      "approved_at": "2026-09-11 15:56:16"
     },
     {
       "id": 31,
@@ -2552,6 +2656,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 11681,
+      "character": "Edel",
+      "category": "chapel_of_eternity_master",
+      "floor": 0,
+      "time_ms": 124000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=AzcjSW5FJH4",
+      "channel": "Borkaz",
+      "published_at": "2025-12-26T10:00:30Z",
+      "approved_at": "2026-09-11 15:56:16"
+    },
+    {
       "id": 36,
       "character": "Lass",
       "category": "void_invasion",
@@ -2615,6 +2732,19 @@
       "channel": "xandindj",
       "published_at": "2026-01-20",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 11684,
+      "character": "Rin/Lin",
+      "category": "hall_of_harmony_master",
+      "floor": 0,
+      "time_ms": 420000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=KVM6GlOY8cc",
+      "channel": "Borkaz",
+      "published_at": "2026-01-21T08:28:33Z",
+      "approved_at": "2026-09-11 15:56:17"
     },
     {
       "id": 9,
