@@ -15,6 +15,7 @@ on:
           - sync-syntaxii
           - sync-borkaz
           - ocr-only
+          - sync-only
       days:
         description: Dias para a busca recente (o preenchimento usa 365)
         required: true
@@ -177,6 +178,13 @@ jobs:
               --limit 8 --workers 1 > ../data/last-run.json
           fi
 
+      - name: Export cached queue without running OCR
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'sync-only' }}
+        run: |
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 queue \
+            | jq '{mode: "sync", candidates: .}' > ../data/last-run.json
+
       - name: Remove temporary YouTube session
         if: ${{ always() && ((github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]'))) }}
         run: rm -f -- "$RUNNER_TEMP/youtube-cookies.txt"
@@ -191,12 +199,18 @@ jobs:
       - name: Send candidates to hosted queue
         if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
         run: |
-          curl --fail-with-body --retry 2 \
-            -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
-            -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data-binary @data/last-run.json \
-            https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
+          total=$(jq '.candidates | length' data/last-run.json)
+          for ((start=0; start<total; start+=50)); do
+            jq --argjson start "$start" \
+              '{candidates: .candidates[$start:($start + 50)]}' \
+              data/last-run.json > "$RUNNER_TEMP/candidate-batch.json"
+            curl --fail-with-body --retry 2 \
+              -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
+              -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data-binary @"$RUNNER_TEMP/candidate-batch.json" \
+              https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
+          done
 
       - name: Refresh public Vercel rankings
         if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
