@@ -1,5 +1,5 @@
 name: YouTube crawler
-# A commit tagged with [ocr] intentionally runs the cookie-backed OCR smoke test.
+# Tags select bounded crawler modes; queue uploads are sent in small batches.
 
 on:
   workflow_dispatch:
