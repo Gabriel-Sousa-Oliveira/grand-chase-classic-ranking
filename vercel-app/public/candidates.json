@@ -1445,6 +1445,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 11876,
+      "character": "Ereb",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 178000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=inFU3_AGcsY",
+      "channel": "Borkaz",
+      "published_at": "2026-09-11T09:01:17Z",
+      "approved_at": "2026-09-11 15:57:28"
+    },
+    {
       "id": 4183,
       "character": "Iris",
       "category": "void_taint",
@@ -3811,6 +3824,33 @@
       "channel": "Borkaz",
       "published_at": null,
       "approved_at": "2026-09-09 20:59:07"
+    },
+    {
+      "id": 11876,
+      "character": "Ereb",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 178000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=inFU3_AGcsY",
+      "channel": "Borkaz",
+      "published_at": "2026-09-11T09:01:17Z",
+      "approved_at": "2026-09-11 15:57:28"
     }
-  ]
+  ],
+  "processing": {
+    "discovered": 499,
+    "classified": 385,
+    "timed": 162,
+    "approved": 162,
+    "ranked": 162,
+    "pending_manual": 234,
+    "ocr_attempted": 11,
+    "ocr_matched": 6,
+    "ocr_unresolved": 5,
+    "title_times": 136,
+    "human_times": 26,
+    "last_updated": "2026-09-11 15:58:04"
+  }
 }
