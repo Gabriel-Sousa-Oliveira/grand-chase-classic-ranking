@@ -3846,11 +3846,11 @@
     "approved": 162,
     "ranked": 162,
     "pending_manual": 234,
-    "ocr_attempted": 233,
+    "ocr_attempted": 11,
     "ocr_matched": 6,
-    "ocr_unresolved": 227,
+    "ocr_unresolved": 5,
     "title_times": 136,
     "human_times": 26,
-    "last_updated": "2026-09-11 16:47:52"
+    "last_updated": "2026-09-12 01:08:44"
   }
 }
