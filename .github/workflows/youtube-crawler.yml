@@ -138,6 +138,13 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 channel-archive \
             https://youtu.be/Q2TUPeiTmPI --max-results 500 > ../data/last-run.json
 
+      - name: Remove irrelevant discoveries from the review queue
+        if: ${{ github.event_name != 'issues' }}
+        run: |
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 prune-irrelevant \
+            > ../data/last-run.json
+
       - name: Install OCR tools
         if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]')) }}
         run: |
@@ -170,7 +177,13 @@ jobs:
           YOUTUBE_USE_PO_TOKEN: "1"
         run: |
           cd backend
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sweep]"* ]]; then
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[targeted]"* ]]; then
+            python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
+              --limit 0 --workers 2 --retry-no-consensus \
+              --character Ai --character Amy --character Decanee --character Jin \
+              --character Lire --character Mari --character Veigas --character Uno \
+              > ../data/last-run.json
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sweep]"* ]]; then
             python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
               --limit 0 --workers 4 --all-missing > ../data/last-run.json
           else
@@ -184,13 +197,6 @@ jobs:
           cd backend
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 queue \
             | jq '{mode: "sync", candidates: .}' > ../data/last-run.json
-
-      - name: Remove irrelevant discoveries from the review queue
-        if: ${{ github.event_name != 'issues' }}
-        run: |
-          cd backend
-          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 prune-irrelevant \
-            > ../data/last-run.json
 
       - name: Remove temporary YouTube session
         if: ${{ always() && ((github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]'))) }}

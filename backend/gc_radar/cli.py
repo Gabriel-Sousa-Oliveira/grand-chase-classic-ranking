@@ -45,6 +45,8 @@ def main() -> None:
     ocr_cmd.add_argument("--limit", type=int, default=8)
     ocr_cmd.add_argument("--workers", type=int, default=1)
     ocr_cmd.add_argument("--all-missing", action="store_true")
+    ocr_cmd.add_argument("--retry-no-consensus", action="store_true")
+    ocr_cmd.add_argument("--character", action="append", dest="characters")
     commands.add_parser("queue")
     commands.add_parser("prune-irrelevant")
     args = parser.parse_args()
@@ -164,7 +166,10 @@ def main() -> None:
         elif args.command == "ocr-queue":
             processed = matched = failed = 0
             results = []
-            candidates = repo.ocr_candidates(args.limit, args.all_missing)
+            candidates = repo.ocr_candidates(
+                args.limit, args.all_missing, args.retry_no_consensus,
+                args.characters,
+            )
 
             def inspect(candidate: dict) -> tuple[dict, object | None, Exception | None]:
                 try:
@@ -201,7 +206,10 @@ def main() -> None:
             )} for candidate in repo.queue()]
             print(json.dumps({"mode": "ocr", "processed": processed, "matched": matched,
                               "failed": failed, "results": results,
-                              "remaining_ocr": repo.ocr_remaining(args.all_missing),
+                              "remaining_ocr": repo.ocr_remaining(
+                                  args.all_missing, args.retry_no_consensus,
+                                  args.characters,
+                              ),
                               "queue_size": len(exported), "candidates": exported},
                              ensure_ascii=False, indent=2))
         elif args.command == "prune-irrelevant":

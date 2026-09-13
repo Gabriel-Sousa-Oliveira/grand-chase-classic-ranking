@@ -189,7 +189,9 @@ class CandidateRepository:
         return [dict(row) for row in rows]
 
     def ocr_candidates(self, limit: int = 8,
-                       include_classification: bool = False) -> list[dict]:
+                       include_classification: bool = False,
+                       retry_no_consensus: bool = False,
+                       characters: Iterable[str] | None = None) -> list[dict]:
         """Return missing-time videos that have not produced a final OCR result.
 
         A previous ``no_consensus`` is final and belongs in the manual queue.
@@ -201,28 +203,47 @@ class CandidateRepository:
         query = f"""
             SELECT * FROM candidates
             WHERE time_ms IS NULL AND status IN ({placeholders})
-              AND COALESCE(json_extract(raw_metadata, '$.ocr_outcome'), '')
-                  != 'no_consensus'
-            ORDER BY json_extract(raw_metadata, '$.ocr_outcome') = 'error',
-                     updated_at ASC
         """
         parameters: list[object] = list(statuses)
+        if not retry_no_consensus:
+            query += """ AND COALESCE(
+                json_extract(raw_metadata, '$.ocr_outcome'), '') != 'no_consensus'
+            """
+        selected_characters = list(dict.fromkeys(characters or ()))
+        if selected_characters:
+            character_placeholders = ",".join("?" for _ in selected_characters)
+            query += f" AND character IN ({character_placeholders})"
+            parameters.extend(selected_characters)
+        query += """ ORDER BY json_extract(raw_metadata, '$.ocr_outcome') = 'error',
+                     updated_at ASC
+        """
         if limit > 0:
             query += " LIMIT ?"
             parameters.append(limit)
         rows = self.connection.execute(query, parameters).fetchall()
         return [dict(row) for row in rows]
 
-    def ocr_remaining(self, include_classification: bool = False) -> int:
+    def ocr_remaining(self, include_classification: bool = False,
+                      retry_no_consensus: bool = False,
+                      characters: Iterable[str] | None = None) -> int:
         statuses = ("time_required", "classification_required") \
             if include_classification else ("time_required",)
         placeholders = ",".join("?" for _ in statuses)
-        row = self.connection.execute(f"""
+        query = f"""
             SELECT COUNT(*) FROM candidates
             WHERE time_ms IS NULL AND status IN ({placeholders})
-              AND COALESCE(json_extract(raw_metadata, '$.ocr_outcome'), '')
-                  != 'no_consensus'
-        """, statuses).fetchone()
+        """
+        parameters: list[object] = list(statuses)
+        if not retry_no_consensus:
+            query += """ AND COALESCE(
+                json_extract(raw_metadata, '$.ocr_outcome'), '') != 'no_consensus'
+            """
+        selected_characters = list(dict.fromkeys(characters or ()))
+        if selected_characters:
+            character_placeholders = ",".join("?" for _ in selected_characters)
+            query += f" AND character IN ({character_placeholders})"
+            parameters.extend(selected_characters)
+        row = self.connection.execute(query, parameters).fetchone()
         return int(row[0])
 
     def record_ocr_attempt(self, candidate_id: int, outcome: str) -> dict:

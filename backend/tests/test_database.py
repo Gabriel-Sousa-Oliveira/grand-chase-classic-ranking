@@ -144,6 +144,25 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(self.repo.get(guide["id"])["status"], "rejected")
         self.assertEqual(self.repo.get(approved["id"])["status"], "approved")
 
+    def test_targeted_ocr_can_retry_no_consensus_for_selected_characters(self):
+        ai, _ = self.repo.add("ai-run", "https://youtu.be/ai-run",
+                              parse_title("Ai Void Invasion 3F Solo"))
+        amy, _ = self.repo.add("amy-run", "https://youtu.be/amy-run",
+                               parse_title("Amy Void Invasion 3F Solo"))
+        self.repo.record_ocr_attempt(ai["id"], "no_consensus")
+        self.repo.record_ocr_attempt(amy["id"], "no_consensus")
+
+        default_ids = {row["video_id"] for row in self.repo.ocr_candidates(0)}
+        targeted_ids = {row["video_id"] for row in self.repo.ocr_candidates(
+            0, retry_no_consensus=True, characters=["Ai"]
+        )}
+
+        self.assertNotIn("ai-run", default_ids)
+        self.assertEqual(targeted_ids, {"ai-run"})
+        self.assertEqual(self.repo.ocr_remaining(
+            retry_no_consensus=True, characters=["Ai"]
+        ), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
