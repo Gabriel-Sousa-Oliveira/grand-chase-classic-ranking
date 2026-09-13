@@ -3840,17 +3840,17 @@
     }
   ],
   "processing": {
-    "discovered": 499,
+    "discovered": 500,
     "classified": 385,
     "timed": 162,
     "approved": 162,
     "ranked": 162,
-    "pending_manual": 234,
+    "pending_manual": 235,
     "ocr_attempted": 11,
     "ocr_matched": 6,
     "ocr_unresolved": 5,
     "title_times": 136,
     "human_times": 26,
-    "last_updated": "2026-09-12 14:08:49"
+    "last_updated": "2026-09-13 01:02:49"
   }
 }
