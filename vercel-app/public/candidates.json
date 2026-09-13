@@ -795,6 +795,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 15676,
+      "character": "Lass",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 78000,
+      "player_nick": "xandindj - Grand Chase",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=qMJM8a1-hyk",
+      "channel": "xandindj - Grand Chase",
+      "published_at": "2026-05-15T16:08:24Z",
+      "approved_at": "2026-09-13 22:21:41"
+    },
+    {
       "id": 37,
       "character": "Lass",
       "category": "void_invasion",
@@ -2617,6 +2630,19 @@
       "approved_at": "2026-09-09 20:55:06"
     },
     {
+      "id": 15677,
+      "character": "Lass",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 113000,
+      "player_nick": "xandindj - Grand Chase",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=BbBLerrXs2I",
+      "channel": "xandindj - Grand Chase",
+      "published_at": "2025-11-05T18:06:24Z",
+      "approved_at": "2026-09-13 22:21:41"
+    },
+    {
       "id": 44,
       "character": "Ley/Rey",
       "category": "void_nightmare",
@@ -3436,6 +3462,19 @@
       "approved_at": "2026-09-10 02:51:19"
     },
     {
+      "id": 15676,
+      "character": "Lass",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 78000,
+      "player_nick": "xandindj - Grand Chase",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=qMJM8a1-hyk",
+      "channel": "xandindj - Grand Chase",
+      "published_at": "2026-05-15T16:08:24Z",
+      "approved_at": "2026-09-13 22:21:41"
+    },
+    {
       "id": 6043,
       "character": "Rin/Lin",
       "category": "apocalypse_vortex_master",
@@ -3840,17 +3879,17 @@
     }
   ],
   "processing": {
-    "discovered": 500,
-    "classified": 385,
-    "timed": 162,
-    "approved": 162,
-    "ranked": 162,
-    "pending_manual": 231,
+    "discovered": 502,
+    "classified": 387,
+    "timed": 164,
+    "approved": 164,
+    "ranked": 164,
+    "pending_manual": 230,
     "ocr_attempted": 11,
     "ocr_matched": 6,
     "ocr_unresolved": 5,
-    "title_times": 136,
+    "title_times": 138,
     "human_times": 26,
-    "last_updated": "2026-09-13 14:56:03"
+    "last_updated": "2026-09-13 22:22:40"
   }
 }
