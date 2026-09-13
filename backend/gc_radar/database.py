@@ -150,6 +150,24 @@ class CandidateRepository:
         """).fetchall()
         return [dict(row) for row in rows]
 
+    def reject_candidates(self, candidate_ids: Iterable[int], reason: str) -> list[dict]:
+        """Reject pending candidates selected by an automatic quality policy."""
+        ids = list(dict.fromkeys(candidate_ids))
+        if not ids:
+            return []
+        placeholders = ",".join("?" for _ in ids)
+        with self.connection:
+            self.connection.execute(f"""UPDATE candidates
+                SET status = 'rejected', rejection_reason = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id IN ({placeholders}) AND status IN
+                  ('ready_for_review','time_required','classification_required')""",
+                (reason, *ids))
+        rows = self.connection.execute(
+            f"SELECT * FROM candidates WHERE id IN ({placeholders}) ORDER BY id", ids
+        ).fetchall()
+        return [dict(row) for row in rows if row["status"] == "rejected"]
+
     def set_time(self, candidate_id: int, time_ms: int) -> dict:
         if time_ms <= 0:
             raise ValueError("time_ms must be positive")

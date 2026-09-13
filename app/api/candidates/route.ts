@@ -133,7 +133,7 @@ export async function POST(request: Request) {
   for (const item of items) {
     if (!item.video_id || !item.video_url || !item.title || !item.status) continue;
     const playerNick = canonicalizePlayerNick(item.player_nick ?? item.channel) ?? null;
-    const autoApprove = shouldAutoApproveTitle(item);
+    const autoApprove = item.status === "ready_for_review" && shouldAutoApproveTitle(item);
     const effectiveStatus = autoApprove ? "approved" : item.status;
     const rawMetadata = typeof item.raw_metadata === "string"
       ? item.raw_metadata

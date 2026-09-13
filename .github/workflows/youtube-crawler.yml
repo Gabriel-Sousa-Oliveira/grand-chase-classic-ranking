@@ -185,6 +185,13 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 queue \
             | jq '{mode: "sync", candidates: .}' > ../data/last-run.json
 
+      - name: Remove irrelevant discoveries from the review queue
+        if: ${{ github.event_name != 'issues' }}
+        run: |
+          cd backend
+          python -m gc_radar.cli --db ../data/gc_radar.sqlite3 prune-irrelevant \
+            > ../data/last-run.json
+
       - name: Remove temporary YouTube session
         if: ${{ always() && ((github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]'))) }}
         run: rm -f -- "$RUNNER_TEMP/youtube-cookies.txt"

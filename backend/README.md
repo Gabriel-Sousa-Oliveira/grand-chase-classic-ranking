@@ -46,6 +46,21 @@ python -m gc_radar.cli --db gc_radar.sqlite3 crawl --days 3
 
 Cada consulta busca no máximo 50 vídeos e somente a primeira página, protegendo a cota. Resultados repetidos são mesclados pelo ID do YouTube; o banco também impede a reinserção em execuções futuras. Use `--query "texto"` uma ou mais vezes para substituir as consultas padrão.
 
+Antes de entrar na fila, cada descoberta passa por uma política de relevância. O
+título precisa identificar personagem e dungeon e também conter uma evidência de
+run, como tempo, “speedrun/record/solo” ou o formato individual
+`Personagem | Dungeon`. Título e descrição eliminam automaticamente guias,
+showcases, tier lists, compilações e vídeos com capítulos para vários personagens,
+incluindo termos em português, inglês, coreano e tailandês. O relatório registra os
+motivos em `ignored_reasons`, permitindo auditar e ajustar o filtro.
+
+A limpeza conservadora da fila existente rejeita apenas falsos positivos com
+evidência explícita; vídeos meramente ambíguos continuam disponíveis para revisão:
+
+~~~bash
+python -m gc_radar.cli --db gc_radar.sqlite3 prune-irrelevant
+~~~
+
 O workflow `.github/workflows/youtube-crawler.yml` executa o crawler duas vezes por dia, mantém o banco entre execuções e publica o banco e o relatório JSON como artefatos privados da execução.
 
 ### Preencher um ranking

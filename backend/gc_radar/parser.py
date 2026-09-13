@@ -126,6 +126,19 @@ def _match_alias(text: str, aliases: dict[str, str]) -> str | None:
     return max(matches, key=lambda item: len(item[0]))[1]
 
 
+def find_character_mentions(value: str) -> set[str]:
+    """Return every canonical character explicitly mentioned in free text."""
+    text = _plain(value)
+    words = " ".join(re.sub(r"[^\w\u0E31-\u0E4E]+", " ", text).split())
+    return {
+        canonical for alias, canonical in CHARACTER_ALIASES.items()
+        if ((not alias.isascii() and alias in words)
+            or (alias.isascii() and re.search(
+                rf"(?<!\w){re.escape(alias)}(?!\w)", words
+            )))
+    }
+
+
 def _extract_time(title: str) -> int | None:
     for pattern in TIME_PATTERNS:
         match = pattern.search(title)

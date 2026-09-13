@@ -125,6 +125,25 @@ class DatabaseTests(unittest.TestCase):
                                   retriable["video_id"]})
         self.assertEqual(self.repo.ocr_remaining(True), 3)
 
+    def test_automatic_relevance_rejection_only_changes_pending_rows(self):
+        guide, _ = self.repo.add(
+            "guide-video", "https://youtu.be/guide-video",
+            parse_title("Ereb Void Invasion 3F Skill Tree Guide")
+        )
+        approved, _ = self.repo.add(
+            "approved-video", "https://youtu.be/approved-video",
+            parse_title("Ronan Void Invasion 3F 01:00")
+        )
+        self.repo.decide(approved["id"], True)
+
+        rejected = self.repo.reject_candidates(
+            [guide["id"], approved["id"]], "automatic_relevance_filter"
+        )
+
+        self.assertEqual([row["id"] for row in rejected], [guide["id"]])
+        self.assertEqual(self.repo.get(guide["id"])["status"], "rejected")
+        self.assertEqual(self.repo.get(approved["id"])["status"], "approved")
+
 
 if __name__ == "__main__":
     unittest.main()

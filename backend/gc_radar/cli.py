@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from .database import CandidateRepository
 from .ocr import read_video_time
 from .parser import parse_title
+from .relevance import description_from_metadata, evaluate_video_relevance
 from .syntaxii import import_syntaxii
 from .youtube import (DEFAULT_SEARCH_QUERIES, channel_archive, discover_videos,
                       extract_video_id, fetch_video, fill_ranking_queries)
@@ -45,6 +46,7 @@ def main() -> None:
     ocr_cmd.add_argument("--workers", type=int, default=1)
     ocr_cmd.add_argument("--all-missing", action="store_true")
     commands.add_parser("queue")
+    commands.add_parser("prune-irrelevant")
     args = parser.parse_args()
 
     if args.command == "parse":
@@ -70,10 +72,16 @@ def main() -> None:
             videos = channel_archive(args.reference_video, max_results=args.max_results)
             created = duplicates = ignored = 0
             statuses: dict[str, int] = {}
+            ignored_reasons: dict[str, int] = {}
             for metadata in videos:
                 parsed = parse_title(metadata["title"])
-                if parsed.character is None and parsed.category is None:
+                decision = evaluate_video_relevance(
+                    metadata["title"], description_from_metadata(metadata["raw"]), parsed
+                )
+                if not decision.accepted:
                     ignored += 1
+                    reason = decision.reasons[0] if decision.reasons else "low_relevance"
+                    ignored_reasons[reason] = ignored_reasons.get(reason, 0) + 1
                     continue
                 candidate, was_created = repo.add(
                     metadata["video_id"], metadata["url"], parsed,
@@ -91,7 +99,8 @@ def main() -> None:
             print(json.dumps({
                 "mode": "channel_archive", "reference_video": args.reference_video,
                 "scanned": len(videos), "created": created, "duplicates": duplicates,
-                "ignored": ignored, "statuses": statuses,
+                "ignored": ignored, "ignored_reasons": ignored_reasons,
+                "statuses": statuses,
                 "queue_size": len(exported), "candidates": exported,
             }, ensure_ascii=False, indent=2))
         elif args.command == "import-syntaxii":
@@ -112,15 +121,23 @@ def main() -> None:
             duplicates = 0
             ignored = 0
             statuses: dict[str, int] = {}
+            ignored_reasons: dict[str, int] = {}
             for metadata in videos:
                 parsed = parse_title(metadata["title"])
+                decision = evaluate_video_relevance(
+                    metadata["title"], description_from_metadata(metadata["raw"]), parsed
+                )
                 if ranking_mode:
-                    accepted = (parsed.character is not None and
+                    accepted = (decision.accepted and parsed.character is not None and
                                 parsed.category == "void_invasion" and parsed.floor == 3)
                 else:
-                    accepted = parsed.character is not None or parsed.category is not None
+                    accepted = decision.accepted
                 if not accepted:
                     ignored += 1
+                    reason = decision.reasons[0] if decision.reasons else "outside_target"
+                    if ranking_mode and decision.accepted:
+                        reason = "outside_target"
+                    ignored_reasons[reason] = ignored_reasons.get(reason, 0) + 1
                     continue
                 candidate, was_created = repo.add(
                     metadata["video_id"], metadata["url"], parsed,
@@ -140,7 +157,8 @@ def main() -> None:
                 "target": "void_invasion_3f" if ranking_mode else "all_supported_dungeons",
                 "queries": len(queries),
                 "discovered_unique": len(videos), "created": created,
-                "duplicates": duplicates, "ignored": ignored, "statuses": statuses,
+                "duplicates": duplicates, "ignored": ignored,
+                "ignored_reasons": ignored_reasons, "statuses": statuses,
                 "queue_size": len(repo.queue()), "candidates": exported,
             }, ensure_ascii=False, indent=2))
         elif args.command == "ocr-queue":
@@ -186,6 +204,34 @@ def main() -> None:
                               "remaining_ocr": repo.ocr_remaining(args.all_missing),
                               "queue_size": len(exported), "candidates": exported},
                              ensure_ascii=False, indent=2))
+        elif args.command == "prune-irrelevant":
+            rejected_ids = []
+            rejection_reasons: dict[str, int] = {}
+            for candidate in repo.queue():
+                parsed = parse_title(candidate["title"])
+                decision = evaluate_video_relevance(
+                    candidate["title"],
+                    description_from_metadata(candidate.get("raw_metadata")), parsed,
+                )
+                # Existing ambiguous rows stay available for human review. Only
+                # explicit guide/compilation evidence is removed automatically.
+                if decision.hard_reject:
+                    rejected_ids.append(candidate["id"])
+                    reason = decision.reasons[0]
+                    rejection_reasons[reason] = rejection_reasons.get(reason, 0) + 1
+            rejected = repo.reject_candidates(
+                rejected_ids, "automatic_relevance_filter"
+            )
+            exported = [{key: candidate[key] for key in (
+                "video_id", "video_url", "title", "channel", "player_nick",
+                "published_at", "character", "category", "floor", "time_ms",
+                "confidence", "status", "era_key", "raw_metadata"
+            )} for candidate in [*repo.queue(), *rejected]]
+            print(json.dumps({
+                "mode": "prune_irrelevant", "rejected": len(rejected),
+                "rejection_reasons": rejection_reasons,
+                "queue_size": len(repo.queue()), "candidates": exported,
+            }, ensure_ascii=False, indent=2))
         else:
             print(json.dumps(repo.queue(), ensure_ascii=False, indent=2))
     finally:
