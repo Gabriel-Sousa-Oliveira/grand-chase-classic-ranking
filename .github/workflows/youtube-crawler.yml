@@ -189,7 +189,7 @@ jobs:
               --limit 0 --workers 4 --all-missing > ../data/last-run.json
           else
             python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
-              --limit 8 --workers 1 > ../data/last-run.json
+              --limit 8 --workers 2 > ../data/last-run.json
           fi
 
       - name: Export cached queue without running OCR
