@@ -366,6 +366,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 18769,
+      "character": "Ereb",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 98000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=_TEuJdQS0ic",
+      "channel": "Borkaz",
+      "published_at": "2026-09-14T09:38:31Z",
+      "approved_at": "2026-09-14 17:14:25"
+    },
+    {
       "id": 4169,
       "character": "Iris",
       "category": "tower_of_disappearance",
@@ -4071,20 +4084,33 @@
       "channel": "Borkaz",
       "published_at": "2026-09-11T09:01:17Z",
       "approved_at": "2026-09-11 15:57:28"
+    },
+    {
+      "id": 18769,
+      "character": "Ereb",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 98000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=_TEuJdQS0ic",
+      "channel": "Borkaz",
+      "published_at": "2026-09-14T09:38:31Z",
+      "approved_at": "2026-09-14 17:14:25"
     }
   ],
   "processing": {
-    "discovered": 502,
-    "classified": 387,
-    "timed": 173,
-    "approved": 171,
-    "ranked": 171,
+    "discovered": 503,
+    "classified": 388,
+    "timed": 174,
+    "approved": 172,
+    "ranked": 172,
     "pending_manual": 209,
-    "ocr_attempted": 76,
+    "ocr_attempted": 18,
     "ocr_matched": 8,
-    "ocr_unresolved": 68,
-    "title_times": 138,
+    "ocr_unresolved": 10,
+    "title_times": 139,
     "human_times": 33,
-    "last_updated": "2026-09-14 17:13:11"
+    "last_updated": "2026-09-14 17:15:14"
   }
 }
