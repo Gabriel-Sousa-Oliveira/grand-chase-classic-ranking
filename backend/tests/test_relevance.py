@@ -43,6 +43,46 @@ class RelevanceTests(unittest.TestCase):
         self.assertTrue(decision.hard_reject)
         self.assertEqual(decision.reasons, ("multi_character_chapters",))
 
+    def test_rejects_two_named_characters_without_waiting_for_ocr(self):
+        decision = self.decide(
+            "Ai and Rufus new 4mp in Berkas' Lair | Grand Chase Classic"
+        )
+        self.assertFalse(decision.accepted)
+        self.assertTrue(decision.hard_reject)
+        self.assertEqual(decision.reasons, ("multiple_named_characters",))
+
+    def test_rejects_showcase_live_and_farming_titles(self):
+        titles = (
+            "Rufus 4MP skill showcase in Berkas Lair",
+            "Ereb farming Void Invasion 3F",
+            "Mari livestream Tower of Disappearance",
+        )
+        for title in titles:
+            with self.subTest(title=title):
+                decision = self.decide(title)
+                self.assertFalse(decision.accepted)
+                self.assertTrue(decision.hard_reject)
+                self.assertEqual(decision.reasons, ("non_run_title",))
+
+    def test_rejects_cooperative_run_but_keeps_no_potions_wording(self):
+        rejected = self.decide(
+            "Ereb Void Invasion 3F run with friends | Grand Chase Classic"
+        )
+        self.assertTrue(rejected.hard_reject)
+        self.assertEqual(rejected.reasons, ("cooperative_title",))
+        accepted = self.decide(
+            "Ereb | Void Invasion 3F Solo no potions | Grand Chase Classic"
+        )
+        self.assertTrue(accepted.accepted)
+
+    def test_description_only_rejects_strong_non_run_context(self):
+        decision = self.decide(
+            "Ereb | Berkas Lair | Grand Chase Classic",
+            "New 4MP skill showcase and damage test.",
+        )
+        self.assertTrue(decision.hard_reject)
+        self.assertEqual(decision.reasons, ("non_run_description",))
+
     def test_generic_gameplay_does_not_count_as_run_intent(self):
         decision = self.decide("Ronan Void Invasion 3F gameplay")
         self.assertFalse(decision.accepted)

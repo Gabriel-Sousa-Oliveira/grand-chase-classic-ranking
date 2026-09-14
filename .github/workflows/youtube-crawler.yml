@@ -143,7 +143,7 @@ jobs:
         run: |
           cd backend
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 prune-irrelevant \
-            > ../data/last-run.json
+            > ../data/prune-result.json
 
       - name: Install OCR tools
         if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]')) }}
@@ -178,7 +178,11 @@ jobs:
           YOUTUBE_USE_PO_TOKEN: "1"
         run: |
           cd backend
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[targeted]"* ]]; then
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sample]"* ]]; then
+            python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
+              --limit 3 --workers 2 --retry-no-consensus \
+              > ../data/last-run.json
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[targeted]"* ]]; then
             python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
               --limit 0 --workers 2 --retry-no-consensus \
               --character Ai --character Amy --character Decanee --character Jin \
@@ -213,6 +217,22 @@ jobs:
       - name: Send candidates to hosted queue
         if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
         run: |
+          if [ -f data/prune-result.json ]; then
+            jq '{candidates: [.candidates[] | select(.status == "rejected")]}' \
+              data/prune-result.json > "$RUNNER_TEMP/rejected-candidates.json"
+            rejected=$(jq '.candidates | length' "$RUNNER_TEMP/rejected-candidates.json")
+            for ((start=0; start<rejected; start+=50)); do
+              jq --argjson start "$start" \
+                '{candidates: .candidates[$start:($start + 50)]}' \
+                "$RUNNER_TEMP/rejected-candidates.json" > "$RUNNER_TEMP/rejected-batch.json"
+              curl --fail-with-body --retry 2 \
+                -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
+                -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
+                -H "Content-Type: application/json" \
+                --data-binary @"$RUNNER_TEMP/rejected-batch.json" \
+                https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
+            done
+          fi
           total=$(jq '.candidates | length' data/last-run.json)
           for ((start=0; start<total; start+=50)); do
             jq --argjson start "$start" \
@@ -229,6 +249,8 @@ jobs:
       - name: Refresh public Vercel rankings
         if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
         run: |
+          git fetch origin main
+          git rebase origin/main
           curl --fail-with-body --retry 2 \
             -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
             https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates \
@@ -239,21 +261,26 @@ jobs:
           git add vercel-app/public/candidates.json
           if ! git diff --cached --quiet; then
             git commit -m "[skip-run] Refresh public rankings"
+            git pull --rebase origin main
             git push
           fi
 
       - name: Save crawler database
+        if: ${{ always() && hashFiles('data/gc_radar.sqlite3') != '' }}
         uses: actions/cache/save@v4
         with:
           path: data/gc_radar.sqlite3
           key: gc-radar-db-${{ github.run_id }}
 
       - name: Upload validation data
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: gc-radar-candidates-${{ github.run_number }}
           path: |
             data/gc_radar.sqlite3
             data/last-run.json
+            data/prune-result.json
             data/ocr-evidence/
+          if-no-files-found: warn
           retention-days: 30

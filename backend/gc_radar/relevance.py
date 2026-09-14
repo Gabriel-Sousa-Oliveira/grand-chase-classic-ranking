@@ -23,6 +23,21 @@ MULTI_CHARACTER_PATTERNS = (
     r"(?:모든\s*캐릭터|전\s*캐릭터|캐릭터\s*(?:1[0-9]|2[0-9]|3[0-9])명)",
     r"(?:ทุกตัวละคร|ตัวละครทั้งหมด|(?:1[0-9]|2[0-9]|3[0-9])\s*ตัวละคร)",
 )
+NON_RUN_PATTERNS = (
+    r"\b(?:new\s+)?(?:4\s*mp|skills?)\s+(?:showcase|preview|test(?:ing)?)\b",
+    r"\b(?:skill|damage|dps)\s+(?:showcase|preview|test(?:ing)?)\b",
+    r"\b(?:showcase|preview|training|practice|leveling|farming|farmando|upando)\b",
+    r"\b(?:live\s*stream|livestream|stream\s+archive)\b",
+    r"(?:스킬\s*(?:쇼케이스|테스트)|데미지\s*테스트|라이브\s*방송|파밍)",
+    r"(?:โชว์สกิล|ทดสอบดาเมจ|ไลฟ์สด|ฟาร์ม)",
+)
+COOPERATIVE_PATTERNS = (
+    r"\b(?:duo|trio|co[ -]?op|multiplayer|party\s+run)\b",
+    r"\b(?:with|w/)\s+(?:my\s+)?(?:friends?|team(?:mates?)?)\b",
+    r"\b(?:dupla|trio|cooperativo|com\s+amigos?)\b",
+    r"(?:듀오|트리오|협동|파티\s*플레이)",
+    r"(?:ดูโอ|ทรีโอ|เล่นกับเพื่อน|ปาร์ตี้)",
+)
 RUN_PATTERNS = (
     r"\b(?:speed\s*run|record|world\s*record|time\s*attack|solo|clear|run)\b",
     r"\b(?:recorde|corrida|tempo|solo|sem\s+pocoes)\b",
@@ -78,10 +93,23 @@ def evaluate_video_relevance(title: str, description: str,
     normalized_description = _plain(description)
     reasons: list[str] = []
 
-    if _matches(EDITORIAL_PATTERNS, normalized_title):
-        return RelevanceDecision(False, -100, ("editorial_title",), True)
     if _matches(MULTI_CHARACTER_PATTERNS, normalized_title):
         return RelevanceDecision(False, -100, ("multi_character_title",), True)
+    if _matches(NON_RUN_PATTERNS, normalized_title):
+        return RelevanceDecision(False, -100, ("non_run_title",), True)
+    if _matches(COOPERATIVE_PATTERNS, normalized_title):
+        return RelevanceDecision(False, -100, ("cooperative_title",), True)
+    if _matches(EDITORIAL_PATTERNS, normalized_title):
+        return RelevanceDecision(False, -100, ("editorial_title",), True)
+    # A ranking row represents one character. Two explicit character names are
+    # therefore strong evidence when the title also joins them explicitly. The
+    # conjunction guard avoids substring ambiguity in unsegmented Thai text.
+    joins_names = bool(re.search(
+        r"(?:\b(?:and|e|y)\b|[,&+/]|(?:와|과|및)|และ)", normalized_title,
+        re.IGNORECASE,
+    ))
+    if joins_names and len(find_character_mentions(title)) >= 2:
+        return RelevanceDecision(False, -100, ("multiple_named_characters",), True)
 
     chapter_lines = [line for line in description.splitlines()
                      if CHAPTER_PATTERN.search(line)]
@@ -90,6 +118,13 @@ def evaluate_video_relevance(title: str, description: str,
         return RelevanceDecision(False, -100, ("multi_character_chapters",), True)
 
     description_intro = _plain("\n".join(description.splitlines()[:5]))[:500]
+    if (_matches(NON_RUN_PATTERNS, description_intro)
+            and not _matches(RUN_PATTERNS, normalized_title)
+            and parsed.time_ms is None):
+        return RelevanceDecision(False, -80, ("non_run_description",), True)
+    if (_matches(COOPERATIVE_PATTERNS, description_intro)
+            and parsed.solo is not True):
+        return RelevanceDecision(False, -80, ("cooperative_description",), True)
     if (_matches(EDITORIAL_PATTERNS, description_intro)
             and not _matches(RUN_PATTERNS, normalized_title)
             and parsed.time_ms is None):
