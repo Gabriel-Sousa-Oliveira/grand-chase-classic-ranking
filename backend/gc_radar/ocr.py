@@ -470,6 +470,12 @@ def read_video_time(video_url: str, evidence_directory: Path | None = None,
                 return _preserve_evidence(
                     result, evidence_directory, evidence_name
                 )
+            # A final timer must remain visible for at least two seconds. If a
+            # one-frame-per-second pass saw no plausible digits at all, a dense
+            # pass over the same ROI only multiplies cost without supporting a
+            # frozen-time consensus.
+            if sightings == 0:
+                continue
             if dense_frames is None:
                 dense_frames = _extract_frames(
                     video, directory, "dense", DENSE_WINDOW_SECONDS, DENSE_FPS

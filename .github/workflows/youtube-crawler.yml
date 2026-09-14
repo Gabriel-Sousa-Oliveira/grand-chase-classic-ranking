@@ -145,6 +145,24 @@ jobs:
           python -m gc_radar.cli --db ../data/gc_radar.sqlite3 prune-irrelevant \
             > ../data/prune-result.json
 
+      - name: Remove rejected candidates from the hosted queue
+        if: ${{ github.event_name != 'issues' && env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
+        run: |
+          jq '{candidates: [.candidates[] | select(.status == "rejected")]}' \
+            data/prune-result.json > "$RUNNER_TEMP/rejected-candidates.json"
+          rejected=$(jq '.candidates | length' "$RUNNER_TEMP/rejected-candidates.json")
+          for ((start=0; start<rejected; start+=50)); do
+            jq --argjson start "$start" \
+              '{candidates: .candidates[$start:($start + 50)]}' \
+              "$RUNNER_TEMP/rejected-candidates.json" > "$RUNNER_TEMP/rejected-batch.json"
+            curl --fail-with-body --retry 2 \
+              -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
+              -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data-binary @"$RUNNER_TEMP/rejected-batch.json" \
+              https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
+          done
+
       - name: Install OCR tools
         if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]')) }}
         run: |
@@ -217,22 +235,6 @@ jobs:
       - name: Send candidates to hosted queue
         if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
         run: |
-          if [ -f data/prune-result.json ]; then
-            jq '{candidates: [.candidates[] | select(.status == "rejected")]}' \
-              data/prune-result.json > "$RUNNER_TEMP/rejected-candidates.json"
-            rejected=$(jq '.candidates | length' "$RUNNER_TEMP/rejected-candidates.json")
-            for ((start=0; start<rejected; start+=50)); do
-              jq --argjson start "$start" \
-                '{candidates: .candidates[$start:($start + 50)]}' \
-                "$RUNNER_TEMP/rejected-candidates.json" > "$RUNNER_TEMP/rejected-batch.json"
-              curl --fail-with-body --retry 2 \
-                -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
-                -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
-                -H "Content-Type: application/json" \
-                --data-binary @"$RUNNER_TEMP/rejected-batch.json" \
-                https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
-            done
-          fi
           total=$(jq '.candidates | length' data/last-run.json)
           for ((start=0; start<total; start+=50)); do
             jq --argjson start "$start" \

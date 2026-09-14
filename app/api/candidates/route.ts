@@ -161,7 +161,15 @@ export async function POST(request: Request) {
       const update = await db().prepare(`UPDATE candidates SET
           video_url = ?, title = ?, channel = COALESCE(?, channel),
           player_nick = COALESCE(?, player_nick), published_at = COALESCE(?, published_at),
-          character = ?, category = ?, floor = ?, time_ms = ?, confidence = ?, status = ?, raw_metadata = ?,
+          character = ?, category = ?, floor = ?, time_ms = ?, confidence = ?, status = ?,
+          raw_metadata = CASE
+            WHEN json_extract(?, '$.ocr_attempted_at') IS NULL
+              AND json_extract(raw_metadata, '$.ocr_attempted_at') IS NOT NULL
+              THEN raw_metadata
+            WHEN COALESCE(json_extract(?, '$.ocr_attempted_at'), '') <
+              COALESCE(json_extract(raw_metadata, '$.ocr_attempted_at'), '')
+              THEN raw_metadata
+            ELSE ? END,
           updated_at = CURRENT_TIMESTAMP
         WHERE video_id = ?
           AND status IN ('ready_for_review','time_required','classification_required')`)
@@ -169,7 +177,7 @@ export async function POST(request: Request) {
           playerNick, item.published_at ?? null,
           item.character ?? null, item.category ?? null, item.floor ?? null,
           item.time_ms ?? null, item.confidence ?? 0, effectiveStatus,
-          rawMetadata, item.video_id).run();
+          rawMetadata, rawMetadata, rawMetadata, item.video_id).run();
       updated += update.meta.changes ?? 0;
     }
     if (autoApprove) {

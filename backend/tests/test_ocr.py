@@ -9,7 +9,7 @@ from gc_radar.ocr import (OcrObservation, _download_excerpt,
                           _parse_tesseract_tsv, _read_timer_frame,
                           choose_consensus,
                           choose_frozen_consensus, extract_time_values,
-                          extract_times, roi_bounds)
+                          extract_times, read_video_time, roi_bounds)
 
 
 class OcrTextTests(unittest.TestCase):
@@ -107,6 +107,18 @@ class OcrTextTests(unittest.TestCase):
             self.assertIn("tessedit_char_whitelist=0123456789:.", command)
             self.assertEqual(observations[0].time_ms, 83_450)
             self.assertAlmostEqual(observations[0].confidence, 0.95)
+
+    def test_skips_dense_scan_when_coarse_rois_have_no_timer_sightings(self):
+        with patch("gc_radar.ocr._require_tools"), \
+                patch("gc_radar.ocr._download_excerpt") as download, \
+                patch("gc_radar.ocr._extract_frames") as extract, \
+                patch("gc_radar.ocr._scan_frames") as scan, \
+                patch("gc_radar.ocr._preserve_diagnostic"):
+            download.return_value = Path("video.mp4")
+            extract.return_value = [Path("coarse-0001.png")]
+            scan.side_effect = [(None, 0), (None, 0)]
+            self.assertIsNone(read_video_time("https://youtu.be/example"))
+            self.assertEqual(extract.call_count, 1)
 
     def test_anonymous_po_token_uses_mweb_client(self):
         with tempfile.TemporaryDirectory() as temporary, \
