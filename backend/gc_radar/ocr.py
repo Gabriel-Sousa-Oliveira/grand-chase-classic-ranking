@@ -21,6 +21,8 @@ class OcrResult:
     confidence: float
     matching_frames: int
     observations: int
+    evidence_frame: str | None = None
+    evidence_seconds_from_end: int | None = None
 
 
 def _valid(seconds: int) -> bool:
@@ -48,24 +50,36 @@ def extract_times(text: str) -> set[int]:
 
 
 def choose_consensus(observations: list[tuple[str, int]]) -> OcrResult | None:
-    """Choose a time only when it occurs in at least two different frames."""
+    """Choose a time only when it occurs in at least two nearby frames."""
     frames_by_time: dict[int, set[str]] = defaultdict(set)
     counts: dict[int, int] = defaultdict(int)
     for frame, seconds in observations:
         if _valid(seconds):
             frames_by_time[seconds].add(frame)
             counts[seconds] += 1
-    ranked = sorted(frames_by_time, key=lambda value: (len(frames_by_time[value]), counts[value]), reverse=True)
+    nearby_frames: dict[int, list[int]] = {}
+    for seconds, frame_names in frames_by_time.items():
+        numbers = sorted({int(frame) for frame in frame_names if frame.isdigit()})
+        nearby_frames[seconds] = max(
+            ([number for number in numbers if start <= number <= start + 3]
+             for start in numbers), key=len, default=[]
+        )
+    ranked = sorted(frames_by_time, key=lambda value: (
+        len(nearby_frames[value]), len(frames_by_time[value]), counts[value]
+    ), reverse=True)
     if not ranked:
         return None
     winner = ranked[0]
-    matching_frames = len(frames_by_time[winner])
+    matching_frames = len(nearby_frames[winner])
     if matching_frames < 2:
         return None
-    if len(ranked) > 1 and len(frames_by_time[ranked[1]]) == matching_frames:
+    if len(ranked) > 1 and len(nearby_frames[ranked[1]]) == matching_frames:
         return None
     confidence = min(0.94, 0.72 + (matching_frames - 2) * 0.05 + min(counts[winner] - matching_frames, 3) * 0.02)
-    return OcrResult(winner * 1000, confidence, matching_frames, counts[winner])
+    evidence_number = max(nearby_frames[winner])
+    return OcrResult(winner * 1000, confidence, matching_frames, counts[winner],
+                     f"frame-{evidence_number:03d}",
+                     max(0, 75 - (evidence_number - 1) * 6))
 
 
 def _run(command: list[str], timeout: int = 240) -> subprocess.CompletedProcess[str]:

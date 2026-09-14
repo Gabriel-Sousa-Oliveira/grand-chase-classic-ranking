@@ -30,6 +30,14 @@ class OcrTextTests(unittest.TestCase):
             ("001", 92), ("002", 92), ("003", 78), ("004", 78),
         ]))
 
+    def test_requires_consensus_frames_to_be_nearby(self):
+        self.assertIsNone(choose_consensus([("001", 92), ("009", 92)]))
+
+    def test_consensus_preserves_best_evidence_frame(self):
+        result = choose_consensus([("010", 92), ("011", 92), ("011", 92)])
+        self.assertEqual(result.evidence_frame, "frame-011")
+        self.assertEqual(result.evidence_seconds_from_end, 15)
+
     def test_anonymous_po_token_uses_mweb_client(self):
         with tempfile.TemporaryDirectory() as temporary, \
                 patch.dict(os.environ, {"YOUTUBE_USE_PO_TOKEN": "1"}, clear=True), \

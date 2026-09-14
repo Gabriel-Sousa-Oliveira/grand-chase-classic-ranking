@@ -12,6 +12,7 @@ from .relevance import description_from_metadata, evaluate_video_relevance
 from .syntaxii import import_syntaxii
 from .youtube import (DEFAULT_SEARCH_QUERIES, channel_archive, discover_videos,
                       extract_video_id, fetch_video, fill_ranking_queries)
+from .video_pipeline import triage_ocr_result
 
 
 def main() -> None:
@@ -182,19 +183,22 @@ def main() -> None:
                 inspections = executor.map(inspect, candidates)
                 for candidate, ocr, error in inspections:
                     processed += 1
-                    if error is not None:
+                    triage = triage_ocr_result(ocr, error)
+                    if triage.processing_reason == "technical_error":
                         failed += 1
                         repo.record_ocr_attempt(candidate["id"], "error")
                         results.append({"video_id": candidate["video_id"], "result": "error",
                                         "error": str(error)[:240]})
                         continue
-                    if ocr is None:
+                    if triage.destination == "manual_review":
                         repo.record_ocr_attempt(candidate["id"], "no_consensus")
                         results.append({"video_id": candidate["video_id"], "result": "no_consensus"})
                         continue
                     repo.set_ocr_time(candidate["id"], ocr.time_ms, ocr.confidence, {
                         "engine": "tesseract", "matching_frames": ocr.matching_frames,
                         "observations": ocr.observations,
+                        "evidence_frame": ocr.evidence_frame,
+                        "evidence_seconds_from_end": ocr.evidence_seconds_from_end,
                     })
                     matched += 1
                     results.append({"video_id": candidate["video_id"], "result": "matched",

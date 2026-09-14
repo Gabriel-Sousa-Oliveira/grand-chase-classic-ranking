@@ -46,6 +46,11 @@ export async function GET() {
         c.published_at, c.created_at, c.character, c.category, c.floor, c.time_ms,
         c.confidence, c.status, c.era_key,
         json_extract(c.raw_metadata, '$.ocr_outcome') AS ocr_outcome,
+        json_extract(c.raw_metadata, '$.ocr_time_ms') AS ocr_time_ms,
+        json_extract(c.raw_metadata, '$.ocr_confidence') AS ocr_confidence,
+        json_extract(c.raw_metadata, '$.evidence_frame') AS evidence_frame,
+        json_extract(c.raw_metadata, '$.evidence_seconds_from_end') AS evidence_seconds_from_end,
+        json_extract(c.raw_metadata, '$.processing_reason') AS processing_reason,
         EXISTS(SELECT 1 FROM candidates duplicate
           WHERE duplicate.id <> c.id AND c.time_ms IS NOT NULL
             AND duplicate.time_ms = c.time_ms
@@ -65,6 +70,7 @@ export async function GET() {
         ) benchmark ON benchmark.character = c.character
           AND benchmark.category = c.category AND benchmark.floor = c.floor
         WHERE c.status IN ('ready_for_review','time_required','classification_required')
+          AND COALESCE(json_extract(c.raw_metadata, '$.ocr_outcome'), '') != 'matched'
         ORDER BY c.confidence DESC, c.created_at ASC LIMIT 500`).all(),
       db().prepare(`SELECT id, character, category, floor, time_ms,
         player_nick, era_key, video_url, channel, published_at, approved_at FROM (
