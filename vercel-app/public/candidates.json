@@ -119,6 +119,19 @@
       "approved_at": "2026-09-11 15:56:16"
     },
     {
+      "id": 16447,
+      "character": "Decanee",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 990000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=8r1glpZHUJM",
+      "channel": "Borkaz",
+      "published_at": "2025-09-01T09:19:50Z",
+      "approved_at": "2026-09-14 01:11:36"
+    },
+    {
       "id": 18,
       "character": "Edel",
       "category": "duel_4",
@@ -509,6 +522,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 16449,
+      "character": "Ai",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 400000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=aS7Jn9EkdZY",
+      "channel": "Borkaz",
+      "published_at": "2024-04-19T09:15:27Z",
+      "approved_at": "2026-09-14 01:20:58"
+    },
+    {
       "id": 2,
       "character": "Amy",
       "category": "void_invasion",
@@ -520,6 +546,19 @@
       "channel": "fatejj",
       "published_at": "2025-10-04",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 16450,
+      "character": "Amy",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 457000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Epdz-_PEhSc",
+      "channel": "Borkaz",
+      "published_at": "2024-03-27T09:09:45Z",
+      "approved_at": "2026-09-14 01:21:35"
     },
     {
       "id": 4,
@@ -587,6 +626,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 16451,
+      "character": "Asin",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 405000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=KRZ9Nr4I_HY",
+      "channel": "Borkaz",
+      "published_at": "2024-07-02T09:10:02Z",
+      "approved_at": "2026-09-14 01:22:17"
+    },
+    {
       "id": 10,
       "character": "Decanee",
       "category": "void_invasion",
@@ -598,6 +650,19 @@
       "channel": "Patata",
       "published_at": "2026-04-03",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 16452,
+      "character": "Decanee",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 396000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=RBKCFu0Yv6o",
+      "channel": "Borkaz",
+      "published_at": "2024-04-17T09:21:36Z",
+      "approved_at": "2026-09-14 01:22:52"
     },
     {
       "id": 15,
@@ -624,6 +689,19 @@
       "channel": "Falonso",
       "published_at": "2026-08-27T14:10:11Z",
       "approved_at": "2026-09-10 00:58:00"
+    },
+    {
+      "id": 16453,
+      "character": "Dio",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 417000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yCyoHgK4tYw",
+      "channel": "Borkaz",
+      "published_at": "2024-06-28T09:00:18Z",
+      "approved_at": "2026-09-14 01:23:32"
     },
     {
       "id": 21,
@@ -806,19 +884,6 @@
       "channel": "xandindj",
       "published_at": "2026-07-27",
       "approved_at": "2026-09-09 17:50:38"
-    },
-    {
-      "id": 15676,
-      "character": "Lass",
-      "category": "void_invasion",
-      "floor": 3,
-      "time_ms": 78000,
-      "player_nick": "xandindj - Grand Chase",
-      "era_key": "current",
-      "video_url": "https://www.youtube.com/watch?v=qMJM8a1-hyk",
-      "channel": "xandindj - Grand Chase",
-      "published_at": "2026-05-15T16:08:24Z",
-      "approved_at": "2026-09-13 22:21:41"
     },
     {
       "id": 37,
@@ -1092,6 +1157,19 @@
       "channel": "Imortal98",
       "published_at": "2026-06-07T22:51:29Z",
       "approved_at": "2026-09-10 01:18:20"
+    },
+    {
+      "id": 16448,
+      "character": "Uno",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 292000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=5D4_AfVl2eU",
+      "channel": "Falonso",
+      "published_at": "2026-05-08T14:03:24Z",
+      "approved_at": "2026-09-14 01:19:57"
     },
     {
       "id": 72,
@@ -1941,6 +2019,45 @@
       "approved_at": "2026-09-10 02:51:28"
     },
     {
+      "id": 16450,
+      "character": "Amy",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 457000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Epdz-_PEhSc",
+      "channel": "Borkaz",
+      "published_at": "2024-03-27T09:09:45Z",
+      "approved_at": "2026-09-14 01:21:35"
+    },
+    {
+      "id": 16452,
+      "character": "Decanee",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 396000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=RBKCFu0Yv6o",
+      "channel": "Borkaz",
+      "published_at": "2024-04-17T09:21:36Z",
+      "approved_at": "2026-09-14 01:22:52"
+    },
+    {
+      "id": 16449,
+      "character": "Ai",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 400000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=aS7Jn9EkdZY",
+      "channel": "Borkaz",
+      "published_at": "2024-04-19T09:15:27Z",
+      "approved_at": "2026-09-14 01:20:58"
+    },
+    {
       "id": 4259,
       "character": "Ai",
       "category": "tower_of_disappearance",
@@ -2017,6 +2134,32 @@
       "channel": "Borkaz",
       "published_at": "2024-06-21T09:26:45Z",
       "approved_at": "2026-09-10 13:28:40"
+    },
+    {
+      "id": 16453,
+      "character": "Dio",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 417000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yCyoHgK4tYw",
+      "channel": "Borkaz",
+      "published_at": "2024-06-28T09:00:18Z",
+      "approved_at": "2026-09-14 01:23:32"
+    },
+    {
+      "id": 16451,
+      "character": "Asin",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 405000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=KRZ9Nr4I_HY",
+      "channel": "Borkaz",
+      "published_at": "2024-07-02T09:10:02Z",
+      "approved_at": "2026-09-14 01:22:17"
     },
     {
       "id": 5976,
@@ -2435,6 +2578,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 16447,
+      "character": "Decanee",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 990000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=8r1glpZHUJM",
+      "channel": "Borkaz",
+      "published_at": "2025-09-01T09:19:50Z",
+      "approved_at": "2026-09-14 01:11:36"
+    },
+    {
       "id": 2115,
       "character": "Iris",
       "category": "void_invasion",
@@ -2680,19 +2836,6 @@
       "channel": "LinDarkness",
       "published_at": "2025-10-30T12:28:23Z",
       "approved_at": "2026-09-09 20:55:06"
-    },
-    {
-      "id": 15677,
-      "character": "Lass",
-      "category": "void_invasion",
-      "floor": 3,
-      "time_ms": 113000,
-      "player_nick": "xandindj - Grand Chase",
-      "era_key": "current",
-      "video_url": "https://www.youtube.com/watch?v=BbBLerrXs2I",
-      "channel": "xandindj - Grand Chase",
-      "published_at": "2025-11-05T18:06:24Z",
-      "approved_at": "2026-09-13 22:21:41"
     },
     {
       "id": 44,
@@ -3488,6 +3631,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 16448,
+      "character": "Uno",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 292000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=5D4_AfVl2eU",
+      "channel": "Falonso",
+      "published_at": "2026-05-08T14:03:24Z",
+      "approved_at": "2026-09-14 01:19:57"
+    },
+    {
       "id": 4186,
       "character": "Rin/Lin",
       "category": "void_taint",
@@ -3512,19 +3668,6 @@
       "channel": "Borkaz",
       "published_at": "2026-05-15T09:08:26Z",
       "approved_at": "2026-09-10 02:51:19"
-    },
-    {
-      "id": 15676,
-      "character": "Lass",
-      "category": "void_invasion",
-      "floor": 3,
-      "time_ms": 78000,
-      "player_nick": "xandindj - Grand Chase",
-      "era_key": "current",
-      "video_url": "https://www.youtube.com/watch?v=qMJM8a1-hyk",
-      "channel": "xandindj - Grand Chase",
-      "published_at": "2026-05-15T16:08:24Z",
-      "approved_at": "2026-09-13 22:21:41"
     },
     {
       "id": 6043,
@@ -3933,15 +4076,15 @@
   "processing": {
     "discovered": 502,
     "classified": 387,
-    "timed": 166,
-    "approved": 166,
-    "ranked": 166,
-    "pending_manual": 228,
-    "ocr_attempted": 73,
+    "timed": 173,
+    "approved": 171,
+    "ranked": 171,
+    "pending_manual": 209,
+    "ocr_attempted": 76,
     "ocr_matched": 8,
-    "ocr_unresolved": 65,
+    "ocr_unresolved": 68,
     "title_times": 138,
-    "human_times": 26,
-    "last_updated": "2026-09-14 00:41:55"
+    "human_times": 33,
+    "last_updated": "2026-09-14 17:13:11"
   }
 }
