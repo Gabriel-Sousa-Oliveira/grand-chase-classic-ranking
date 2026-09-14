@@ -210,6 +210,19 @@
       "approved_at": "2026-09-10 02:51:18"
     },
     {
+      "id": 16170,
+      "character": "Amy",
+      "category": "great_explosion_of_kounat",
+      "floor": 0,
+      "time_ms": 127000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=BWOfhRKna8M",
+      "channel": "Borkaz",
+      "published_at": "2024-06-06T09:17:56Z",
+      "approved_at": "2026-09-14 00:41:43"
+    },
+    {
       "id": 5941,
       "character": "Kallia",
       "category": "great_explosion_of_kounat",
@@ -1666,6 +1679,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 16167,
+      "character": "Uno",
+      "category": "void_taint",
+      "floor": 4,
+      "time_ms": 349000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=zaHEM7861nM",
+      "channel": "Borkaz",
+      "published_at": "2024-08-17T09:28:41Z",
+      "approved_at": "2026-09-14 00:41:42"
+    },
+    {
       "id": 5974,
       "character": "Jin",
       "category": "wizards_labyrinth_30",
@@ -1954,6 +1980,19 @@
       "approved_at": "2026-09-10 13:28:40"
     },
     {
+      "id": 16170,
+      "character": "Amy",
+      "category": "great_explosion_of_kounat",
+      "floor": 0,
+      "time_ms": 127000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=BWOfhRKna8M",
+      "channel": "Borkaz",
+      "published_at": "2024-06-06T09:17:56Z",
+      "approved_at": "2026-09-14 00:41:43"
+    },
+    {
       "id": 6052,
       "character": "Lime/Holy",
       "category": "wizards_labyrinth_30",
@@ -2030,6 +2069,19 @@
       "channel": "Borkaz",
       "published_at": "2024-08-16T09:02:21Z",
       "approved_at": "2026-09-10 13:28:40"
+    },
+    {
+      "id": 16167,
+      "character": "Uno",
+      "category": "void_taint",
+      "floor": 4,
+      "time_ms": 349000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=zaHEM7861nM",
+      "channel": "Borkaz",
+      "published_at": "2024-08-17T09:28:41Z",
+      "approved_at": "2026-09-14 00:41:42"
     },
     {
       "id": 5951,
@@ -3881,15 +3933,15 @@
   "processing": {
     "discovered": 502,
     "classified": 387,
-    "timed": 164,
-    "approved": 164,
-    "ranked": 164,
-    "pending_manual": 230,
-    "ocr_attempted": 11,
-    "ocr_matched": 6,
-    "ocr_unresolved": 5,
+    "timed": 166,
+    "approved": 166,
+    "ranked": 166,
+    "pending_manual": 228,
+    "ocr_attempted": 73,
+    "ocr_matched": 8,
+    "ocr_unresolved": 65,
     "title_times": 138,
     "human_times": 26,
-    "last_updated": "2026-09-13 22:22:40"
+    "last_updated": "2026-09-14 00:41:55"
   }
 }
