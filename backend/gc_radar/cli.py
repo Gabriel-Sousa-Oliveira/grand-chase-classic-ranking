@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from .database import CandidateRepository
 from .ocr import read_video_time
@@ -167,6 +168,7 @@ def main() -> None:
         elif args.command == "ocr-queue":
             processed = matched = failed = 0
             results = []
+            evidence_directory = Path(args.db).resolve().parent / "ocr-evidence"
             candidates = repo.ocr_candidates(
                 args.limit, args.all_missing, args.retry_no_consensus,
                 args.characters,
@@ -174,7 +176,10 @@ def main() -> None:
 
             def inspect(candidate: dict) -> tuple[dict, object | None, Exception | None]:
                 try:
-                    return candidate, read_video_time(candidate["video_url"]), None
+                    return candidate, read_video_time(
+                        candidate["video_url"], evidence_directory,
+                        candidate["video_id"],
+                    ), None
                 except Exception as error:
                     return candidate, None, error
 
@@ -191,14 +196,23 @@ def main() -> None:
                                         "error": str(error)[:240]})
                         continue
                     if triage.destination == "manual_review":
-                        repo.record_ocr_attempt(candidate["id"], "no_consensus")
+                        diagnostic = evidence_directory / (
+                            f"{candidate['video_id']}-no-consensus.png"
+                        )
+                        repo.record_ocr_attempt(candidate["id"], "no_consensus", {
+                            "evidence_image": str(Path("ocr-evidence") / diagnostic.name)
+                            if diagnostic.exists() else None,
+                            "processing_reason": "timer_not_frozen_or_not_readable",
+                        })
                         results.append({"video_id": candidate["video_id"], "result": "no_consensus"})
                         continue
                     repo.set_ocr_time(candidate["id"], ocr.time_ms, ocr.confidence, {
-                        "engine": "tesseract", "matching_frames": ocr.matching_frames,
+                        "engine": "tesseract+opencv", "matching_frames": ocr.matching_frames,
                         "observations": ocr.observations,
                         "evidence_frame": ocr.evidence_frame,
                         "evidence_seconds_from_end": ocr.evidence_seconds_from_end,
+                        "evidence_image": ocr.evidence_image,
+                        "roi": ocr.roi,
                     })
                     matched += 1
                     results.append({"video_id": candidate["video_id"], "result": "matched",

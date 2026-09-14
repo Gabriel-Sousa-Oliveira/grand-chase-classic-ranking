@@ -151,7 +151,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr
           python -m pip install --disable-pip-version-check --upgrade --pre \
-            "yt-dlp[default,curl-cffi]" "yt-dlp-getpot-wpc"
+            "yt-dlp[default,curl-cffi]" "yt-dlp-getpot-wpc" \
+            "opencv-python-headless==4.10.0.84"
 
       - name: Configure browser PO Token provider
         if: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ocr-only') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]')) }}
@@ -254,4 +255,5 @@ jobs:
           path: |
             data/gc_radar.sqlite3
             data/last-run.json
+            data/ocr-evidence/
           retention-days: 30

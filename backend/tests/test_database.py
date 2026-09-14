@@ -98,7 +98,14 @@ class DatabaseTests(unittest.TestCase):
                                  parse_title("Ronan Void Invasion 3F"))
         second, _ = self.repo.add("second", "https://youtu.be/second",
                                   parse_title("Arme Void Invasion 3F"))
-        self.repo.record_ocr_attempt(first["id"], "no_consensus")
+        attempted = self.repo.record_ocr_attempt(
+            first["id"], "no_consensus", {
+                "evidence_image": "ocr-evidence/first-no-consensus.png",
+                "processing_reason": "timer_not_frozen_or_not_readable",
+            }
+        )
+        self.assertIn("first-no-consensus.png", attempted["raw_metadata"])
+        self.assertIn("timer_not_frozen_or_not_readable", attempted["raw_metadata"])
         self.assertEqual(self.repo.time_required(1)[0]["id"], second["id"])
         updated = self.repo.set_ocr_time(first["id"], 92_000, 0.82,
                                          {"engine": "tesseract", "matching_frames": 3})

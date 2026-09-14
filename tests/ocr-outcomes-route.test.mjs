@@ -16,6 +16,8 @@ test("pending queue excludes OCR matches and exposes audit evidence",async()=>{
   assert.match(source,/ocr_confidence/);
   assert.match(source,/evidence_frame/);
   assert.match(source,/evidence_seconds_from_end/);
+  assert.match(source,/evidence_image/);
+  assert.match(source,/ocr_roi/);
   assert.match(source,/processing_reason/);
   assert.match(source,/ocr_outcome'\), ''\) != 'matched'/);
 });

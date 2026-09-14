@@ -50,6 +50,8 @@ export async function GET() {
         json_extract(c.raw_metadata, '$.ocr_confidence') AS ocr_confidence,
         json_extract(c.raw_metadata, '$.evidence_frame') AS evidence_frame,
         json_extract(c.raw_metadata, '$.evidence_seconds_from_end') AS evidence_seconds_from_end,
+        json_extract(c.raw_metadata, '$.evidence_image') AS evidence_image,
+        json_extract(c.raw_metadata, '$.ocr_roi') AS ocr_roi,
         json_extract(c.raw_metadata, '$.processing_reason') AS processing_reason,
         EXISTS(SELECT 1 FROM candidates duplicate
           WHERE duplicate.id <> c.id AND c.time_ms IS NOT NULL

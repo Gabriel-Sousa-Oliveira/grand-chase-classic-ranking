@@ -246,7 +246,8 @@ class CandidateRepository:
         row = self.connection.execute(query, parameters).fetchone()
         return int(row[0])
 
-    def record_ocr_attempt(self, candidate_id: int, outcome: str) -> dict:
+    def record_ocr_attempt(self, candidate_id: int, outcome: str,
+                           evidence: dict | None = None) -> dict:
         candidate = self.get(candidate_id)
         metadata = json.loads(candidate["raw_metadata"] or "{}")
         metadata["ocr_attempted_at"] = datetime.now(timezone.utc).isoformat()
@@ -255,6 +256,8 @@ class CandidateRepository:
         metadata["processing_reason"] = (
             "technical_error" if outcome == "error" else "no_consensus"
         )
+        if evidence:
+            metadata.update(evidence)
         self.connection.execute("""
             UPDATE candidates SET raw_metadata = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
@@ -275,6 +278,8 @@ class CandidateRepository:
         metadata["evidence_seconds_from_end"] = evidence.get(
             "evidence_seconds_from_end"
         )
+        metadata["evidence_image"] = evidence.get("evidence_image")
+        metadata["ocr_roi"] = evidence.get("roi")
         metadata["processing_reason"] = "nearby_frame_consensus"
         metadata["ocr_attempted_at"] = datetime.now(timezone.utc).isoformat()
         metadata["ocr_outcome"] = "matched"

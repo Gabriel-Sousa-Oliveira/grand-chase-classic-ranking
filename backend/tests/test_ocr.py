@@ -2,9 +2,14 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
-from gc_radar.ocr import _download_excerpt, choose_consensus, extract_times
+from gc_radar.ocr import (OcrObservation, _download_excerpt,
+                          _parse_tesseract_tsv, _read_timer_frame,
+                          choose_consensus,
+                          choose_frozen_consensus, extract_time_values,
+                          extract_times, roi_bounds)
 
 
 class OcrTextTests(unittest.TestCase):
@@ -12,6 +17,10 @@ class OcrTextTests(unittest.TestCase):
         self.assertEqual(extract_times("CLEAR TIME 01:32"), {92})
         self.assertEqual(extract_times("Tempo 2'56"), {176})
         self.assertEqual(extract_times("3m 07s"), {187})
+
+    def test_extracts_gc_fractional_timer_formats(self):
+        self.assertEqual(extract_time_values("CLEAR 01:23:45"), {83_450})
+        self.assertEqual(extract_time_values("TIME 01:23.456"), {83_456})
 
     def test_repairs_common_ocr_characters(self):
         self.assertEqual(extract_times("O1:3I"), {91})
@@ -38,6 +47,67 @@ class OcrTextTests(unittest.TestCase):
         self.assertEqual(result.evidence_frame, "frame-011")
         self.assertEqual(result.evidence_seconds_from_end, 15)
 
+    def test_relative_timer_roi_reduces_area_by_more_than_ninety_percent(self):
+        left, top, right, bottom = roi_bounds(
+            1920, 1080, (0.32, 0.0, 0.68, 0.2)
+        )
+        area_ratio = ((right - left) * (bottom - top)) / (1920 * 1080)
+        self.assertLess(area_ratio, 0.10)
+
+    def test_accepts_a_timer_frozen_for_two_seconds(self):
+        observations = [
+            OcrObservation(f"top_center-coarse-{index:04d}", 83_450,
+                           float(index), 0.90, f"frame-{index}.png")
+            for index in range(3)
+        ]
+        result = choose_frozen_consensus(observations, 1.0)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.time_ms, 83_450)
+        self.assertEqual(result.matching_frames, 3)
+
+    def test_rejects_a_normally_ticking_timer_and_conflicts(self):
+        ticking = [
+            OcrObservation(str(index), 80_000 + index * 1000,
+                           float(index), 0.90, f"frame-{index}.png")
+            for index in range(5)
+        ]
+        self.assertIsNone(choose_frozen_consensus(ticking, 1.0))
+        conflict = [
+            OcrObservation(f"a-{index}", 83_000, float(index), 0.9, "a.png")
+            for index in range(3)
+        ] + [
+            OcrObservation(f"b-{index}", 91_000, float(index + 5), 0.9, "b.png")
+            for index in range(3)
+        ]
+        self.assertIsNone(choose_frozen_consensus(conflict, 1.0))
+
+    def test_reads_text_and_real_confidence_from_tesseract_tsv(self):
+        tsv = ("level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\t"
+               "left\ttop\twidth\theight\tconf\ttext\n"
+               "5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t90\t01:23:45\n")
+        text, confidence = _parse_tesseract_tsv(tsv)
+        self.assertEqual(text, "01:23:45")
+        self.assertAlmostEqual(confidence, 0.9)
+
+    def test_timer_ocr_uses_the_restricted_vocabulary(self):
+        tsv = ("level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\t"
+               "left\ttop\twidth\theight\tconf\ttext\n"
+               "5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t95\t01:23:45\n")
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch("gc_radar.ocr._preprocess_roi") as preprocess, \
+                patch("gc_radar.ocr._run") as run:
+            processed = Path(temporary) / "timer.png"
+            preprocess.return_value = [processed]
+            run.return_value = SimpleNamespace(stdout=tsv)
+            observations = _read_timer_frame(
+                Path(temporary) / "frame.png", Path(temporary),
+                "top_center", 3.0,
+            )
+            command = run.call_args.args[0]
+            self.assertIn("tessedit_char_whitelist=0123456789:.", command)
+            self.assertEqual(observations[0].time_ms, 83_450)
+            self.assertAlmostEqual(observations[0].confidence, 0.95)
+
     def test_anonymous_po_token_uses_mweb_client(self):
         with tempfile.TemporaryDirectory() as temporary, \
                 patch.dict(os.environ, {"YOUTUBE_USE_PO_TOKEN": "1"}, clear=True), \
@@ -58,8 +128,8 @@ class OcrTextTests(unittest.TestCase):
             _download_excerpt("https://youtu.be/example", Path(temporary))
             command = run.call_args.args[0]
             self.assertEqual(command[command.index("-f") + 1], "bv*")
-            self.assertEqual(command[command.index("-S") + 1], "+res:360,+size,+br")
-            self.assertEqual(command[command.index("--download-sections") + 1], "*-75-inf")
+            self.assertEqual(command[command.index("-S") + 1], "res:720,+size,+br")
+            self.assertEqual(command[command.index("--download-sections") + 1], "*-120-inf")
 
     def test_browser_po_token_uses_configured_chrome(self):
         environment = {

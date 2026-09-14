@@ -11,8 +11,28 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-MIN_TIME_SECONDS = 20
-MAX_TIME_SECONDS = 20 * 60
+MIN_TIME_MS = 20_000
+MAX_TIME_MS = 20 * 60 * 1000
+DOWNLOAD_WINDOW_SECONDS = 120
+COARSE_WINDOW_SECONDS = 120
+COARSE_FPS = 1
+DENSE_WINDOW_SECONDS = 45
+DENSE_FPS = 4
+TIMER_ROIS = {
+    # Each crop is under 8% of a 16:9 frame. The second is only attempted when
+    # the primary GC HUD position cannot produce a frozen timer.
+    "top_center": (0.32, 0.00, 0.68, 0.20),
+    "top_right": (0.65, 0.00, 1.00, 0.22),
+}
+
+
+@dataclass(frozen=True)
+class OcrObservation:
+    frame_id: str
+    time_ms: int
+    seconds_from_end: float
+    confidence: float
+    evidence_path: str
 
 
 @dataclass(frozen=True)
@@ -23,38 +43,78 @@ class OcrResult:
     observations: int
     evidence_frame: str | None = None
     evidence_seconds_from_end: int | None = None
+    evidence_image: str | None = None
+    roi: str | None = None
 
 
-def _valid(seconds: int) -> bool:
-    return MIN_TIME_SECONDS <= seconds <= MAX_TIME_SECONDS
+def _valid_ms(time_ms: int) -> bool:
+    return MIN_TIME_MS <= time_ms <= MAX_TIME_MS
 
 
-def extract_times(text: str) -> set[int]:
-    """Return plausible run durations in seconds from noisy OCR text."""
+def extract_time_values(text: str) -> set[int]:
+    """Return plausible durations in milliseconds from noisy OCR text.
+
+    GC may render the timer as MM:SS, MM:SS.mmm or MM:SS:CC, where CC is
+    centiseconds. The latter is not treated as an hours field because supported
+    dungeon runs are bounded to twenty minutes.
+    """
     normalized = text.translate(str.maketrans({
         "O": "0", "o": "0", "I": "1", "l": "1", "|": "1",
-        "’": "'", "′": "'", "：": ":",
+        "’": ":", "'": ":", "′": ":", "：": ":", ",": ".",
     }))
     found: set[int] = set()
-    for match in re.finditer(r"(?<!\d)(\d{1,2})\s*[:']\s*(\d{2})(?!\d)", normalized):
-        minutes, seconds = map(int, match.groups())
-        total = minutes * 60 + seconds
-        if seconds < 60 and _valid(total):
+    occupied: list[tuple[int, int]] = []
+
+    fractional = re.compile(
+        r"(?<!\d)(\d{1,2})\s*:\s*(\d{2})\s*([:.])\s*(\d{2,3})(?!\d)"
+    )
+    for match in fractional.finditer(normalized):
+        minutes, seconds = map(int, match.group(1, 2))
+        fraction = match.group(4)
+        millis = int(fraction) * (10 if len(fraction) == 2 else 1)
+        total = (minutes * 60 + seconds) * 1000 + millis
+        if seconds < 60 and _valid_ms(total):
             found.add(total)
-    for match in re.finditer(r"(?<!\d)(\d{1,2})\s*[mM]\s*(\d{1,2})\s*[sS]?(?!\d)", normalized):
+        occupied.append(match.span())
+
+    def overlaps(start: int, end: int) -> bool:
+        return any(start < right and end > left for left, right in occupied)
+
+    for match in re.finditer(
+            r"(?<!\d)(\d{1,2})\s*:\s*(\d{2})(?!\s*[:.]\s*\d)(?!\d)",
+            normalized):
+        if overlaps(*match.span()):
+            continue
         minutes, seconds = map(int, match.groups())
-        total = minutes * 60 + seconds
-        if seconds < 60 and _valid(total):
+        total = (minutes * 60 + seconds) * 1000
+        if seconds < 60 and _valid_ms(total):
+            found.add(total)
+    for match in re.finditer(
+            r"(?<!\d)(\d{1,2})\s*[mM]\s*(\d{1,2})\s*[sS]?(?!\d)",
+            normalized):
+        minutes, seconds = map(int, match.groups())
+        total = (minutes * 60 + seconds) * 1000
+        if seconds < 60 and _valid_ms(total):
             found.add(total)
     return found
 
 
+def extract_times(text: str) -> set[int]:
+    """Backward-compatible whole-second view used by unit tests."""
+    return {time_ms // 1000 for time_ms in extract_time_values(text)}
+
+
 def choose_consensus(observations: list[tuple[str, int]]) -> OcrResult | None:
-    """Choose a time only when it occurs in at least two nearby frames."""
+    """Choose a whole-second time only when it occurs in nearby frames.
+
+    This compatibility entry point retains the original six-second frame
+    numbering contract. The video pipeline uses ``choose_frozen_consensus``.
+    """
     frames_by_time: dict[int, set[str]] = defaultdict(set)
     counts: dict[int, int] = defaultdict(int)
     for frame, seconds in observations:
-        if _valid(seconds):
+        time_ms = seconds * 1000
+        if _valid_ms(time_ms):
             frames_by_time[seconds].add(frame)
             counts[seconds] += 1
     nearby_frames: dict[int, list[int]] = {}
@@ -75,23 +135,102 @@ def choose_consensus(observations: list[tuple[str, int]]) -> OcrResult | None:
         return None
     if len(ranked) > 1 and len(nearby_frames[ranked[1]]) == matching_frames:
         return None
-    confidence = min(0.94, 0.72 + (matching_frames - 2) * 0.05 + min(counts[winner] - matching_frames, 3) * 0.02)
+    confidence = min(
+        0.94,
+        0.72 + (matching_frames - 2) * 0.05
+        + min(counts[winner] - matching_frames, 3) * 0.02,
+    )
     evidence_number = max(nearby_frames[winner])
-    return OcrResult(winner * 1000, confidence, matching_frames, counts[winner],
-                     f"frame-{evidence_number:03d}",
-                     max(0, 75 - (evidence_number - 1) * 6))
+    return OcrResult(
+        winner * 1000, confidence, matching_frames, counts[winner],
+        f"frame-{evidence_number:03d}",
+        max(0, 75 - (evidence_number - 1) * 6),
+    )
+
+
+def _stable_sequence(observations: list[OcrObservation], max_gap: float,
+                     minimum_span: float) -> list[OcrObservation]:
+    """Return the newest sequence whose identical timer spans long enough."""
+    ordered = sorted(observations, key=lambda item: item.seconds_from_end)
+    sequences: list[list[OcrObservation]] = []
+    current: list[OcrObservation] = []
+    for observation in ordered:
+        if not current or abs(
+                observation.seconds_from_end - current[-1].seconds_from_end
+        ) <= max_gap:
+            current.append(observation)
+        else:
+            sequences.append(current)
+            current = [observation]
+    if current:
+        sequences.append(current)
+    qualified = [sequence for sequence in sequences if len(sequence) >= 2 and (
+        max(item.seconds_from_end for item in sequence)
+        - min(item.seconds_from_end for item in sequence)
+    ) >= minimum_span]
+    return min(
+        qualified,
+        key=lambda sequence: min(item.seconds_from_end for item in sequence),
+        default=[],
+    )
+
+
+def choose_frozen_consensus(observations: list[OcrObservation],
+                            sample_interval: float) -> OcrResult | None:
+    """Accept a timer only after it remains frozen across temporal frames."""
+    by_time: dict[int, list[OcrObservation]] = defaultdict(list)
+    for observation in observations:
+        if _valid_ms(observation.time_ms):
+            by_time[observation.time_ms].append(observation)
+    stable: dict[int, list[OcrObservation]] = {}
+    max_gap = sample_interval * 1.6
+    # A running MM:SS timer can repeat inside a one-second bucket. Requiring
+    # almost two seconds prevents that normal tick from looking "frozen".
+    minimum_span = max(1.8, sample_interval)
+    for time_ms, values in by_time.items():
+        sequence = _stable_sequence(values, max_gap, minimum_span)
+        if sequence:
+            stable[time_ms] = sequence
+    if len(stable) != 1:
+        return None
+    winner, sequence = next(iter(stable.items()))
+    best = max(sequence, key=lambda item: (
+        item.confidence, -item.seconds_from_end
+    ))
+    average_engine_confidence = sum(
+        item.confidence for item in sequence
+    ) / len(sequence)
+    confidence = min(
+        0.98,
+        max(0.72, average_engine_confidence * 0.75 + 0.20
+            + min(len(sequence) - 2, 4) * 0.015),
+    )
+    return OcrResult(
+        winner, confidence, len(sequence), len(by_time[winner]),
+        best.frame_id, int(round(best.seconds_from_end)), best.evidence_path,
+        best.frame_id.split("-", 1)[0],
+    )
 
 
 def _run(command: list[str], timeout: int = 240) -> subprocess.CompletedProcess[str]:
     try:
-        return subprocess.run(command, check=True, capture_output=True, text=True, timeout=timeout)
+        return subprocess.run(
+            command, check=True, capture_output=True, text=True, timeout=timeout
+        )
     except subprocess.CalledProcessError as error:
         detail = (error.stderr or error.stdout or str(error)).strip()
         raise RuntimeError(detail[-1200:]) from error
 
 
 def _require_tools() -> None:
-    missing = [name for name in ("yt-dlp", "ffmpeg", "tesseract") if shutil.which(name) is None]
+    missing = [
+        name for name in ("yt-dlp", "ffmpeg", "tesseract")
+        if shutil.which(name) is None
+    ]
+    try:
+        import cv2  # noqa: F401
+    except ImportError:
+        missing.append("opencv-python-headless")
     if missing:
         raise RuntimeError("missing OCR tools: " + ", ".join(missing))
 
@@ -101,22 +240,19 @@ def _download_excerpt(video_url: str, destination: Path) -> Path:
     command = [
         "yt-dlp", "--no-playlist", "--no-warnings", "--quiet",
         "--js-runtimes", "node", "--remote-components", "ejs:npm",
-        "--impersonate", "chrome",
-        # mweb may expose only combined audio/video formats.  ``bv*`` accepts
-        # both combined and video-only streams, while the sort keeps OCR
-        # downloads close to 360p instead of fetching an unnecessarily large
-        # source file.
-        "-f", "bv*",
-        "-S", "+res:360,+size,+br",
-        "--download-sections", "*-75-inf",
+        "--impersonate", "chrome", "-f", "bv*",
+        "-S", "res:720,+size,+br",
+        "--download-sections", f"*-{DOWNLOAD_WINDOW_SECONDS}-inf",
         "-o", str(output),
     ]
     if os.environ.get("YOUTUBE_USE_PO_TOKEN") == "1":
         command.extend(["--extractor-args", "youtube:player_client=mweb"])
-        # Browser-based providers can mint one video-bound token per download.
         browser_path = os.environ.get("YOUTUBE_PO_BROWSER_PATH")
         if browser_path:
-            command.extend(["--extractor-args", f"youtubepot-wpc:browser_path={browser_path}"])
+            command.extend([
+                "--extractor-args",
+                f"youtubepot-wpc:browser_path={browser_path}",
+            ])
     cookies_file = os.environ.get("YOUTUBE_COOKIES_FILE")
     if cookies_file:
         command.extend(["--cookies", cookies_file])
@@ -128,34 +264,224 @@ def _download_excerpt(video_url: str, destination: Path) -> Path:
     return videos[0]
 
 
-def _extract_frames(video: Path, destination: Path) -> list[Path]:
-    filters = {
-        "full": "fps=1/6,scale=1280:-2,format=gray,eq=contrast=1.6",
-        "center": "fps=1/6,crop=iw*0.80:ih*0.70:iw*0.10:ih*0.12,scale=1280:-2,format=gray,eq=contrast=1.7",
-        "lower": "fps=1/6,crop=iw:ih*0.58:0:ih*0.42,scale=1280:-2,format=gray,eq=contrast=1.7",
-    }
-    frames: list[Path] = []
-    for region, video_filter in filters.items():
-        pattern = destination / f"{region}-%03d.png"
-        _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-sseof", "-75", "-i", str(video),
-              "-vf", video_filter, "-frames:v", "14", str(pattern)], timeout=180)
-        frames.extend(sorted(destination.glob(f"{region}-*.png")))
-    return frames
+def _extract_frames(video: Path, destination: Path, prefix: str,
+                    window_seconds: int, fps: int) -> list[Path]:
+    pattern = destination / f"{prefix}-%04d.png"
+    frame_limit = window_seconds * fps + 2
+    _run([
+        "ffmpeg", "-hide_banner", "-loglevel", "error",
+        "-sseof", f"-{window_seconds}", "-i", str(video),
+        "-vf", f"fps={fps},scale=1280:-2", "-frames:v", str(frame_limit),
+        str(pattern),
+    ], timeout=240)
+    return sorted(destination.glob(f"{prefix}-*.png"))
 
 
-def read_video_time(video_url: str) -> OcrResult | None:
-    """Download the final excerpt, sample frames and OCR a stable completion time."""
+def roi_bounds(width: int, height: int,
+               relative: tuple[float, float, float, float]) -> tuple[int, int, int, int]:
+    """Convert a relative ROI to clamped pixel coordinates."""
+    left, top, right, bottom = relative
+    return (
+        max(0, min(width, round(width * left))),
+        max(0, min(height, round(height * top))),
+        max(0, min(width, round(width * right))),
+        max(0, min(height, round(height * bottom))),
+    )
+
+
+def _preprocess_roi(frame: Path, destination: Path,
+                    roi_name: str) -> list[Path]:
+    """Crop the timer and create grayscale/Otsu variants with OpenCV."""
+    import cv2
+
+    image = cv2.imread(str(frame))
+    if image is None:
+        raise RuntimeError(f"OpenCV could not read {frame.name}")
+    height, width = image.shape[:2]
+    left, top, right, bottom = roi_bounds(width, height, TIMER_ROIS[roi_name])
+    crop = image[top:bottom, left:right]
+    if crop.size == 0:
+        raise RuntimeError(f"empty OCR ROI for {frame.name}")
+    gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+    gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+    gray = cv2.GaussianBlur(gray, (3, 3), 0)
+    _, otsu = cv2.threshold(
+        gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+    )
+    variants = (("otsu", otsu), ("inverse", cv2.bitwise_not(otsu)),
+                ("gray", gray))
+    paths: list[Path] = []
+    for variant_name, pixels in variants:
+        output = destination / f"{frame.stem}-{roi_name}-{variant_name}.png"
+        if not cv2.imwrite(str(output), pixels):
+            raise RuntimeError(f"OpenCV could not write {output.name}")
+        paths.append(output)
+    return paths
+
+
+def _parse_tesseract_tsv(output: str) -> tuple[str, float]:
+    words: list[str] = []
+    confidences: list[float] = []
+    for line in output.splitlines()[1:]:
+        columns = line.split("\t")
+        if len(columns) < 12 or not columns[11].strip():
+            continue
+        words.append(columns[11].strip())
+        try:
+            confidence = float(columns[10])
+        except ValueError:
+            continue
+        if confidence >= 0:
+            confidences.append(confidence / 100)
+    return " ".join(words), (
+        sum(confidences) / len(confidences) if confidences else 0.0
+    )
+
+
+def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
+                      seconds_from_end: float,
+                      exhaustive: bool = False) -> list[OcrObservation]:
+    variants = _preprocess_roi(frame, destination, roi_name)
+    # Otsu is the fast path. Grayscale and inverted Otsu are only sent to
+    # Tesseract after the coarse scan has proved that this ROI contains a timer.
+    for processed in variants if exhaustive else variants[:1]:
+        result = _run([
+            "tesseract", str(processed), "stdout", "--psm", "7", "-l", "eng",
+            "-c", "tessedit_char_whitelist=0123456789:.", "tsv",
+        ], timeout=20)
+        text, confidence = _parse_tesseract_tsv(result.stdout)
+        values = extract_time_values(text)
+        if values:
+            return [OcrObservation(
+                f"{roi_name}-{frame.stem}", time_ms, seconds_from_end,
+                confidence, str(processed),
+            ) for time_ms in values]
+    return []
+
+
+def _scan_frames(frames: list[Path], destination: Path, roi_name: str,
+                 window_seconds: int, fps: int,
+                 exhaustive: bool = False) -> tuple[OcrResult | None, int]:
+    observations: list[OcrObservation] = []
+    total = len(frames)
+    first_consensus_at: int | None = None
+    consensus: OcrResult | None = None
+    for reverse_index, frame in enumerate(reversed(frames)):
+        chronological_index = total - reverse_index - 1
+        seconds_from_end = max(0.0, (total - chronological_index - 1) / fps)
+        observations.extend(_read_timer_frame(
+            frame, destination, roi_name, seconds_from_end, exhaustive
+        ))
+        consensus = choose_frozen_consensus(observations, 1 / fps)
+        if consensus is not None and first_consensus_at is None:
+            first_consensus_at = reverse_index
+        # Inspect four additional seconds around a first match. This keeps the
+        # backwards scan bounded while still surfacing conflicting readings.
+        if (first_consensus_at is not None
+                and reverse_index - first_consensus_at >= 4 * fps):
+            return consensus, len(observations)
+    return choose_frozen_consensus(observations, 1 / fps), len(observations)
+
+
+def _preserve_evidence(result: OcrResult, evidence_directory: Path | None,
+                       evidence_name: str | None) -> OcrResult:
+    if not result.evidence_image or evidence_directory is None:
+        return result
+    evidence_directory.mkdir(parents=True, exist_ok=True)
+    safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "-", evidence_name or "video")
+    target = evidence_directory / f"{safe_name}-{result.time_ms}.png"
+    shutil.copyfile(result.evidence_image, target)
+    return OcrResult(
+        result.time_ms, result.confidence, result.matching_frames,
+        result.observations, result.evidence_frame,
+        result.evidence_seconds_from_end,
+        str(Path("ocr-evidence") / target.name), result.roi,
+    )
+
+
+def _preserve_diagnostic(directory: Path, evidence_directory: Path | None,
+                         evidence_name: str | None) -> str | None:
+    """Keep a compact ROI contact sheet when no timer reaches consensus."""
+    if evidence_directory is None:
+        return None
+    import cv2
+
+    candidates = sorted(directory.glob("dense-*-top_center-otsu.png"))
+    if not candidates:
+        candidates = sorted(directory.glob("coarse-*-top_center-otsu.png"))
+    if not candidates:
+        return None
+    count = min(8, len(candidates))
+    indexes = [
+        round(index * (len(candidates) - 1) / max(1, count - 1))
+        for index in range(count)
+    ]
+    tiles = []
+    for index in indexes:
+        pixels = cv2.imread(str(candidates[index]), cv2.IMREAD_GRAYSCALE)
+        if pixels is None:
+            continue
+        scale = 360 / pixels.shape[1]
+        tile = cv2.resize(
+            pixels, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA
+        )
+        cv2.putText(
+            tile, candidates[index].stem.split("-top_center", 1)[0], (8, 22),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.5, 180, 1, cv2.LINE_AA,
+        )
+        tiles.append(tile)
+    if not tiles:
+        return None
+    tile_height = max(tile.shape[0] for tile in tiles)
+    normalized = [cv2.copyMakeBorder(
+        tile, 0, tile_height - tile.shape[0], 0, 0,
+        cv2.BORDER_CONSTANT, value=0,
+    ) for tile in tiles]
+    while len(normalized) % 4:
+        normalized.append(normalized[-1] * 0)
+    rows = [cv2.hconcat(normalized[index:index + 4])
+            for index in range(0, len(normalized), 4)]
+    contact_sheet = cv2.vconcat(rows)
+    evidence_directory.mkdir(parents=True, exist_ok=True)
+    safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "-", evidence_name or "video")
+    target = evidence_directory / f"{safe_name}-no-consensus.png"
+    if not cv2.imwrite(str(target), contact_sheet):
+        raise RuntimeError(f"OpenCV could not write {target.name}")
+    return str(Path("ocr-evidence") / target.name)
+
+
+def read_video_time(video_url: str, evidence_directory: Path | None = None,
+                    evidence_name: str | None = None) -> OcrResult | None:
+    """Find a stable completion timer using adaptive temporal and spatial OCR."""
     _require_tools()
     with tempfile.TemporaryDirectory(prefix="gc-radar-ocr-") as temporary:
         directory = Path(temporary)
         video = _download_excerpt(video_url, directory)
-        frames = _extract_frames(video, directory)
-        observations: list[tuple[str, int]] = []
-        for frame in frames:
-            result = _run([
-                "tesseract", str(frame), "stdout", "--psm", "11", "-l", "eng",
-                "-c", "tessedit_char_whitelist=0123456789:;'mMsS",
-            ], timeout=45)
-            frame_id = frame.stem.rsplit("-", 1)[-1]
-            observations.extend((frame_id, seconds) for seconds in extract_times(result.stdout))
-        return choose_consensus(observations)
+        coarse_frames = _extract_frames(
+            video, directory, "coarse", COARSE_WINDOW_SECONDS, COARSE_FPS
+        )
+        dense_frames: list[Path] | None = None
+        for roi_name in TIMER_ROIS:
+            result, sightings = _scan_frames(
+                coarse_frames, directory, roi_name,
+                COARSE_WINDOW_SECONDS, COARSE_FPS,
+            )
+            if result is not None:
+                return _preserve_evidence(
+                    result, evidence_directory, evidence_name
+                )
+            if dense_frames is None:
+                dense_frames = _extract_frames(
+                    video, directory, "dense", DENSE_WINDOW_SECONDS, DENSE_FPS
+                )
+            result, _ = _scan_frames(
+                dense_frames, directory, roi_name,
+                DENSE_WINDOW_SECONDS, DENSE_FPS,
+                exhaustive=sightings > 0,
+            )
+            if result is not None:
+                return _preserve_evidence(
+                    result, evidence_directory, evidence_name
+                )
+        _preserve_diagnostic(directory, evidence_directory, evidence_name)
+        return None

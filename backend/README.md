@@ -75,7 +75,9 @@ No GitHub Actions, abra **YouTube crawler**, escolha **Run workflow** e selecion
 
 ## OCR dos vídeos pendentes
 
-O workflow baixa somente o trecho final de até oito vídeos por execução, extrai quadros e usa Tesseract para procurar o tempo de conclusão. Um valor só é aceito quando aparece em pelo menos dois quadros distintos e não há empate entre leituras. Mesmo após o OCR, o vídeo fica em `ready_for_review`: nenhuma entrada vai ao ranking sem validação humana.
+O workflow baixa em 720p apenas os dois minutos finais de até oito vídeos por execução. O primeiro passe lê, de trás para frente, um quadro por segundo; se necessário, um segundo passe examina os 45 segundos finais a 4 FPS. O OpenCV recorta os ROIs do cronômetro no topo central e direito, amplia a imagem em 3x e produz versões em escala de cinza, Otsu e Otsu invertida. O Tesseract recebe somente `0123456789:.` e um valor só é aceito quando permanece congelado por aproximadamente dois segundos sem outro resultado conflitante.
+
+O melhor recorte, o instante relativo ao fim, o ROI e a confiança real devolvida pelo Tesseract ficam registrados como evidência. Quando não há consenso, o processo preserva uma folha de contato com oito recortes distribuídos pela janela densa. As imagens ficam em `data/ocr-evidence/` e são incluídas no artefato privado da execução por 30 dias. Mesmo após o OCR, o vídeo fica em `ready_for_review`: nenhuma entrada vai ao ranking sem validação humana.
 
 Para executar localmente, instale `yt-dlp`, `ffmpeg` e `tesseract`, e rode:
 
