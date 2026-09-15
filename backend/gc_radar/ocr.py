@@ -14,17 +14,16 @@ from pathlib import Path
 MIN_TIME_MS = 20_000
 MAX_TIME_MS = 20 * 60 * 1000
 DOWNLOAD_WINDOW_SECONDS = 120
-COARSE_WINDOW_SECONDS = 120
+COARSE_WINDOW_SECONDS = 90
 COARSE_FPS = 1
-DENSE_WINDOW_SECONDS = 45
-DENSE_FPS = 4
+DENSE_WINDOW_SECONDS = 30
+DENSE_FPS = 2
 TIMER_ROIS = {
     # GCC is rendered both stretched to 16:9 and as a 4:3 viewport with side
     # bars. Keep two tight right-corner crops before the broader fallback.
-    # Every crop remains below 6% of the source frame.
+    # Every crop remains below 4% of the source frame.
     "top_right_4_3": (0.66, 0.00, 0.89, 0.16),
     "top_right_wide": (0.76, 0.00, 1.00, 0.16),
-    "top_center": (0.36, 0.00, 0.64, 0.16),
 }
 
 
@@ -547,7 +546,10 @@ def read_video_time(video_url: str, evidence_directory: Path | None = None,
             # one-frame-per-second pass saw no plausible digits at all, a dense
             # pass over the same ROI only multiplies cost without supporting a
             # frozen-time consensus.
-            if sightings == 0:
+            # One accidental number inside an effects-heavy frame used to
+            # trigger hundreds of dense OCR calls. A real frozen timer must be
+            # visible in at least two coarse frames before the expensive pass.
+            if sightings < 2:
                 continue
             if dense_frames is None:
                 dense_frames = _extract_frames(

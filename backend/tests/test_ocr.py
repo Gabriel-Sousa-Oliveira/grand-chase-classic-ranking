@@ -5,7 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from gc_radar.ocr import (OcrObservation, _download_excerpt,
+from gc_radar.ocr import (TIMER_ROIS, OcrObservation, _download_excerpt,
                           _parse_tesseract_tsv, _read_timer_frame,
                           choose_consensus,
                           choose_frozen_consensus, extract_time_values,
@@ -48,11 +48,10 @@ class OcrTextTests(unittest.TestCase):
         self.assertEqual(result.evidence_seconds_from_end, 15)
 
     def test_relative_timer_roi_reduces_area_by_more_than_ninety_percent(self):
-        left, top, right, bottom = roi_bounds(
-            1920, 1080, (0.32, 0.0, 0.68, 0.2)
-        )
-        area_ratio = ((right - left) * (bottom - top)) / (1920 * 1080)
-        self.assertLess(area_ratio, 0.10)
+        for relative in TIMER_ROIS.values():
+            left, top, right, bottom = roi_bounds(1920, 1080, relative)
+            area_ratio = ((right - left) * (bottom - top)) / (1920 * 1080)
+            self.assertLess(area_ratio, 0.04)
 
     def test_accepts_fractional_ocr_jitter_inside_a_frozen_second(self):
         observations = [
@@ -141,7 +140,7 @@ class OcrTextTests(unittest.TestCase):
                 patch("gc_radar.ocr._preserve_diagnostic"):
             download.return_value = Path("video.mp4")
             extract.return_value = [Path("coarse-0001.png")]
-            scan.side_effect = [(None, 0)] * 3
+            scan.side_effect = [(None, 0)] * len(TIMER_ROIS)
             self.assertIsNone(read_video_time("https://youtu.be/example"))
             self.assertEqual(extract.call_count, 1)
 
