@@ -14,6 +14,11 @@ class SyntaxiiImportTests(unittest.TestCase):
              "tower_of_disappearance", "duel_4", "loj_unlimited"},
         )
 
+    def test_archive_urls_are_pinned_to_immutable_commits(self):
+        for dungeon in ARCHIVE_DUNGEONS:
+            self.assertIn("raw.githubusercontent.com/syntax817/leaderboard/", dungeon.url)
+            self.assertNotIn("/main/", dungeon.url)
+
     def test_parses_numbered_character_and_known_time(self):
         source = (
             "Void 1 3f,Average Time:,01:01\n"

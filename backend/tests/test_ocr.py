@@ -54,6 +54,17 @@ class OcrTextTests(unittest.TestCase):
         area_ratio = ((right - left) * (bottom - top)) / (1920 * 1080)
         self.assertLess(area_ratio, 0.10)
 
+    def test_accepts_fractional_ocr_jitter_inside_a_frozen_second(self):
+        observations = [
+            OcrObservation(f"top_right-coarse-{index:04d}", time_ms,
+                           float(index), 0.82, f"frame-{index}.png")
+            for index, time_ms in enumerate((83_420, 83_450, 83_460))
+        ]
+        result = choose_frozen_consensus(observations, 1.0)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.time_ms, 83_450)
+        self.assertLessEqual(result.confidence, 0.86)
+
     def test_accepts_a_timer_frozen_for_two_seconds(self):
         observations = [
             OcrObservation(f"top_center-coarse-{index:04d}", 83_450,
@@ -116,7 +127,7 @@ class OcrTextTests(unittest.TestCase):
                 patch("gc_radar.ocr._preserve_diagnostic"):
             download.return_value = Path("video.mp4")
             extract.return_value = [Path("coarse-0001.png")]
-            scan.side_effect = [(None, 0), (None, 0)]
+            scan.side_effect = [(None, 0)] * 3
             self.assertIsNone(read_video_time("https://youtu.be/example"))
             self.assertEqual(extract.call_count, 1)
 

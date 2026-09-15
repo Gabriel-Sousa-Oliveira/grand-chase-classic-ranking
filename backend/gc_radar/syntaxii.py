@@ -46,12 +46,19 @@ DUNGEONS = (
     SyntaxiiDungeon("LoJ Unlimited", "loj_unlimited", 0, "1478193332", "score"),
 )
 
-ARCHIVE_ROOT = "https://raw.githubusercontent.com/syntax817/leaderboard/main/"
+# Pin historical snapshots to the commits that introduced them. Reading from
+# ``main`` would silently rewrite our historical era if Syntaxii updates or
+# removes an archive during another leaderboard reset.
+ARCHIVE_ROOT = "https://raw.githubusercontent.com/syntax817/leaderboard/"
 ARCHIVE_DUNGEONS = (
-    SyntaxiiDungeon("Void Invasion", "void_invasion", 3, "archive-v1", source_url=ARCHIVE_ROOT + "v1.csv"),
-    SyntaxiiDungeon("Void Taint", "void_taint", 3, "archive-v2", source_url=ARCHIVE_ROOT + "v2.csv"),
-    SyntaxiiDungeon("Void Nightmare", "void_nightmare", 4, "archive-v3", source_url=ARCHIVE_ROOT + "v3.csv"),
-    SyntaxiiDungeon("Tower of Disappearance", "tower_of_disappearance", 0, "archive-tod", source_url=ARCHIVE_ROOT + "tod.csv"),
+    SyntaxiiDungeon("Void Invasion", "void_invasion", 3, "archive-v1",
+                     source_url=ARCHIVE_ROOT + "d0569f96283f08cb0c9e8cf1ccd77af67ddc29d8/v1.csv"),
+    SyntaxiiDungeon("Void Taint", "void_taint", 3, "archive-v2",
+                     source_url=ARCHIVE_ROOT + "7db4532dcc60d23ffa82f51f68fc0d1d08965b89/v2.csv"),
+    SyntaxiiDungeon("Void Nightmare", "void_nightmare", 4, "archive-v3",
+                     source_url=ARCHIVE_ROOT + "d1b2f2c50b3a55eaebccfc9e02b419e5a5693c37/v3.csv"),
+    SyntaxiiDungeon("Tower of Disappearance", "tower_of_disappearance", 0, "archive-tod",
+                     source_url=ARCHIVE_ROOT + "5489503000274e0e550fe07aaa25952ed852a925/tod.csv"),
 )
 
 CHARACTERS = {

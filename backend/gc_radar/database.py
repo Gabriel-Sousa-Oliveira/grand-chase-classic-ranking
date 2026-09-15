@@ -191,7 +191,8 @@ class CandidateRepository:
     def ocr_candidates(self, limit: int = 8,
                        include_classification: bool = False,
                        retry_no_consensus: bool = False,
-                       characters: Iterable[str] | None = None) -> list[dict]:
+                       characters: Iterable[str] | None = None,
+                       video_ids: Iterable[str] | None = None) -> list[dict]:
         """Return missing-time videos that have not produced a final OCR result.
 
         A previous ``no_consensus`` is final and belongs in the manual queue.
@@ -214,6 +215,11 @@ class CandidateRepository:
             character_placeholders = ",".join("?" for _ in selected_characters)
             query += f" AND character IN ({character_placeholders})"
             parameters.extend(selected_characters)
+        selected_video_ids = list(dict.fromkeys(video_ids or ()))
+        if selected_video_ids:
+            video_placeholders = ",".join("?" for _ in selected_video_ids)
+            query += f" AND video_id IN ({video_placeholders})"
+            parameters.extend(selected_video_ids)
         query += """ ORDER BY json_extract(raw_metadata, '$.ocr_outcome') = 'error',
                      updated_at ASC
         """
@@ -225,7 +231,8 @@ class CandidateRepository:
 
     def ocr_remaining(self, include_classification: bool = False,
                       retry_no_consensus: bool = False,
-                      characters: Iterable[str] | None = None) -> int:
+                      characters: Iterable[str] | None = None,
+                      video_ids: Iterable[str] | None = None) -> int:
         statuses = ("time_required", "classification_required") \
             if include_classification else ("time_required",)
         placeholders = ",".join("?" for _ in statuses)
@@ -243,6 +250,11 @@ class CandidateRepository:
             character_placeholders = ",".join("?" for _ in selected_characters)
             query += f" AND character IN ({character_placeholders})"
             parameters.extend(selected_characters)
+        selected_video_ids = list(dict.fromkeys(video_ids or ()))
+        if selected_video_ids:
+            video_placeholders = ",".join("?" for _ in selected_video_ids)
+            query += f" AND video_id IN ({video_placeholders})"
+            parameters.extend(selected_video_ids)
         row = self.connection.execute(query, parameters).fetchone()
         return int(row[0])
 

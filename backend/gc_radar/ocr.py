@@ -19,10 +19,12 @@ COARSE_FPS = 1
 DENSE_WINDOW_SECONDS = 45
 DENSE_FPS = 4
 TIMER_ROIS = {
-    # Each crop is under 8% of a 16:9 frame. The second is only attempted when
-    # the primary GC HUD position cannot produce a frozen timer.
-    "top_center": (0.32, 0.00, 0.68, 0.20),
-    "top_right": (0.65, 0.00, 1.00, 0.22),
+    # GCC is rendered both stretched to 16:9 and as a 4:3 viewport with side
+    # bars. Keep two tight right-corner crops before the broader fallback.
+    # Every crop remains below 6% of the source frame.
+    "top_right_4_3": (0.66, 0.00, 0.89, 0.16),
+    "top_right_wide": (0.76, 0.00, 1.00, 0.16),
+    "top_center": (0.36, 0.00, 0.64, 0.16),
 }
 
 
@@ -191,22 +193,54 @@ def choose_frozen_consensus(observations: list[OcrObservation],
         sequence = _stable_sequence(values, max_gap, minimum_span)
         if sequence:
             stable[time_ms] = sequence
-    if len(stable) != 1:
+    if len(stable) == 1:
+        winner, sequence = next(iter(stable.items()))
+        return _consensus_result(winner, sequence, len(by_time[winner]))
+
+    # Fractional digits are the least stable part of the stylized GC timer.
+    # If exact millisecond readings disagree, allow a second-level cluster only
+    # when it is frozen for the same temporal span. A normally ticking timer
+    # cannot pass because it stays in a second bucket for less than one second.
+    by_second: dict[int, list[OcrObservation]] = defaultdict(list)
+    for observation in observations:
+        if _valid_ms(observation.time_ms):
+            by_second[observation.time_ms // 1000].append(observation)
+    second_stable = {
+        second: sequence
+        for second, values in by_second.items()
+        if (sequence := _stable_sequence(values, max_gap, minimum_span))
+    }
+    if len(second_stable) != 1:
         return None
-    winner, sequence = next(iter(stable.items()))
+    sequence = next(iter(second_stable.values()))
+    ranked_values = sorted(item.time_ms for item in sequence)
+    median = ranked_values[len(ranked_values) // 2]
+    representative = max(
+        sequence,
+        key=lambda item: (-abs(item.time_ms - median), item.confidence,
+                          -item.seconds_from_end),
+    )
+    return _consensus_result(
+        representative.time_ms, sequence, len(sequence), confidence_cap=0.86
+    )
+
+
+def _consensus_result(winner: int, sequence: list[OcrObservation],
+                      observations: int, confidence_cap: float = 0.98) -> OcrResult:
+    """Build an auditable result from a temporally stable OCR sequence."""
     best = max(sequence, key=lambda item: (
-        item.confidence, -item.seconds_from_end
+        -abs(item.time_ms - winner), item.confidence, -item.seconds_from_end
     ))
     average_engine_confidence = sum(
         item.confidence for item in sequence
     ) / len(sequence)
     confidence = min(
-        0.98,
+        confidence_cap,
         max(0.72, average_engine_confidence * 0.75 + 0.20
             + min(len(sequence) - 2, 4) * 0.015),
     )
     return OcrResult(
-        winner, confidence, len(sequence), len(by_time[winner]),
+        winner, confidence, len(sequence), observations,
         best.frame_id, int(round(best.seconds_from_end)), best.evidence_path,
         best.frame_id.split("-", 1)[0],
     )
@@ -291,7 +325,7 @@ def roi_bounds(width: int, height: int,
 
 def _preprocess_roi(frame: Path, destination: Path,
                     roi_name: str) -> list[Path]:
-    """Crop the timer and create grayscale/Otsu variants with OpenCV."""
+    """Crop the timer and create contrast-safe variants with OpenCV."""
     import cv2
 
     image = cv2.imread(str(frame))
@@ -303,13 +337,23 @@ def _preprocess_roi(frame: Path, destination: Path,
     if crop.size == 0:
         raise RuntimeError(f"empty OCR ROI for {frame.name}")
     gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
-    gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
-    gray = cv2.GaussianBlur(gray, (3, 3), 0)
+    gray = cv2.resize(gray, None, fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
+    # CLAHE retains thin timer strokes when attacks make a large part of the
+    # crop bright. Global Otsu alone overexposed those frames in run 68.
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)).apply(gray)
+    blurred = cv2.GaussianBlur(clahe, (0, 0), 1.0)
+    sharpened = cv2.addWeighted(clahe, 1.7, blurred, -0.7, 0)
     _, otsu = cv2.threshold(
-        gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        sharpened, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )
-    variants = (("otsu", otsu), ("inverse", cv2.bitwise_not(otsu)),
-                ("gray", gray))
+    adaptive = cv2.adaptiveThreshold(
+        sharpened, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY, 31, 7,
+    )
+    # Tesseract performs its own thresholding; the enhanced grayscale image is
+    # therefore the fastest and most information-preserving first attempt.
+    variants = (("clahe", sharpened), ("adaptive", adaptive),
+                ("otsu", otsu), ("inverse", cv2.bitwise_not(otsu)))
     paths: list[Path] = []
     for variant_name, pixels in variants:
         output = destination / f"{frame.stem}-{roi_name}-{variant_name}.png"
@@ -342,21 +386,26 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
                       seconds_from_end: float,
                       exhaustive: bool = False) -> list[OcrObservation]:
     variants = _preprocess_roi(frame, destination, roi_name)
-    # Otsu is the fast path. Grayscale and inverted Otsu are only sent to
-    # Tesseract after the coarse scan has proved that this ROI contains a timer.
-    for processed in variants if exhaustive else variants[:1]:
-        result = _run([
-            "tesseract", str(processed), "stdout", "--psm", "7", "-l", "eng",
-            "-c", "tessedit_char_whitelist=0123456789:.", "tsv",
-        ], timeout=20)
-        text, confidence = _parse_tesseract_tsv(result.stdout)
-        values = extract_time_values(text)
-        if values:
-            return [OcrObservation(
-                f"{roi_name}-{frame.stem}", time_ms, seconds_from_end,
-                confidence, str(processed),
-            ) for time_ms in values]
-    return []
+    selected = variants if exhaustive else variants[:1]
+    page_modes = (7, 13) if exhaustive else (7,)
+    best_by_time: dict[int, OcrObservation] = {}
+    for processed in selected:
+        for page_mode in page_modes:
+            result = _run([
+                "tesseract", str(processed), "stdout", "--psm", str(page_mode),
+                "-l", "eng", "-c",
+                "tessedit_char_whitelist=0123456789:.", "tsv",
+            ], timeout=20)
+            text, confidence = _parse_tesseract_tsv(result.stdout)
+            for time_ms in extract_time_values(text):
+                observation = OcrObservation(
+                    f"{roi_name}-{frame.stem}", time_ms, seconds_from_end,
+                    confidence, str(processed),
+                )
+                previous = best_by_time.get(time_ms)
+                if previous is None or observation.confidence > previous.confidence:
+                    best_by_time[time_ms] = observation
+    return list(best_by_time.values())
 
 
 def _scan_frames(frames: list[Path], destination: Path, roi_name: str,
@@ -406,12 +455,21 @@ def _preserve_diagnostic(directory: Path, evidence_directory: Path | None,
         return None
     import cv2
 
-    candidates = sorted(directory.glob("dense-*-top_center-otsu.png"))
-    if not candidates:
-        candidates = sorted(directory.glob("coarse-*-top_center-otsu.png"))
+    candidates: list[Path] = []
+    for roi_name in TIMER_ROIS:
+        roi_candidates = sorted(directory.glob(f"dense-*-{roi_name}-clahe.png"))
+        if not roi_candidates:
+            roi_candidates = sorted(directory.glob(
+                f"coarse-*-{roi_name}-clahe.png"
+            ))
+        if roi_candidates:
+            count = min(4, len(roi_candidates))
+            candidates.extend(roi_candidates[round(
+                index * (len(roi_candidates) - 1) / max(1, count - 1)
+            )] for index in range(count))
     if not candidates:
         return None
-    count = min(8, len(candidates))
+    count = min(12, len(candidates))
     indexes = [
         round(index * (len(candidates) - 1) / max(1, count - 1))
         for index in range(count)
@@ -426,7 +484,7 @@ def _preserve_diagnostic(directory: Path, evidence_directory: Path | None,
             pixels, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA
         )
         cv2.putText(
-            tile, candidates[index].stem.split("-top_center", 1)[0], (8, 22),
+            tile, candidates[index].stem.rsplit("-clahe", 1)[0], (8, 22),
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, 180, 1, cv2.LINE_AA,
         )
         tiles.append(tile)

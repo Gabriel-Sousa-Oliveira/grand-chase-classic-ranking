@@ -170,6 +170,22 @@ class DatabaseTests(unittest.TestCase):
             retry_no_consensus=True, characters=["Ai"]
         ), 1)
 
+    def test_targeted_ocr_can_select_exact_reference_videos(self):
+        first, _ = self.repo.add("reference-a", "https://youtu.be/reference-a",
+                                 parse_title("Ai Void Invasion 3F Solo"))
+        self.repo.add("reference-b", "https://youtu.be/reference-b",
+                      parse_title("Ai Void Invasion 3F Solo"))
+        self.repo.record_ocr_attempt(first["id"], "no_consensus")
+
+        selected = self.repo.ocr_candidates(
+            0, retry_no_consensus=True, video_ids=["reference-a"]
+        )
+
+        self.assertEqual([row["video_id"] for row in selected], ["reference-a"])
+        self.assertEqual(self.repo.ocr_remaining(
+            retry_no_consensus=True, video_ids=["reference-a"]
+        ), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

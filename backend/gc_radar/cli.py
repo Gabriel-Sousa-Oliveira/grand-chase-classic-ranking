@@ -49,6 +49,7 @@ def main() -> None:
     ocr_cmd.add_argument("--all-missing", action="store_true")
     ocr_cmd.add_argument("--retry-no-consensus", action="store_true")
     ocr_cmd.add_argument("--character", action="append", dest="characters")
+    ocr_cmd.add_argument("--video-id", action="append", dest="video_ids")
     commands.add_parser("queue")
     commands.add_parser("prune-irrelevant")
     args = parser.parse_args()
@@ -171,7 +172,7 @@ def main() -> None:
             evidence_directory = Path(args.db).resolve().parent / "ocr-evidence"
             candidates = repo.ocr_candidates(
                 args.limit, args.all_missing, args.retry_no_consensus,
-                args.characters,
+                args.characters, args.video_ids,
             )
 
             def inspect(candidate: dict) -> tuple[dict, object | None, Exception | None]:
@@ -226,7 +227,7 @@ def main() -> None:
                               "failed": failed, "results": results,
                               "remaining_ocr": repo.ocr_remaining(
                                   args.all_missing, args.retry_no_consensus,
-                                  args.characters,
+                                  args.characters, args.video_ids,
                               ),
                               "queue_size": len(exported), "candidates": exported},
                              ensure_ascii=False, indent=2))
