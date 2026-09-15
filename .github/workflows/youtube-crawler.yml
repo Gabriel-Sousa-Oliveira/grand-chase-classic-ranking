@@ -36,7 +36,9 @@ permissions:
 
 concurrency:
   group: youtube-crawler
-  cancel-in-progress: false
+  # Iterative OCR experiments replace stale scans; scheduled discovery runs
+  # continue to wait normally and are never cancelled by another schedule.
+  cancel-in-progress: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]') }}
 
 jobs:
   discover:
