@@ -119,6 +119,20 @@ class OcrTextTests(unittest.TestCase):
             self.assertEqual(observations[0].time_ms, 83_450)
             self.assertAlmostEqual(observations[0].confidence, 0.95)
 
+    def test_empty_tesseract_component_is_not_a_video_error(self):
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch("gc_radar.ocr._preprocess_roi") as preprocess, \
+                patch("gc_radar.ocr._run") as run:
+            preprocess.return_value = [Path(temporary) / "timer.png"]
+            run.side_effect = RuntimeError(
+                "Image too small to scale!!\nLine cannot be recognized!!"
+            )
+            observations = _read_timer_frame(
+                Path(temporary) / "frame.png", Path(temporary),
+                "top_right_wide", 3.0,
+            )
+            self.assertEqual(observations, [])
+
     def test_skips_dense_scan_when_coarse_rois_have_no_timer_sightings(self):
         with patch("gc_radar.ocr._require_tools"), \
                 patch("gc_radar.ocr._download_excerpt") as download, \

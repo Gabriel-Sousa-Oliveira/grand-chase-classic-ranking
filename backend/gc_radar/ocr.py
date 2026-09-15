@@ -391,11 +391,26 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
     best_by_time: dict[int, OcrObservation] = {}
     for processed in selected:
         for page_mode in page_modes:
-            result = _run([
-                "tesseract", str(processed), "stdout", "--psm", str(page_mode),
-                "-l", "eng", "-c",
-                "tessedit_char_whitelist=0123456789:.", "tsv",
-            ], timeout=20)
+            try:
+                result = _run([
+                    "tesseract", str(processed), "stdout", "--psm",
+                    str(page_mode), "-l", "eng", "-c",
+                    "tessedit_char_whitelist=0123456789:.", "tsv",
+                ], timeout=20)
+            except RuntimeError as error:
+                # Tesseract may exit non-zero for an empty/tiny connected
+                # component even though the frame itself is valid. That means
+                # "no observation", not a technical failure for the video.
+                detail = str(error)
+                harmless = (
+                    "level\tpage_num\tblock_num" in detail
+                    or "Image too small to scale" in detail
+                    or "Line cannot be recognized" in detail
+                    or "Empty page" in detail
+                )
+                if harmless:
+                    continue
+                raise
             text, confidence = _parse_tesseract_tsv(result.stdout)
             for time_ms in extract_time_values(text):
                 observation = OcrObservation(
