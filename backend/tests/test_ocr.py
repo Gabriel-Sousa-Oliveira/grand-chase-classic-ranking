@@ -9,10 +9,24 @@ from gc_radar.ocr import (TIMER_ROIS, OcrObservation, _download_excerpt,
                           _parse_tesseract_tsv, _read_timer_frame,
                           choose_consensus,
                           choose_frozen_consensus, extract_time_values,
-                          extract_times, read_video_time, roi_bounds)
+                          extract_times, infer_chapter_time, read_video_time,
+                          roi_bounds)
 
 
 class OcrTextTests(unittest.TestCase):
+    def test_infers_target_floor_from_consecutive_description_chapters(self):
+        description = "0:00 1f\n2:09 2f\n2:39 3f\n3:54 4f\n4:57 Stats"
+        result = infer_chapter_time(description, 4)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.time_ms, 63_000)
+        self.assertEqual(result.source, "youtube-description-chapters")
+
+    def test_chapter_inference_rejects_ambiguous_or_unordered_markers(self):
+        self.assertIsNone(infer_chapter_time("0:00 4f\n1:03 Stats", 4))
+        self.assertIsNone(infer_chapter_time(
+            "0:00 1f\n2:00 4f\n1:30 Stats", 4
+        ))
+
     def test_extracts_common_timer_formats(self):
         self.assertEqual(extract_times("CLEAR TIME 01:32"), {92})
         self.assertEqual(extract_times("Tempo 2'56"), {176})

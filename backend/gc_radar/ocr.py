@@ -46,10 +46,66 @@ class OcrResult:
     evidence_seconds_from_end: int | None = None
     evidence_image: str | None = None
     roi: str | None = None
+    source: str = "tesseract+opencv"
 
 
 def _valid_ms(time_ms: int) -> bool:
     return MIN_TIME_MS <= time_ms <= MAX_TIME_MS
+
+
+CHAPTER_LINE_PATTERN = re.compile(
+    r"^\s*((?:\d{1,2}:)?\d{1,2}:\d{2})\s+(.+?)\s*$", re.MULTILINE
+)
+CHAPTER_FLOOR_PATTERN = re.compile(
+    r"(?<!\d)([1-9])\s*(?:f|floor|andar|층|ชั้น)(?!\w)", re.IGNORECASE
+)
+
+
+def infer_chapter_time(description: str, floor: int | None) -> OcrResult | None:
+    """Infer one floor duration from consecutive YouTube chapter markers.
+
+    This intentionally requires a multi-floor chapter list. A lone timestamp in
+    prose is not enough evidence, while a target floor followed by the next
+    chapter provides explicit start and end boundaries.
+    """
+    if floor is None or floor <= 0:
+        return None
+
+    chapters: list[tuple[int, str, int | None]] = []
+    for timestamp, label in CHAPTER_LINE_PATTERN.findall(description):
+        parts = [int(part) for part in timestamp.split(":")]
+        seconds = (parts[0] * 60 + parts[1]) if len(parts) == 2 else (
+            parts[0] * 3600 + parts[1] * 60 + parts[2]
+        )
+        match = CHAPTER_FLOOR_PATTERN.search(label)
+        chapters.append((seconds, label.strip(), int(match.group(1)) if match else None))
+
+    if len(chapters) < 3 or any(
+            current[0] >= following[0]
+            for current, following in zip(chapters, chapters[1:])):
+        return None
+    floor_markers = [chapter for chapter in chapters if chapter[2] is not None]
+    if len(floor_markers) < 2:
+        return None
+    targets = [index for index, chapter in enumerate(chapters) if chapter[2] == floor]
+    if len(targets) != 1 or targets[0] + 1 >= len(chapters):
+        return None
+
+    index = targets[0]
+    start, start_label, _ = chapters[index]
+    end, end_label, _ = chapters[index + 1]
+    time_ms = (end - start) * 1000
+    if not _valid_ms(time_ms):
+        return None
+    return OcrResult(
+        time_ms=time_ms,
+        confidence=0.90,
+        matching_frames=2,
+        observations=len(chapters),
+        evidence_frame=f"description:{start_label}->{end_label}",
+        roi="description_chapters",
+        source="youtube-description-chapters",
+    )
 
 
 def extract_time_values(text: str) -> set[int]:

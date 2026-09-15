@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from .database import CandidateRepository
-from .ocr import read_video_time
+from .ocr import infer_chapter_time, read_video_time
 from .parser import parse_title
 from .relevance import description_from_metadata, evaluate_video_relevance
 from .syntaxii import import_syntaxii
@@ -177,6 +177,12 @@ def main() -> None:
 
             def inspect(candidate: dict) -> tuple[dict, object | None, Exception | None]:
                 try:
+                    chapter_time = infer_chapter_time(
+                        description_from_metadata(candidate.get("raw_metadata")),
+                        candidate.get("floor"),
+                    )
+                    if chapter_time is not None:
+                        return candidate, chapter_time, None
                     return candidate, read_video_time(
                         candidate["video_url"], evidence_directory,
                         candidate["video_id"],
@@ -208,7 +214,7 @@ def main() -> None:
                         results.append({"video_id": candidate["video_id"], "result": "no_consensus"})
                         continue
                     repo.set_ocr_time(candidate["id"], ocr.time_ms, ocr.confidence, {
-                        "engine": "tesseract+opencv", "matching_frames": ocr.matching_frames,
+                        "engine": ocr.source, "matching_frames": ocr.matching_frames,
                         "observations": ocr.observations,
                         "evidence_frame": ocr.evidence_frame,
                         "evidence_seconds_from_end": ocr.evidence_seconds_from_end,
@@ -217,7 +223,8 @@ def main() -> None:
                     })
                     matched += 1
                     results.append({"video_id": candidate["video_id"], "result": "matched",
-                                    "time_ms": ocr.time_ms, "confidence": ocr.confidence})
+                                    "time_ms": ocr.time_ms, "confidence": ocr.confidence,
+                                    "source": ocr.source})
             exported = [{key: candidate[key] for key in (
                 "video_id", "video_url", "title", "channel", "player_nick",
                 "published_at", "character", "category", "floor", "time_ms",
