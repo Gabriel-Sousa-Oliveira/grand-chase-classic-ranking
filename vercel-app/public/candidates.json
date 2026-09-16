@@ -4711,17 +4711,17 @@
     }
   ],
   "processing": {
-    "discovered": 504,
-    "classified": 389,
+    "discovered": 505,
+    "classified": 390,
     "timed": 200,
     "approved": 198,
     "ranked": 198,
-    "pending_manual": 184,
+    "pending_manual": 185,
     "ocr_attempted": 117,
     "ocr_matched": 32,
     "ocr_unresolved": 85,
     "title_times": 141,
     "human_times": 33,
-    "last_updated": "2026-09-16 13:46:23"
+    "last_updated": "2026-09-16 15:26:56"
   }
 }
