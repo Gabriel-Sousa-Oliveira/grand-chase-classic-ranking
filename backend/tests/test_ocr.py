@@ -62,6 +62,10 @@ class OcrTextTests(unittest.TestCase):
         self.assertEqual(result.evidence_seconds_from_end, 15)
 
     def test_relative_timer_roi_reduces_area_by_more_than_ninety_percent(self):
+        self.assertEqual(
+            set(TIMER_ROIS),
+            {"top_center_timer", "top_center_timer_wide", "results_panel"},
+        )
         for relative in TIMER_ROIS.values():
             left, top, right, bottom = roi_bounds(1920, 1080, relative)
             area_ratio = ((right - left) * (bottom - top)) / (1920 * 1080)

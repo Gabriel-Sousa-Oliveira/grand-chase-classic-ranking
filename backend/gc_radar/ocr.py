@@ -24,11 +24,13 @@ COARSE_FPS = 1
 DENSE_WINDOW_SECONDS = 30
 DENSE_FPS = 2
 TIMER_ROIS = {
-    # GCC is rendered both stretched to 16:9 and as a 4:3 viewport with side
-    # bars. Keep two tight right-corner crops before the broader fallback.
+    # Calibrated from full-frame mosaics captured across real GCC uploads.
+    # Gameplay countdowns sit at the top-center; the completion screen exposes
+    # a separate Clear Time field lower in the central results panel.
     # Every crop remains below 4% of the source frame.
-    "top_right_4_3": (0.66, 0.00, 0.89, 0.16),
-    "top_right_wide": (0.76, 0.00, 1.00, 0.16),
+    "top_center_timer": (0.40, 0.02, 0.60, 0.15),
+    "top_center_timer_wide": (0.43, 0.02, 0.64, 0.15),
+    "results_panel": (0.48, 0.67, 0.66, 0.85),
 }
 
 
