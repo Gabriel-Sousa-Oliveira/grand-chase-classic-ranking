@@ -233,7 +233,7 @@ jobs:
                              "ocr-queue", "--limit", "0", "--workers", "4",
                              "--all-missing", "--retry-no-consensus"]
                   for video_id in batch:
-                      command.extend(["--video-id", video_id])
+                      command.append(f"--video-id={video_id}")
                   print(f"{category}: {start + 1}-{start + len(batch)}/{len(ids)}", flush=True)
                   report = report_dir / f"{category}-{start:03d}.json"
                   with report.open("w") as output:
