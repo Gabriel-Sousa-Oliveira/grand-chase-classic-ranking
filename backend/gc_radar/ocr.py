@@ -1,6 +1,7 @@
 """Conservative OCR extraction for completion times shown inside YouTube videos."""
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
@@ -622,6 +623,15 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
             values = extract_time_values(text)
             if "-digits" in processed.stem:
                 values.update(extract_compact_time_values(text))
+            if os.environ.get("GC_OCR_DEBUG_TEXT") == "1" and text.strip():
+                print("OCR_TEXT " + json.dumps({
+                    "frame": frame.stem,
+                    "roi": roi_name,
+                    "variant": processed.stem.rsplit("-", 1)[-1],
+                    "psm": page_mode,
+                    "text": text,
+                    "values_ms": sorted(values),
+                }, ensure_ascii=True), flush=True)
             for time_ms in values:
                 observation = OcrObservation(
                     f"{roi_name}-{frame.stem}", time_ms, seconds_from_end,
