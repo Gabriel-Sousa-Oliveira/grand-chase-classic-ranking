@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 from contextvars import ContextVar
@@ -631,7 +632,7 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
                     "psm": page_mode,
                     "text": text,
                     "values_ms": sorted(values),
-                }, ensure_ascii=True), flush=True)
+                }, ensure_ascii=True), file=sys.stderr, flush=True)
             for time_ms in values:
                 observation = OcrObservation(
                     f"{roi_name}-{frame.stem}", time_ms, seconds_from_end,
