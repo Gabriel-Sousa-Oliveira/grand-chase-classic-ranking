@@ -496,10 +496,11 @@ def _isolate_digit_band(pixels):
             ))
     if candidates:
         _, x, y, box_width, box_height = max(candidates)
-        pad_x, pad_y = max(6, box_width // 16), max(4, box_height // 3)
-        left, right = max(0, x-pad_x), min(width, x+box_width+pad_x)
+        pad_y = max(4, box_height // 3)
         top, bottom = max(0, y-pad_y), min(height, y+box_height+pad_y)
-        band = pixels[top:bottom, left:right]
+        # A contour may cover just one digit. Use it only to locate the text
+        # baseline and preserve the calibrated ROI's complete horizontal line.
+        band = pixels[top:bottom, :]
     else:
         # The calibrated ROI is already tight. A centered fallback still
         # removes the HUD edges that most often confuse line segmentation.
