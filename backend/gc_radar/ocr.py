@@ -596,54 +596,69 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
                       seconds_from_end: float,
                       exhaustive: bool = False) -> list[OcrObservation]:
     variants = _preprocess_roi(frame, destination, roi_name)
-    selected = variants if exhaustive else variants[:1]
     page_modes = (7, 13) if exhaustive else (7,)
+    attempts = [
+        (processed, page_mode)
+        for processed in (variants if exhaustive else variants[:1])
+        for page_mode in page_modes
+    ]
+    expanded_partial = exhaustive
     best_by_time: dict[int, OcrObservation] = {}
-    for processed in selected:
-        for page_mode in page_modes:
-            try:
-                result = _run([
-                    "tesseract", str(processed), "stdout", "--psm",
-                    str(page_mode), "-l", "eng", "-c",
-                    "tessedit_char_whitelist=0123456789:.", "tsv",
-                ], timeout=20)
-            except RuntimeError as error:
-                # Tesseract may exit non-zero for an empty/tiny connected
-                # component even though the frame itself is valid. That means
-                # "no observation", not a technical failure for the video.
-                detail = str(error)
-                harmless = (
-                    "level\tpage_num\tblock_num" in detail
-                    or "Image too small to scale" in detail
-                    or "Line cannot be recognized" in detail
-                    or "Empty page" in detail
-                )
-                if harmless:
-                    continue
-                raise
-            text, confidence = _parse_tesseract_tsv(result.stdout)
-            values = extract_time_values(text)
-            if "-digits" in processed.stem:
-                values.update(extract_compact_time_values(text))
-            if os.environ.get("GC_OCR_DEBUG_TEXT") == "1" and text.strip():
-                print("OCR_TEXT " + json.dumps({
-                    "frame": frame.stem,
-                    "roi": roi_name,
-                    "variant": processed.stem.rsplit("-", 1)[-1],
-                    "psm": page_mode,
-                    "text": text,
-                    "values_ms": sorted(values),
-                }, ensure_ascii=True), file=sys.stderr, flush=True)
-            for time_ms in values:
-                observation = OcrObservation(
-                    f"{roi_name}-{frame.stem}", time_ms, seconds_from_end,
-                    confidence, str(processed),
-                )
-                previous = best_by_time.get(time_ms)
-                if previous is None or observation.confidence > previous.confidence:
-                    best_by_time[time_ms] = observation
+    # List iteration intentionally sees attempts appended below. A partial
+    # timer expands only its own frame instead of multiplying every OCR call.
+    for processed, page_mode in attempts:
+        try:
+            result = _run([
+                "tesseract", str(processed), "stdout", "--psm",
+                str(page_mode), "-l", "eng", "-c",
+                "tessedit_char_whitelist=0123456789:.", "tsv",
+            ], timeout=20)
+        except RuntimeError as error:
+            # Tesseract may exit non-zero for an empty/tiny connected
+            # component even though the frame itself is valid. That means
+            # "no observation", not a technical failure for the video.
+            detail = str(error)
+            harmless = (
+                "level\tpage_num\tblock_num" in detail
+                or "Image too small to scale" in detail
+                or "Line cannot be recognized" in detail
+                or "Empty page" in detail
+            )
+            if harmless:
+                continue
+            raise
+        text, confidence = _parse_tesseract_tsv(result.stdout)
+        values = extract_time_values(text)
+        if "-digits" in processed.stem:
+            values.update(extract_compact_time_values(text))
+        digit_count = len(re.sub(r"\D", "", text))
+        if not expanded_partial and not values and digit_count >= 3:
+            # The fast pass found a real-looking fragment such as ..363 in
+            # run 90. Expand only this promising frame.
+            attempts.extend(
+                (variant, mode)
+                for variant in variants[1:4]
+                for mode in (7, 13)
+            )
+            expanded_partial = True
+        if os.environ.get("GC_OCR_DEBUG_TEXT") == "1" and text.strip():
+            print("OCR_TEXT " + json.dumps({
+                "frame": frame.stem,
+                "roi": roi_name,
+                "variant": processed.stem.rsplit("-", 1)[-1],
+                "psm": page_mode,
+                "text": text,
+                "values_ms": sorted(values),
+            }, ensure_ascii=True), file=sys.stderr, flush=True)
+        for time_ms in values:
+            observation = OcrObservation(
+                f"{roi_name}-{frame.stem}", time_ms, seconds_from_end,
+                confidence, str(processed),
+            )
+            previous = best_by_time.get(time_ms)
+            if previous is None or observation.confidence > previous.confidence:
+                best_by_time[time_ms] = observation
     return list(best_by_time.values())
-
 
 def _scan_frames(frames: list[Path], destination: Path, roi_name: str,
                  window_seconds: int, fps: int,
