@@ -198,7 +198,63 @@ jobs:
           YOUTUBE_USE_PO_TOKEN: "1"
         run: |
           cd backend
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sample]"* ]]; then
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[dungeon-batches]"* ]]; then
+            python - <<'PY'
+          import json
+          import sqlite3
+          import subprocess
+          import sys
+          from pathlib import Path
+          
+          db = "../data/gc_radar.sqlite3"
+          categories = ["duel_4", "tower_of_disappearance", "void_apocalypse",
+                        "void_taint", "void_nightmare", "void_invasion"]
+          with sqlite3.connect(db) as conn:
+              selected = {
+                  category: [row[0] for row in conn.execute(
+                      "SELECT video_id FROM candidates WHERE category = ? "
+                      "AND time_ms IS NULL AND status IN "
+                      "('time_required', 'classification_required') ORDER BY video_id",
+                      (category,))]
+                  for category in categories
+              }
+          summary = {"mode": "ocr-selected-dungeons", "processed": 0, "matched": 0,
+                     "failed": 0, "results": [], "dungeons": {},
+                     "selected": sum(map(len, selected.values()))}
+          report_dir = Path("../data/ocr-batches")
+          report_dir.mkdir(parents=True, exist_ok=True)
+          print("Selected:", {key: len(value) for key, value in selected.items()}, flush=True)
+          for category, ids in selected.items():
+              stats = {"selected": len(ids), "processed": 0, "matched": 0, "failed": 0}
+              summary["dungeons"][category] = stats
+              for start in range(0, len(ids), 8):
+                  batch = ids[start:start + 8]
+                  command = [sys.executable, "-m", "gc_radar.cli", "--db", db,
+                             "ocr-queue", "--limit", "0", "--workers", "4",
+                             "--all-missing", "--retry-no-consensus"]
+                  for video_id in batch:
+                      command.extend(["--video-id", video_id])
+                  print(f"{category}: {start + 1}-{start + len(batch)}/{len(ids)}", flush=True)
+                  report = report_dir / f"{category}-{start:03d}.json"
+                  with report.open("w") as output:
+                      subprocess.run(command, stdout=output, check=True)
+                  result = json.loads(report.read_text())
+                  for key in ("processed", "matched", "failed"):
+                      summary[key] += result[key]
+                      stats[key] += result[key]
+                  summary["results"].extend(result["results"])
+                  summary["candidates"] = result["candidates"]
+                  summary["queue_size"] = result["queue_size"]
+                  Path("../data/last-run.json").write_text(json.dumps(summary))
+                  print("Completed:", stats, flush=True)
+          if "candidates" not in summary:
+              summary["candidates"] = json.loads(subprocess.check_output(
+                  [sys.executable, "-m", "gc_radar.cli", "--db", db, "queue"]))
+              summary["queue_size"] = len(summary["candidates"])
+          summary["unprocessed"] = summary["selected"] - summary["processed"]
+          Path("../data/last-run.json").write_text(json.dumps(summary))
+          PY
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sample]"* ]]; then
             python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
               --limit 1 --workers 1 --retry-no-consensus \
               --video-id V6O_9x6QTvw \
@@ -287,5 +343,6 @@ jobs:
             data/last-run.json
             data/prune-result.json
             data/ocr-evidence/
+            data/ocr-batches/
           if-no-files-found: warn
           retention-days: 30
