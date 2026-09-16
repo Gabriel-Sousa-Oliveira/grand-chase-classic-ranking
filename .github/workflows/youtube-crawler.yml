@@ -290,6 +290,9 @@ jobs:
 
       - name: Add report to workflow summary
         run: |
+          echo 'OCR_RESULT_BEGIN'
+          jq 'del(.candidates)' data/last-run.json
+          echo 'OCR_RESULT_END'
           echo '## GC Run Radar — descoberta do YouTube' >> "$GITHUB_STEP_SUMMARY"
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
           cat data/last-run.json >> "$GITHUB_STEP_SUMMARY"
