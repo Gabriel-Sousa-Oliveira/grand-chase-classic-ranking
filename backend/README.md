@@ -75,9 +75,9 @@ No GitHub Actions, abra **YouTube crawler**, escolha **Run workflow** e selecion
 
 ## OCR dos vídeos pendentes
 
-O workflow baixa em 720p apenas os dois minutos finais de até oito vídeos por execução. O primeiro passe lê, de trás para frente, um quadro por segundo; se necessário, um segundo passe examina os 45 segundos finais a 4 FPS. O OpenCV recorta os ROIs do cronômetro no topo central e direito, amplia a imagem em 3x e produz versões em escala de cinza, Otsu e Otsu invertida. O Tesseract recebe somente `0123456789:.` e um valor só é aceito quando permanece congelado por aproximadamente dois segundos sem outro resultado conflitante.
+O pipeline tenta capítulos da descrição antes do OCR. O modo legado baixa os dois minutos finais, lê os últimos 90 segundos a 1 FPS e só tenta os 30 segundos finais a 2 FPS quando existem pelo menos duas observações plausíveis. O OpenCV usa recortes no canto superior direito, ampliação 4x, CLAHE, nitidez e binarizações. Esses recortes ainda precisam de calibração: nos diagnósticos reais eles também capturam cenário e o relógio LOCAL, que não é tempo de run. O Tesseract recebe somente `0123456789:.`; o consenso temporal é necessário, mas não substitui a confirmação humana da identidade do cronômetro.
 
-O melhor recorte, o instante relativo ao fim, o ROI e a confiança real devolvida pelo Tesseract ficam registrados como evidência. Quando não há consenso, o processo preserva uma folha de contato com oito recortes distribuídos pela janela densa. As imagens ficam em `data/ocr-evidence/` e são incluídas no artefato privado da execução por 30 dias. Mesmo após o OCR, o vídeo fica em `ready_for_review`: nenhuma entrada vai ao ranking sem validação humana.
+O recorte, o instante relativo ao fim, a ROI e uma confiança heurística ficam registrados como evidência. Quadros completos, cópias originais sem grade e mosaicos permitem verificar a localização do tempo. As imagens ficam em `data/ocr-evidence/`, incluídas no artefato da execução por 30 dias (a visibilidade segue as permissões do GitHub; não presuma privacidade). Nenhuma entrada vai ao ranking sem validação humana. Falhas técnicas continuam reprocessáveis; há orçamento de 300 segundos por vídeo para subprocessos e limite de threads internas.
 
 Para executar localmente, instale `yt-dlp`, `ffmpeg` e `tesseract`, e rode:
 
@@ -97,3 +97,50 @@ uma rodada anterior não conseguiu ler:
 python -m gc_radar.cli --db gc_radar.sqlite3 ocr-queue --limit 0 --workers 2 \
   --retry-no-consensus --character Ai --character Amy --character Uno
 ~~~
+
+### Inspeção visual e amostragem por eventos (experimental)
+
+Instale `opencv-python-headless==4.10.0.84` e `numpy<2` para os utilitários/testes
+visuais, além de FFmpeg/ffprobe. A coleta por URLs requer também o yt-dlp e a
+configuração de acesso ao YouTube descrita acima.
+
+O modo experimental é opt-in: `GC_OCR_VISUAL_EVENTS=1`. Ele baixa até os últimos
+300 segundos por padrão (`GC_OCR_LOOKBACK_SECONDS`, intervalo 30–900), sonda no
+máximo 60 frames completos sem Tesseract e propõe até três janelas de transição.
+Uma diferença de histograma seguida por estabilidade é apenas um candidato de
+cena, não confirmação de vitória. Flashes que retornam à cena anterior são
+descartados. Sem evento, o fallback lê somente os 20 segundos finais; a inspeção
+completa permanece salva para investigar o que esse fallback não cobriu.
+
+Cada janela é lida primeiro a 1 FPS. A passagem densa a 2 FPS exige duas leituras
+plausíveis e fica restrita à mesma janela, dentro do orçamento por vídeo. Não há
+detecção de encerramento por áudio implementada: silêncio não prova fim da run.
+Outros finais com mais de 15 minutos precisam de inspeção dirigida; nenhuma
+cobertura integral da transmissão é prometida.
+
+Gere um levantamento de 20–30 vídeos sem executar OCR nem alterar banco/fila:
+
+~~~bash
+python -m gc_radar.inspect_frames --video-dir ./videos --output ./survey --limit 25 --lookback 300
+# Ou: urls.txt com uma URL de vídeo por linha; downloads sequenciais e limitados.
+python -m gc_radar.inspect_frames --urls-file urls.txt --output ./survey --limit 25 --lookback 300
+~~~
+
+Saídas: `survey-mosaic.jpg` (um representante de cada vídeo), mosaicos individuais,
+quadros originais PNG, quadros com grade X/Y e manifestos JSON. As coordenadas
+referem-se ao frame completo normalizado para 1280 pixels de largura, não à
+miniatura do mosaico. Tempos são aproximados e relativos ao trecho baixado; não
+são o tempo oficial da run. Para arquivos locais, são relativos ao próprio arquivo.
+
+Para ancoragem, copie `ocr-anchors.example.json`, extraia um template de um quadro
+**original** real e calibre `timer_offset: [dx, dy, largura, altura]` relativamente
+ao canto superior esquerdo da âncora na escala do template. Somente depois ative
+`enabled` e configure `GC_OCR_ANCHORS=/caminho/anchors.json`. A comparação usa
+`cv2.matchTemplate`, limiar configurável e até cinco escalas. Imagens constantes,
+matches ambíguos e ROIs fora do quadro são rejeitados. No modo por eventos, a
+âncora deve aparecer em duas amostras consecutivas para priorizar uma janela;
+ela é localizada novamente em cada frame lido. Não há template real de CLEAR
+validado incluído — o exemplo desativado não é um detector pronto para produção.
+
+Referências: [OpenCV template matching](https://docs.opencv.org/4.x/d4/dc6/tutorial_py_template_matching.html)
+e [comparação de histogramas](https://docs.opencv.org/4.x/d8/dc8/tutorial_histogram_comparison.html).

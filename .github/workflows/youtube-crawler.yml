@@ -258,7 +258,8 @@ jobs:
           Path("../data/last-run.json").write_text(json.dumps(summary))
           PY
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sample]"* ]]; then
-            python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
+            GC_OCR_VISUAL_EVENTS=1 GC_OCR_LOOKBACK_SECONDS=300 \
+              python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
               --limit 2 --workers 2 --retry-no-consensus \
               --video-id=6ljAMGvQq-8 --video-id=9dlG5iMzGv0 \
               > ../data/last-run.json

@@ -17,6 +17,7 @@ MIN_TIME_MS = 20_000
 MAX_TIME_MS = 20 * 60 * 1000
 VIDEO_BUDGET_SECONDS = 300
 _deadline: ContextVar[float | None] = ContextVar("ocr_deadline", default=None)
+_anchors: ContextVar[dict] = ContextVar("ocr_anchors", default={})
 DOWNLOAD_WINDOW_SECONDS = 120
 COARSE_WINDOW_SECONDS = 90
 COARSE_FPS = 1
@@ -337,14 +338,17 @@ def _require_tools() -> None:
         raise RuntimeError("missing OCR tools: " + ", ".join(missing))
 
 
-def _download_excerpt(video_url: str, destination: Path) -> Path:
+def _download_excerpt(video_url: str, destination: Path,
+                      window_seconds: int = DOWNLOAD_WINDOW_SECONDS) -> Path:
+    if not 30 <= window_seconds <= 900:
+        raise ValueError("Lookback must be between 30 and 900 seconds")
     output = destination / "video.%(ext)s"
     command = [
         "yt-dlp", "--no-playlist", "--no-warnings", "--quiet",
         "--js-runtimes", "node", "--remote-components", "ejs:npm",
         "--impersonate", "chrome", "-f", "bv*",
         "-S", "res:720,+size,+br",
-        "--download-sections", f"*-{DOWNLOAD_WINDOW_SECONDS}-inf",
+        "--download-sections", f"*-{window_seconds}-inf",
         "-o", str(output),
     ]
     if os.environ.get("YOUTUBE_USE_PO_TOKEN") == "1":
@@ -360,10 +364,48 @@ def _download_excerpt(video_url: str, destination: Path) -> Path:
         command.extend(["--cookies", cookies_file])
     command.append(video_url)
     _run(command, timeout=360)
-    videos = [path for path in destination.glob("video.*") if path.is_file()]
+    videos = [path for path in destination.glob("video.*")
+              if path.is_file() and path.suffix.lower() in {".mp4", ".mkv", ".webm", ".mov"}]
     if not videos:
         raise RuntimeError("yt-dlp did not create a video file")
     return videos[0]
+
+
+def _video_duration(video: Path) -> float:
+    result = _run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                   "-of", "default=noprint_wrappers=1:nokey=1", str(video)], timeout=15)
+    duration = float(result.stdout.strip())
+    if not 0 < duration < 86400:
+        raise ValueError("Invalid video duration")
+    return duration
+
+
+def _window_frames(video: Path, directory: Path, prefix: str,
+                   start: float, duration: float, fps: float) -> list[Path]:
+    if start < 0 or duration <= 0 or fps <= 0 or duration * fps > 181:
+        raise ValueError("Invalid or excessive frame window")
+    _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-threads", "1",
+          "-filter_threads", "1", "-ss", str(start), "-i", str(video),
+          "-t", str(duration), "-vf", f"fps={fps},scale=1280:-2",
+          "-frames:v", str(int(duration * fps) + 1),
+          str(directory / f"{prefix}-%04d.png")], timeout=120)
+    frames = sorted(directory.glob(f"{prefix}-*.png"))
+    if not frames:
+        raise RuntimeError("ffmpeg produced no inspection frames")
+    return frames
+
+
+def scout_video(video: Path, directory: Path, lookback: int = 300):
+    """At most 60 full frames, no OCR. Return approximate excerpt timestamps."""
+    from .visual import Sample
+    if not 30 <= lookback <= 900:
+        raise ValueError("Lookback must be between 30 and 900 seconds")
+    duration = _video_duration(video)
+    window = min(duration, lookback)
+    start = duration - window
+    fps = max(1 / window, min(0.2, 60 / window))
+    frames = _window_frames(video, directory, "scout", start, window, fps)
+    return [Sample(p, min(duration, start + i/fps)) for i, p in enumerate(frames)], duration
 
 
 def _extract_frames(video: Path, destination: Path, prefix: str,
@@ -401,7 +443,14 @@ def _preprocess_roi(frame: Path, destination: Path,
     if image is None:
         raise RuntimeError(f"OpenCV could not read {frame.name}")
     height, width = image.shape[:2]
-    left, top, right, bottom = roi_bounds(width, height, TIMER_ROIS[roi_name])
+    if roi_name.startswith("anchor_"):
+        from .visual import locate_anchor
+        match = locate_anchor(image, _anchors.get()[roi_name])
+        if match is None:
+            return []
+        left, top, right, bottom = match["roi"]
+    else:
+        left, top, right, bottom = roi_bounds(width, height, TIMER_ROIS[roi_name])
     crop = image[top:bottom, left:right]
     if crop.size == 0:
         raise RuntimeError(f"empty OCR ROI for {frame.name}")
@@ -494,7 +543,7 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
 
 def _scan_frames(frames: list[Path], destination: Path, roi_name: str,
                  window_seconds: int, fps: int,
-                 exhaustive: bool = False) -> tuple[OcrResult | None, int]:
+                 exhaustive: bool = False, seconds_offset: float = 0) -> tuple[OcrResult | None, int]:
     observations: list[OcrObservation] = []
     total = len(frames)
     first_consensus_at: int | None = None
@@ -502,7 +551,7 @@ def _scan_frames(frames: list[Path], destination: Path, roi_name: str,
     timeouts = 0
     for reverse_index, frame in enumerate(reversed(frames)):
         chronological_index = total - reverse_index - 1
-        seconds_from_end = max(0.0, (total - chronological_index - 1) / fps)
+        seconds_from_end = max(0.0, (total - chronological_index - 1) / fps) + seconds_offset
         try:
             observations.extend(_read_timer_frame(
                 frame, destination, roi_name, seconds_from_end, exhaustive
@@ -617,10 +666,16 @@ def _read_video_time(video_url: str, evidence_directory: Path | None = None,
     _require_tools()
     with tempfile.TemporaryDirectory(prefix="gc-radar-ocr-") as temporary:
         directory = Path(temporary)
+        if os.environ.get("GC_OCR_VISUAL_EVENTS") == "1":
+            return _read_event_video(video_url, directory, evidence_directory, evidence_name)
         video = _download_excerpt(video_url, directory)
         coarse_frames = _extract_frames(
             video, directory, "coarse", COARSE_WINDOW_SECONDS, COARSE_FPS
         )
+        if evidence_directory is not None:
+            from .visual import Sample, write_inspection
+            write_inspection([Sample(p, i / COARSE_FPS) for i, p in enumerate(coarse_frames)],
+                             evidence_directory, evidence_name or "video", [], max_frames=8)
         dense_frames: list[Path] | None = None
         for roi_name in TIMER_ROIS:
             result, sightings = _scan_frames(
@@ -655,3 +710,41 @@ def _read_video_time(video_url: str, evidence_directory: Path | None = None,
                 )
         _preserve_diagnostic(directory, evidence_directory, evidence_name)
         return None
+
+
+def _read_event_video(video_url: str, directory: Path,
+                      evidence_directory: Path | None, evidence_name: str | None):
+    from .visual import load_anchors, propose_windows, write_inspection
+    lookback = int(os.environ.get("GC_OCR_LOOKBACK_SECONDS", "300"))
+    manifest = os.environ.get("GC_OCR_ANCHORS")
+    anchors = load_anchors(Path(manifest) if manifest else None)
+    video = _download_excerpt(video_url, directory, lookback)
+    samples, duration = scout_video(video, directory, lookback)
+    windows = propose_windows(samples, anchors, duration)
+    if not windows:
+        windows = [{"start": max(0, duration-20), "end": duration,
+                    "reason": "fallback_tail", "anchors": [], "score": 0}]
+    # Save full-frame evidence before OCR, including if the subsequent scan fails.
+    if evidence_directory is not None:
+        write_inspection(samples, evidence_directory, evidence_name or "video", windows)
+    token = _anchors.set({"anchor_" + a.name: a for a in anchors})
+    try:
+        for index, window in enumerate(windows):
+            start, length = window["start"], window["end"] - window["start"]
+            frames = _window_frames(video, directory, f"event{index}", start, length, 1)
+            roi_names = ["anchor_" + name for name in window["anchors"]] or list(TIMER_ROIS)
+            for roi_name in roi_names:
+                result, sightings = _scan_frames(frames, directory, roi_name,
+                                                 length, 1, seconds_offset=duration-window["end"])
+                if result:
+                    return _preserve_evidence(result, evidence_directory, evidence_name)
+                if sightings < 2:
+                    continue
+                dense = _window_frames(video, directory, f"dense-event{index}-{roi_name}", start, length, 2)
+                result, _ = _scan_frames(dense, directory, roi_name, length, 2,
+                                         exhaustive=True, seconds_offset=duration-window["end"])
+                if result:
+                    return _preserve_evidence(result, evidence_directory, evidence_name)
+        return None
+    finally:
+        _anchors.reset(token)

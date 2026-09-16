@@ -1,0 +1,12 @@
+{
+  "anchors": [
+    {
+      "name": "clear_panel_calibrate_first",
+      "enabled": false,
+      "image": "templates/replace-with-real-panel.png",
+      "timer_offset": [0, 40, 180, 40],
+      "scales": [0.75, 1.0, 1.25],
+      "threshold": 0.9
+    }
+  ]
+}
