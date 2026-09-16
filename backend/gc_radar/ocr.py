@@ -6,6 +6,8 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
+from contextvars import ContextVar
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -13,6 +15,8 @@ from pathlib import Path
 
 MIN_TIME_MS = 20_000
 MAX_TIME_MS = 20 * 60 * 1000
+VIDEO_BUDGET_SECONDS = 300
+_deadline: ContextVar[float | None] = ContextVar("ocr_deadline", default=None)
 DOWNLOAD_WINDOW_SECONDS = 120
 COARSE_WINDOW_SECONDS = 90
 COARSE_FPS = 1
@@ -302,9 +306,18 @@ def _consensus_result(winner: int, sequence: list[OcrObservation],
 
 
 def _run(command: list[str], timeout: int = 240) -> subprocess.CompletedProcess[str]:
+    deadline = _deadline.get()
+    if deadline is not None:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise RuntimeError("ocr_video_budget_exhausted")
+        timeout = min(timeout, remaining)
+    # Each video already has a worker. Nested OpenMP pools oversubscribe CPUs.
+    environment = dict(os.environ, OMP_THREAD_LIMIT="1", OMP_NUM_THREADS="1")
     try:
         return subprocess.run(
-            command, check=True, capture_output=True, text=True, timeout=timeout
+            command, check=True, capture_output=True, text=True, timeout=timeout,
+            env=environment,
         )
     except subprocess.CalledProcessError as error:
         detail = (error.stderr or error.stdout or str(error)).strip()
@@ -359,6 +372,7 @@ def _extract_frames(video: Path, destination: Path, prefix: str,
     frame_limit = window_seconds * fps + 2
     _run([
         "ffmpeg", "-hide_banner", "-loglevel", "error",
+        "-threads", "1", "-filter_threads", "1",
         "-sseof", f"-{window_seconds}", "-i", str(video),
         "-vf", f"fps={fps},scale=1280:-2", "-frames:v", str(frame_limit),
         str(pattern),
@@ -485,12 +499,19 @@ def _scan_frames(frames: list[Path], destination: Path, roi_name: str,
     total = len(frames)
     first_consensus_at: int | None = None
     consensus: OcrResult | None = None
+    timeouts = 0
     for reverse_index, frame in enumerate(reversed(frames)):
         chronological_index = total - reverse_index - 1
         seconds_from_end = max(0.0, (total - chronological_index - 1) / fps)
-        observations.extend(_read_timer_frame(
-            frame, destination, roi_name, seconds_from_end, exhaustive
-        ))
+        try:
+            observations.extend(_read_timer_frame(
+                frame, destination, roi_name, seconds_from_end, exhaustive
+            ))
+        except subprocess.TimeoutExpired:
+            timeouts += 1
+            if timeouts >= 3:
+                raise RuntimeError("tesseract_repeated_timeout")
+            continue
         consensus = choose_frozen_consensus(observations, 1 / fps)
         if consensus is not None and first_consensus_at is None:
             first_consensus_at = reverse_index
@@ -499,6 +520,9 @@ def _scan_frames(frames: list[Path], destination: Path, roi_name: str,
         if (first_consensus_at is not None
                 and reverse_index - first_consensus_at >= 4 * fps):
             return consensus, len(observations)
+    if timeouts:
+        # Preserve retryability rather than mislabel an incomplete scan as final.
+        raise RuntimeError("tesseract_incomplete_scan_timeout")
     return choose_frozen_consensus(observations, 1 / fps), len(observations)
 
 
@@ -580,6 +604,15 @@ def _preserve_diagnostic(directory: Path, evidence_directory: Path | None,
 
 def read_video_time(video_url: str, evidence_directory: Path | None = None,
                     evidence_name: str | None = None) -> OcrResult | None:
+    token = _deadline.set(time.monotonic() + VIDEO_BUDGET_SECONDS)
+    try:
+        return _read_video_time(video_url, evidence_directory, evidence_name)
+    finally:
+        _deadline.reset(token)
+
+
+def _read_video_time(video_url: str, evidence_directory: Path | None = None,
+                     evidence_name: str | None = None) -> OcrResult | None:
     """Find a stable completion timer using adaptive temporal and spatial OCR."""
     _require_tools()
     with tempfile.TemporaryDirectory(prefix="gc-radar-ocr-") as temporary:

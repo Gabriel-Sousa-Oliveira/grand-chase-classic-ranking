@@ -198,7 +198,10 @@ def main() -> None:
                     triage = triage_ocr_result(ocr, error)
                     if triage.processing_reason == "technical_error":
                         failed += 1
-                        repo.record_ocr_attempt(candidate["id"], "error")
+                        repo.record_ocr_attempt(candidate["id"], "error", {
+                            "error_type": type(error).__name__,
+                            "error_detail": str(error)[:1200],
+                        })
                         results.append({"video_id": candidate["video_id"], "result": "error",
                                         "error": str(error)[:240]})
                         continue
@@ -231,6 +234,10 @@ def main() -> None:
                 "confidence", "status", "era_key", "raw_metadata"
             )} for candidate in repo.queue()]
             print(json.dumps({"mode": "ocr", "processed": processed, "matched": matched,
+                              "matched_by_source": {
+                                  source: sum(r.get("source") == source for r in results)
+                                  for source in sorted({r["source"] for r in results if "source" in r})
+                              },
                               "failed": failed, "results": results,
                               "remaining_ocr": repo.ocr_remaining(
                                   args.all_missing, args.retry_no_consensus,
