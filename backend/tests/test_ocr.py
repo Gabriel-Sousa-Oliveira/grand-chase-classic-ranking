@@ -8,7 +8,8 @@ from unittest.mock import patch
 from gc_radar.ocr import (TIMER_ROIS, OcrObservation, _download_excerpt,
                           _parse_tesseract_tsv, _read_timer_frame,
                           choose_consensus,
-                          choose_frozen_consensus, extract_time_values,
+                          choose_frozen_consensus,
+                          extract_compact_time_values, extract_time_values,
                           extract_times, infer_chapter_time, read_video_time,
                           roi_bounds)
 
@@ -35,6 +36,16 @@ class OcrTextTests(unittest.TestCase):
     def test_extracts_gc_fractional_timer_formats(self):
         self.assertEqual(extract_time_values("CLEAR 01:23:45"), {83_450})
         self.assertEqual(extract_time_values("TIME 01:23.456"), {83_456})
+
+    def test_recovers_separator_free_segmented_timers(self):
+        self.assertEqual(extract_compact_time_values("012345"), {83_450})
+        self.assertEqual(extract_compact_time_values("0123456"), {83_456})
+        self.assertEqual(extract_compact_time_values("0132"), {92_000})
+
+    def test_rejects_ambiguous_compact_numbers(self):
+        self.assertEqual(extract_compact_time_values("123"), set())
+        self.assertEqual(extract_compact_time_values("016099"), set())
+        self.assertEqual(extract_compact_time_values("score 012345"), set())
 
     def test_repairs_common_ocr_characters(self):
         self.assertEqual(extract_times("O1:3I"), {91})

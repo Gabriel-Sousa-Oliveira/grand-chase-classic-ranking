@@ -163,6 +163,32 @@ def extract_time_values(text: str) -> set[int]:
     return found
 
 
+def extract_compact_time_values(text: str) -> set[int]:
+    """Parse a separator-free timer only after spatial digit isolation.
+
+    Tesseract commonly drops the tiny colons in GCC's stylized timer. Keep this
+    deliberately strict: the entire OCR result must be 4, 6 or 7 digits, which
+    map to MMSS, MMSScc or MMSSmmm. Temporal consensus still decides whether
+    the observation is safe to accept.
+    """
+    normalized = text.translate(str.maketrans({
+        "O": "0", "o": "0", "I": "1", "l": "1", "|": "1",
+    }))
+    compact = re.sub(r"\s+", "", normalized)
+    if not re.fullmatch(r"(?:\d{4}|\d{6}|\d{7})", compact):
+        return set()
+    minutes, seconds = int(compact[:2]), int(compact[2:4])
+    if seconds >= 60:
+        return set()
+    millis = 0
+    if len(compact) == 6:
+        millis = int(compact[4:]) * 10
+    elif len(compact) == 7:
+        millis = int(compact[4:])
+    time_ms = (minutes * 60 + seconds) * 1000 + millis
+    return {time_ms} if _valid_ms(time_ms) else set()
+
+
 def extract_times(text: str) -> set[int]:
     """Backward-compatible whole-second view used by unit tests."""
     return {time_ms // 1000 for time_ms in extract_time_values(text)}
@@ -436,6 +462,64 @@ def roi_bounds(width: int, height: int,
     )
 
 
+def _isolate_digit_band(pixels):
+    """Locate one horizontal glyph band and normalize it for timer OCR."""
+    import cv2
+
+    height, width = pixels.shape[:2]
+    gradient = cv2.convertScaleAbs(
+        cv2.Sobel(pixels, cv2.CV_32F, 1, 0, ksize=3)
+    )
+    _, edges = cv2.threshold(
+        gradient, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+    )
+    kernel_width = max(9, width // 16)
+    joined = cv2.morphologyEx(
+        edges, cv2.MORPH_CLOSE,
+        cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_width, 3)),
+    )
+    contours, _ = cv2.findContours(
+        joined, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
+    candidates = []
+    for contour in contours:
+        x, y, box_width, box_height = cv2.boundingRect(contour)
+        if (box_width >= width * 0.18 and box_height >= height * 0.08
+                and box_height <= height * 0.80
+                and box_width / max(1, box_height) >= 1.4):
+            center_penalty = abs((y + box_height / 2) - height / 2) / height
+            candidates.append((
+                box_width * box_height * (1 - center_penalty * 0.55),
+                x, y, box_width, box_height,
+            ))
+    if candidates:
+        _, x, y, box_width, box_height = max(candidates)
+        pad_x, pad_y = max(6, box_width // 16), max(4, box_height // 3)
+        left, right = max(0, x-pad_x), min(width, x+box_width+pad_x)
+        top, bottom = max(0, y-pad_y), min(height, y+box_height+pad_y)
+        band = pixels[top:bottom, left:right]
+    else:
+        # The calibrated ROI is already tight. A centered fallback still
+        # removes the HUD edges that most often confuse line segmentation.
+        top, bottom = height // 8, height - height // 8
+        band = pixels[top:bottom, :]
+
+    scale = max(1.0, 160 / max(1, band.shape[0]))
+    band = cv2.resize(
+        band, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC
+    )
+    band = cv2.copyMakeBorder(
+        band, 20, 20, 20, 20, cv2.BORDER_CONSTANT, value=255
+    )
+    _, binary = cv2.threshold(
+        band, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+    )
+    # Tesseract is more reliable with dark glyphs on a light field.
+    if cv2.countNonZero(binary) < binary.size / 2:
+        binary = cv2.bitwise_not(binary)
+    return band, binary
+
+
 def _preprocess_roi(frame: Path, destination: Path,
                     roi_name: str) -> list[Path]:
     """Crop the timer and create contrast-safe variants with OpenCV."""
@@ -470,9 +554,12 @@ def _preprocess_roi(frame: Path, destination: Path,
         sharpened, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY, 31, 7,
     )
-    # Tesseract performs its own thresholding; the enhanced grayscale image is
-    # therefore the fastest and most information-preserving first attempt.
-    variants = (("clahe", sharpened), ("adaptive", adaptive),
+    # First isolate the horizontal glyph band. This removes HUD labels and
+    # effects before OCR and makes the fast pass useful even when tiny colons
+    # disappear. The original variants remain available to exhaustive scans.
+    digit_band, digit_binary = _isolate_digit_band(sharpened)
+    variants = (("digits", digit_band), ("digits-binary", digit_binary),
+                ("clahe", sharpened), ("adaptive", adaptive),
                 ("otsu", otsu), ("inverse", cv2.bitwise_not(otsu)))
     paths: list[Path] = []
     for variant_name, pixels in variants:
@@ -532,7 +619,10 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
                     continue
                 raise
             text, confidence = _parse_tesseract_tsv(result.stdout)
-            for time_ms in extract_time_values(text):
+            values = extract_time_values(text)
+            if "-digits" in processed.stem:
+                values.update(extract_compact_time_values(text))
+            for time_ms in values:
                 observation = OcrObservation(
                     f"{roi_name}-{frame.stem}", time_ms, seconds_from_end,
                     confidence, str(processed),
