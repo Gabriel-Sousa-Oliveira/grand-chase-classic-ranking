@@ -509,6 +509,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 25434,
+      "character": "Mari",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 248000,
+      "player_nick": "delete",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=zeh1RJC34pM",
+      "channel": "delete",
+      "published_at": "2026-07-14",
+      "approved_at": "2026-09-17 15:33:08"
+    },
+    {
       "id": 51,
       "character": "Rin/Lin",
       "category": "void_apocalypse",
@@ -1014,6 +1027,19 @@
       "channel": "soup",
       "published_at": "2026-02-18",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 25435,
+      "character": "Mari",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 94000,
+      "player_nick": "delete",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=i81b3N-G7ZQ",
+      "channel": "delete",
+      "published_at": "2026-08-16",
+      "approved_at": "2026-09-17 15:33:08"
     },
     {
       "id": 49,
@@ -1911,6 +1937,19 @@
       "channel": "Borkaz",
       "published_at": "2024-10-16T14:06:28Z",
       "approved_at": "2026-09-16 10:10:59"
+    },
+    {
+      "id": 25436,
+      "character": "Mari",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 131000,
+      "player_nick": "delete",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=97k_8gddOcg",
+      "channel": "delete",
+      "published_at": "2026-08-03",
+      "approved_at": "2026-09-17 15:33:08"
     },
     {
       "id": 50,
@@ -4398,6 +4437,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 25434,
+      "character": "Mari",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 248000,
+      "player_nick": "delete",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=zeh1RJC34pM",
+      "channel": "delete",
+      "published_at": "2026-07-14",
+      "approved_at": "2026-09-17 15:33:08"
+    },
+    {
       "id": 22046,
       "character": "Elesis",
       "category": "void_invasion",
@@ -4461,6 +4513,19 @@
       "channel": "vanzcake",
       "published_at": "2026-08-03",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 25436,
+      "character": "Mari",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 131000,
+      "player_nick": "delete",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=97k_8gddOcg",
+      "channel": "delete",
+      "published_at": "2026-08-03",
+      "approved_at": "2026-09-17 15:33:08"
     },
     {
       "id": 18,
@@ -4539,6 +4604,19 @@
       "channel": "Borkaz",
       "published_at": "2026-08-14T09:07:25Z",
       "approved_at": "2026-09-10 00:59:12"
+    },
+    {
+      "id": 25435,
+      "character": "Mari",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 94000,
+      "player_nick": "delete",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=i81b3N-G7ZQ",
+      "channel": "delete",
+      "published_at": "2026-08-16",
+      "approved_at": "2026-09-17 15:33:08"
     },
     {
       "id": 9794,
@@ -4711,17 +4789,17 @@
     }
   ],
   "processing": {
-    "discovered": 505,
-    "classified": 390,
-    "timed": 200,
-    "approved": 198,
-    "ranked": 198,
-    "pending_manual": 185,
+    "discovered": 509,
+    "classified": 394,
+    "timed": 203,
+    "approved": 201,
+    "ranked": 201,
+    "pending_manual": 186,
     "ocr_attempted": 117,
     "ocr_matched": 32,
     "ocr_unresolved": 85,
-    "title_times": 141,
+    "title_times": 144,
     "human_times": 33,
-    "last_updated": "2026-09-17 01:26:54"
+    "last_updated": "2026-09-17 15:33:54"
   }
 }
