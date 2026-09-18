@@ -132,6 +132,19 @@
       "approved_at": "2026-09-14 01:11:36"
     },
     {
+      "id": 26846,
+      "character": "Edel",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 48450,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=6ljAMGvQq-8",
+      "channel": "Borkaz",
+      "published_at": "2025-07-04T09:07:36Z",
+      "approved_at": "2026-09-18 17:05:36"
+    },
+    {
       "id": 18,
       "character": "Edel",
       "category": "duel_4",
@@ -3176,6 +3189,19 @@
       "approved_at": "2026-09-10 02:51:17"
     },
     {
+      "id": 26846,
+      "character": "Edel",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 48450,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=6ljAMGvQq-8",
+      "channel": "Borkaz",
+      "published_at": "2025-07-04T09:07:36Z",
+      "approved_at": "2026-09-18 17:05:36"
+    },
+    {
       "id": 11683,
       "character": "Lire",
       "category": "duel_4",
@@ -4791,15 +4817,15 @@
   "processing": {
     "discovered": 510,
     "classified": 395,
-    "timed": 203,
-    "approved": 201,
-    "ranked": 201,
-    "pending_manual": 187,
+    "timed": 204,
+    "approved": 202,
+    "ranked": 202,
+    "pending_manual": 186,
     "ocr_attempted": 117,
-    "ocr_matched": 32,
-    "ocr_unresolved": 85,
+    "ocr_matched": 33,
+    "ocr_unresolved": 84,
     "title_times": 144,
     "human_times": 33,
-    "last_updated": "2026-09-18 16:58:42"
+    "last_updated": "2026-09-18 17:05:48"
   }
 }
