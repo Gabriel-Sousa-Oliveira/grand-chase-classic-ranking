@@ -26,13 +26,13 @@ COARSE_FPS = 1
 DENSE_WINDOW_SECONDS = 30
 DENSE_FPS = 2
 TIMER_ROIS = {
-    # Calibrated from full-frame mosaics captured across real GCC uploads.
-    # Gameplay countdowns sit at the top-center; the completion screen exposes
-    # a separate Clear Time field lower in the central results panel.
+    # Measured from 1280x720 source frames in workflow run 96. Earlier crops
+    # ended at y=15% and cut the lower half of the gameplay digits; the result
+    # crop also missed the Clear Time row entirely.
     # Every crop remains below 4% of the source frame.
-    "top_center_timer": (0.40, 0.02, 0.60, 0.15),
-    "top_center_timer_wide": (0.43, 0.02, 0.64, 0.15),
-    "results_panel": (0.48, 0.67, 0.66, 0.85),
+    "top_center_timer": (0.45, 0.10, 0.61, 0.19),
+    "top_center_timer_wide": (0.42, 0.08, 0.64, 0.21),
+    "results_panel": (0.79, 0.31, 0.97, 0.42),
 }
 
 
@@ -163,6 +163,37 @@ def extract_time_values(text: str) -> set[int]:
         if seconds < 60 and _valid_ms(total):
             found.add(total)
     return found
+
+
+def extract_result_time_values(text: str) -> set[int]:
+    """Parse GCC's Clear Time notation only inside the results-panel ROI.
+
+    The panel uses racing-style notation: 48'4 means 48.4 seconds, while a
+    minute-bearing result can appear as 1'23"4. Keeping this contextual avoids
+    changing the legacy title parser where 2'56 means two minutes 56 seconds.
+    """
+    normalized = text.translate(str.maketrans({
+        "’": "'", "′": "'", "＇": "'", "“": '"', "”": '"',
+    })).strip(" .")
+    minute = re.fullmatch(
+        r"(\d{1,2})\s*'\s*(\d{2})\s*(?:\"|:)\s*(\d{1,3})",
+        normalized,
+    )
+    if minute:
+        minutes, seconds = map(int, minute.group(1, 2))
+        fraction = minute.group(3)
+        millis = int(fraction) * (100 if len(fraction) == 1 else
+                                  10 if len(fraction) == 2 else 1)
+        value = (minutes * 60 + seconds) * 1000 + millis
+        return {value} if seconds < 60 and _valid_ms(value) else set()
+    seconds_only = re.fullmatch(r"(\d{1,3})\s*[':]\s*(\d{1,3})", normalized)
+    if not seconds_only:
+        return set()
+    seconds, fraction = seconds_only.groups()
+    millis = int(fraction) * (100 if len(fraction) == 1 else
+                              10 if len(fraction) == 2 else 1)
+    value = int(seconds) * 1000 + millis
+    return {value} if _valid_ms(value) else set()
 
 
 def extract_compact_time_values(text: str) -> set[int]:
@@ -561,8 +592,8 @@ def _preprocess_roi(frame: Path, destination: Path,
     # effects before OCR and makes the fast pass useful even when tiny colons
     # disappear. The original variants remain available to exhaustive scans.
     digit_band, digit_binary = _isolate_digit_band(sharpened)
-    variants = (("digits", digit_band), ("digits-binary", digit_binary),
-                ("clahe", sharpened), ("adaptive", adaptive),
+    variants = (("clahe", sharpened), ("digits", digit_band),
+                ("digits-binary", digit_binary), ("adaptive", adaptive),
                 ("otsu", otsu), ("inverse", cv2.bitwise_not(otsu)))
     paths: list[Path] = []
     for variant_name, pixels in variants:
@@ -596,7 +627,11 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
                       seconds_from_end: float,
                       exhaustive: bool = False) -> list[OcrObservation]:
     variants = _preprocess_roi(frame, destination, roi_name)
-    page_modes = (7, 13) if exhaustive else (7,)
+    page_modes = (
+        (7, 13) if exhaustive
+        else (13,) if roi_name == "results_panel"
+        else (7,)
+    )
     attempts = [
         (processed, page_mode)
         for processed in (variants if exhaustive else variants[:1])
@@ -629,6 +664,8 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
             raise
         text, confidence = _parse_tesseract_tsv(result.stdout)
         values = extract_time_values(text)
+        if roi_name == "results_panel":
+            values.update(extract_result_time_values(text))
         if "-digits" in processed.stem:
             values.update(extract_compact_time_values(text))
         digit_count = len(re.sub(r"\D", "", text))

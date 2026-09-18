@@ -9,7 +9,8 @@ from gc_radar.ocr import (TIMER_ROIS, OcrObservation, _download_excerpt,
                           _parse_tesseract_tsv, _read_timer_frame,
                           choose_consensus,
                           choose_frozen_consensus,
-                          extract_compact_time_values, extract_time_values,
+                          extract_compact_time_values,
+                          extract_result_time_values, extract_time_values,
                           extract_times, infer_chapter_time, read_video_time,
                           roi_bounds)
 
@@ -36,6 +37,12 @@ class OcrTextTests(unittest.TestCase):
     def test_extracts_gc_fractional_timer_formats(self):
         self.assertEqual(extract_time_values("CLEAR 01:23:45"), {83_450})
         self.assertEqual(extract_time_values("TIME 01:23.456"), {83_456})
+
+    def test_parses_clear_time_result_notation_contextually(self):
+        self.assertEqual(extract_result_time_values("48'4"), {48_400})
+        self.assertEqual(extract_result_time_values("1'23\"45"), {83_450})
+        self.assertEqual(extract_result_time_values("48:4."), {48_400})
+        self.assertEqual(extract_result_time_values("Time 48'4"), set())
 
     def test_recovers_separator_free_segmented_timers(self):
         self.assertEqual(extract_compact_time_values("012345"), {83_450})
