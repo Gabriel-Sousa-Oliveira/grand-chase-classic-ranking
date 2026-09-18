@@ -187,13 +187,29 @@ def extract_result_time_values(text: str) -> set[int]:
         value = (minutes * 60 + seconds) * 1000 + millis
         return {value} if seconds < 60 and _valid_ms(value) else set()
     seconds_only = re.fullmatch(r"(\d{1,3})\s*[':]\s*(\d{1,3})", normalized)
-    if not seconds_only:
+    if seconds_only:
+        seconds, fraction = seconds_only.groups()
+        millis = int(fraction) * (100 if len(fraction) == 1 else
+                                  10 if len(fraction) == 2 else 1)
+        value = int(seconds) * 1000 + millis
+        return {value} if _valid_ms(value) else set()
+
+    # The tiny apostrophe is frequently dropped after thresholding. Interpret
+    # separator-free digits using the results panel's SScc / MSScc layout only.
+    compact = re.fullmatch(r"\d{3,6}", normalized)
+    if not compact:
         return set()
-    seconds, fraction = seconds_only.groups()
-    millis = int(fraction) * (100 if len(fraction) == 1 else
-                              10 if len(fraction) == 2 else 1)
-    value = int(seconds) * 1000 + millis
-    return {value} if _valid_ms(value) else set()
+    digits = compact.group(0)
+    if len(digits) in (3, 4):
+        minutes, seconds, fraction = 0, int(digits[:2]), digits[2:]
+    else:
+        minute_digits = len(digits) - 4
+        minutes = int(digits[:minute_digits])
+        seconds = int(digits[minute_digits:minute_digits + 2])
+        fraction = digits[minute_digits + 2:]
+    millis = int(fraction) * (100 if len(fraction) == 1 else 10)
+    value = (minutes * 60 + seconds) * 1000 + millis
+    return {value} if seconds < 60 and _valid_ms(value) else set()
 
 
 def extract_compact_time_values(text: str) -> set[int]:

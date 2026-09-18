@@ -42,6 +42,8 @@ class OcrTextTests(unittest.TestCase):
         self.assertEqual(extract_result_time_values("48'4"), {48_400})
         self.assertEqual(extract_result_time_values("1'23\"45"), {83_450})
         self.assertEqual(extract_result_time_values("48:4."), {48_400})
+        self.assertEqual(extract_result_time_values("4845"), {48_450})
+        self.assertEqual(extract_result_time_values("14845"), {108_450})
         self.assertEqual(extract_result_time_values("Time 48'4"), set())
 
     def test_recovers_separator_free_segmented_timers(self):
