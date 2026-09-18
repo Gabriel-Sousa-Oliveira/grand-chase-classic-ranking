@@ -291,6 +291,13 @@ jobs:
 
       - name: Add report to workflow summary
         run: |
+          diagnostic=$(find data/ocr-evidence -name '*-no-consensus.png' -print -quit 2>/dev/null || true)
+          if [[ -n "$diagnostic" ]]; then
+            echo 'OCR_DIAGNOSTIC_BEGIN'
+            base64 -w 0 "$diagnostic"
+            echo
+            echo 'OCR_DIAGNOSTIC_END'
+          fi
           echo 'OCR_RESULT_BEGIN'
           jq 'del(.candidates)' data/last-run.json
           echo 'OCR_RESULT_END'

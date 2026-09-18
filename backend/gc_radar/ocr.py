@@ -864,6 +864,7 @@ def _read_event_video(video_url: str, directory: Path,
                                          exhaustive=True, seconds_offset=duration-window["end"])
                 if result:
                     return _preserve_evidence(result, evidence_directory, evidence_name)
+        _preserve_diagnostic(directory, evidence_directory, evidence_name)
         return None
     finally:
         _anchors.reset(token)
