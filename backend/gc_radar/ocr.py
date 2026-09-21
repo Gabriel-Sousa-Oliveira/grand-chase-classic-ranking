@@ -681,8 +681,18 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
         text, confidence = _parse_tesseract_tsv(result.stdout)
         values = extract_time_values(text)
         if roi_name == "results_panel":
-            values.update(extract_result_time_values(text))
-        if "-digits" in processed.stem:
+            # A separator-free SScc value is valid only in the untouched
+            # Clear Time crop. Applying that interpretation to segmented
+            # variants turned stable inventory icons (for example ``2383``)
+            # into convincing false times. Explicit punctuation is safe in
+            # every variant; compact MMSS is accepted only from the isolated
+            # digit band, never from its binary derivative.
+            has_separator = any(mark in text for mark in (":", "'", '"'))
+            if processed.stem.endswith("-clahe") or has_separator:
+                values.update(extract_result_time_values(text))
+            if processed.stem.endswith("-digits"):
+                values.update(extract_compact_time_values(text))
+        elif "-digits" in processed.stem:
             values.update(extract_compact_time_values(text))
         digit_count = len(re.sub(r"\D", "", text))
         if not expanded_partial and not values and digit_count >= 3:

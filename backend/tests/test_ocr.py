@@ -156,6 +156,38 @@ class OcrTextTests(unittest.TestCase):
             self.assertEqual(observations[0].time_ms, 83_450)
             self.assertAlmostEqual(observations[0].confidence, 0.95)
 
+    def test_results_panel_rejects_compact_inventory_icon_numbers(self):
+        tsv = ("level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\t"
+               "left\ttop\twidth\theight\tconf\ttext\n"
+               "5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t95\t2383\n")
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch("gc_radar.ocr._preprocess_roi") as preprocess, \
+                patch("gc_radar.ocr._run") as run:
+            processed = Path(temporary) / "frame-results_panel-digits.png"
+            preprocess.return_value = [processed]
+            run.return_value = SimpleNamespace(stdout=tsv)
+            observations = _read_timer_frame(
+                Path(temporary) / "frame.png", Path(temporary),
+                "results_panel", 3.0,
+            )
+            self.assertEqual(observations, [])
+
+    def test_results_panel_keeps_compact_mmss_from_digit_band(self):
+        tsv = ("level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\t"
+               "left\ttop\twidth\theight\tconf\ttext\n"
+               "5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t95\t0126\n")
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch("gc_radar.ocr._preprocess_roi") as preprocess, \
+                patch("gc_radar.ocr._run") as run:
+            processed = Path(temporary) / "frame-results_panel-digits.png"
+            preprocess.return_value = [processed]
+            run.return_value = SimpleNamespace(stdout=tsv)
+            observations = _read_timer_frame(
+                Path(temporary) / "frame.png", Path(temporary),
+                "results_panel", 3.0,
+            )
+            self.assertEqual([item.time_ms for item in observations], [86_000])
+
     def test_empty_tesseract_component_is_not_a_video_error(self):
         with tempfile.TemporaryDirectory() as temporary, \
                 patch("gc_radar.ocr._preprocess_roi") as preprocess, \
