@@ -158,6 +158,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 28566,
+      "character": "Elesis",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 33800,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=YOYQRzmlJ9M",
+      "channel": "Borkaz",
+      "published_at": "2025-08-11T09:06:15Z",
+      "approved_at": "2026-09-21 16:06:03"
+    },
+    {
       "id": 22031,
       "character": "Ereb",
       "category": "duel_4",
@@ -390,6 +403,19 @@
       "channel": "Syntaxii",
       "published_at": "2026-04-02",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 28569,
+      "character": "Dio",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 158000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=jvv3saC2aFw",
+      "channel": "Borkaz",
+      "published_at": "2025-12-12T10:00:05Z",
+      "approved_at": "2026-09-21 16:06:03"
     },
     {
       "id": 18769,
@@ -782,6 +808,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 28572,
+      "character": "Edel",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 399000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=cf2kpl8TVWw",
+      "channel": "Borkaz",
+      "published_at": "2024-04-12T09:39:47Z",
+      "approved_at": "2026-09-21 16:06:04"
+    },
+    {
       "id": 22046,
       "character": "Elesis",
       "category": "void_invasion",
@@ -1003,6 +1042,19 @@
       "approved_at": "2026-09-10 01:02:44"
     },
     {
+      "id": 28574,
+      "character": "Ley/Rey",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 397000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=l0yLPheosyo",
+      "channel": "Borkaz",
+      "published_at": "2024-04-05T09:22:47Z",
+      "approved_at": "2026-09-21 16:06:04"
+    },
+    {
       "id": 45,
       "character": "Lime/Holy",
       "category": "void_invasion",
@@ -1118,6 +1170,19 @@
       "channel": "Syntaxii",
       "published_at": "2026-03-28",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 28575,
+      "character": "Ronan",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 428000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=haoxBQ89gE4",
+      "channel": "Borkaz",
+      "published_at": "2024-03-25T09:42:09Z",
+      "approved_at": "2026-09-21 16:06:04"
     },
     {
       "id": 62,
@@ -1263,6 +1328,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 28578,
+      "character": "Veigas",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 381000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=R4YhUK-RzoQ",
+      "channel": "Borkaz",
+      "published_at": "2024-04-15T08:59:47Z",
+      "approved_at": "2026-09-21 16:06:05"
+    },
+    {
       "id": 73,
       "character": "Zero",
       "category": "void_invasion",
@@ -1300,6 +1378,19 @@
       "channel": "Kyururu1",
       "published_at": "2026-04-16T21:29:12Z",
       "approved_at": "2026-09-10 01:19:31"
+    },
+    {
+      "id": 28579,
+      "character": "Zero",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 395000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Y1h5JYfojt8",
+      "channel": "Borkaz",
+      "published_at": "2024-04-03T09:06:56Z",
+      "approved_at": "2026-09-21 16:06:05"
     },
     {
       "id": 22048,
@@ -1495,6 +1586,19 @@
       "channel": "GCLabs",
       "published_at": "2025-08-05",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 28580,
+      "character": "Asin",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 22200,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=vllstD-TUeY",
+      "channel": "Borkaz",
+      "published_at": "2025-06-25T09:01:12Z",
+      "approved_at": "2026-09-21 16:06:05"
     },
     {
       "id": 11,
@@ -2292,6 +2396,32 @@
       "approved_at": "2026-09-10 02:51:18"
     },
     {
+      "id": 28577,
+      "character": "Sieghart",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 416000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=qs_ryVY99-8",
+      "channel": "Borkaz",
+      "published_at": "2024-01-27T10:00:51Z",
+      "approved_at": "2026-09-21 16:06:04"
+    },
+    {
+      "id": 28573,
+      "character": "Kallia",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 430000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=CfTG3Wzx-JM",
+      "channel": "Borkaz",
+      "published_at": "2024-02-01T09:09:11Z",
+      "approved_at": "2026-09-21 16:06:04"
+    },
+    {
       "id": 11685,
       "character": "Kallia",
       "category": "void_taint",
@@ -2370,6 +2500,19 @@
       "approved_at": "2026-09-10 02:51:28"
     },
     {
+      "id": 28575,
+      "character": "Ronan",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 428000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=haoxBQ89gE4",
+      "channel": "Borkaz",
+      "published_at": "2024-03-25T09:42:09Z",
+      "approved_at": "2026-09-21 16:06:04"
+    },
+    {
       "id": 16450,
       "character": "Amy",
       "category": "void_invasion",
@@ -2381,6 +2524,58 @@
       "channel": "Borkaz",
       "published_at": "2024-03-27T09:09:45Z",
       "approved_at": "2026-09-14 01:21:35"
+    },
+    {
+      "id": 28579,
+      "character": "Zero",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 395000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Y1h5JYfojt8",
+      "channel": "Borkaz",
+      "published_at": "2024-04-03T09:06:56Z",
+      "approved_at": "2026-09-21 16:06:05"
+    },
+    {
+      "id": 28574,
+      "character": "Ley/Rey",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 397000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=l0yLPheosyo",
+      "channel": "Borkaz",
+      "published_at": "2024-04-05T09:22:47Z",
+      "approved_at": "2026-09-21 16:06:04"
+    },
+    {
+      "id": 28572,
+      "character": "Edel",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 399000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=cf2kpl8TVWw",
+      "channel": "Borkaz",
+      "published_at": "2024-04-12T09:39:47Z",
+      "approved_at": "2026-09-21 16:06:04"
+    },
+    {
+      "id": 28578,
+      "character": "Veigas",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 381000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=R4YhUK-RzoQ",
+      "channel": "Borkaz",
+      "published_at": "2024-04-15T08:59:47Z",
+      "approved_at": "2026-09-21 16:06:05"
     },
     {
       "id": 16452,
@@ -2511,6 +2706,19 @@
       "channel": "Borkaz",
       "published_at": "2024-06-21T09:26:45Z",
       "approved_at": "2026-09-10 13:28:40"
+    },
+    {
+      "id": 28576,
+      "character": "Sieghart",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 404000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=zkUzDP0A3Bc",
+      "channel": "Borkaz",
+      "published_at": "2024-06-25T08:59:56Z",
+      "approved_at": "2026-09-21 16:06:04"
     },
     {
       "id": 16453,
@@ -3111,6 +3319,32 @@
       "approved_at": "2026-09-10 02:51:19"
     },
     {
+      "id": 28582,
+      "character": "Rin/Lin",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 283000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=_9rVulsJ2iA",
+      "channel": "Borkaz",
+      "published_at": "2025-05-07T10:07:49Z",
+      "approved_at": "2026-09-21 16:06:05"
+    },
+    {
+      "id": 28581,
+      "character": "Rin/Lin",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 304000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=fwYFowVIZY4",
+      "channel": "Borkaz",
+      "published_at": "2025-05-08T15:00:01Z",
+      "approved_at": "2026-09-21 16:06:05"
+    },
+    {
       "id": 4176,
       "character": "Rin/Lin",
       "category": "void_invasion",
@@ -3189,6 +3423,19 @@
       "approved_at": "2026-09-10 02:51:17"
     },
     {
+      "id": 28580,
+      "character": "Asin",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 22200,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=vllstD-TUeY",
+      "channel": "Borkaz",
+      "published_at": "2025-06-25T09:01:12Z",
+      "approved_at": "2026-09-21 16:06:05"
+    },
+    {
       "id": 26846,
       "character": "Edel",
       "category": "duel_4",
@@ -3228,6 +3475,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 28566,
+      "character": "Elesis",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 33800,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=YOYQRzmlJ9M",
+      "channel": "Borkaz",
+      "published_at": "2025-08-11T09:06:15Z",
+      "approved_at": "2026-09-21 16:06:03"
+    },
+    {
       "id": 16447,
       "character": "Decanee",
       "category": "duel_4",
@@ -3252,6 +3512,19 @@
       "channel": "Borkaz",
       "published_at": "2025-09-11T10:15:38Z",
       "approved_at": "2026-09-10 01:00:19"
+    },
+    {
+      "id": 28583,
+      "character": "Iris",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 208000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=iFpbwGMJxYE",
+      "channel": "Borkaz",
+      "published_at": "2025-09-12T09:27:21Z",
+      "approved_at": "2026-09-21 16:06:05"
     },
     {
       "id": 22053,
@@ -3538,6 +3811,19 @@
       "channel": "Falonso",
       "published_at": "2025-12-09T14:04:21Z",
       "approved_at": "2026-09-10 01:02:08"
+    },
+    {
+      "id": 28569,
+      "character": "Dio",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 158000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=jvv3saC2aFw",
+      "channel": "Borkaz",
+      "published_at": "2025-12-12T10:00:05Z",
+      "approved_at": "2026-09-21 16:06:03"
     },
     {
       "id": 68,
@@ -4817,15 +5103,15 @@
   "processing": {
     "discovered": 510,
     "classified": 395,
-    "timed": 204,
-    "approved": 202,
-    "ranked": 202,
-    "pending_manual": 186,
-    "ocr_attempted": 117,
-    "ocr_matched": 33,
-    "ocr_unresolved": 84,
+    "timed": 218,
+    "approved": 216,
+    "ranked": 216,
+    "pending_manual": 172,
+    "ocr_attempted": 118,
+    "ocr_matched": 47,
+    "ocr_unresolved": 71,
     "title_times": 144,
     "human_times": 33,
-    "last_updated": "2026-09-21 01:06:32"
+    "last_updated": "2026-09-21 16:06:13"
   }
 }
