@@ -1,0 +1,297 @@
+name: Scalable OCR queue
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ocr-scale.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: youtube-crawler
+  cancel-in-progress: false
+
+jobs:
+  process:
+    if: ${{ contains(github.event.head_commit.message, '[ocr-scale]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
+      SITE_ACCESS_TOKEN: ${{ secrets.SITE_ACCESS_TOKEN }}
+      OMP_THREAD_LIMIT: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      YOUTUBE_USE_PO_TOKEN: "1"
+      GC_OCR_VISUAL_EVENTS: "1"
+      GC_OCR_LOOKBACK_SECONDS: "300"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore crawler database
+        id: database
+        uses: actions/cache/restore@v4
+        with:
+          path: data/gc_radar.sqlite3
+          key: gc-radar-db-${{ github.run_id }}
+          restore-keys: gc-radar-db-
+          fail-on-cache-miss: true
+
+      - name: Install bounded OCR tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr
+          python -m pip install --disable-pip-version-check --upgrade --pre \
+            "yt-dlp[default,curl-cffi]" "yt-dlp-getpot-wpc" \
+            "opencv-python-headless==4.10.0.84"
+
+      - name: Configure YouTube access
+        env:
+          YOUTUBE_COOKIES_B64: ${{ secrets.YOUTUBE_COOKIES_B64 }}
+        run: |
+          browser_path="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$browser_path"
+          echo "YOUTUBE_PO_BROWSER_PATH=$browser_path" >> "$GITHUB_ENV"
+          if [ -n "$YOUTUBE_COOKIES_B64" ]; then
+            echo "$YOUTUBE_COOKIES_B64" | base64 --decode > "$RUNNER_TEMP/youtube-cookies.txt"
+            chmod 600 "$RUNNER_TEMP/youtube-cookies.txt"
+            echo "YOUTUBE_COOKIES_FILE=$RUNNER_TEMP/youtube-cookies.txt" >> "$GITHUB_ENV"
+          fi
+
+      - name: Process largest dungeons first
+        run: |
+          cd backend
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import os
+          import re
+          import shutil
+          import sqlite3
+          import subprocess
+          import sys
+          import time
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from pathlib import Path
+
+          MASTER = Path("../data/gc_radar.sqlite3").resolve()
+          OUTPUT = Path("../data/last-run.json").resolve()
+          EVIDENCE = Path("../data/ocr-evidence").resolve()
+          SHARDS = Path(os.environ["RUNNER_TEMP"]) / "gc-ocr-shards"
+          BATCH_SIZE = 8
+          MAX_PARALLEL = 4
+          ALLOWED = (
+              "duel_4",
+              "tower_of_disappearance",
+              "void_apocalypse",
+              "void_taint",
+              "void_nightmare",
+              "void_invasion",
+          )
+          KEEP_EVIDENCE = re.compile(r"-(?:\d+|no-consensus)\.png$")
+
+          EVIDENCE.mkdir(parents=True, exist_ok=True)
+          SHARDS.mkdir(parents=True, exist_ok=True)
+
+          def pending_ids(connection: sqlite3.Connection, category: str) -> list[str]:
+              return [row[0] for row in connection.execute(
+                  "SELECT video_id FROM candidates WHERE category = ? "
+                  "AND time_ms IS NULL AND status IN "
+                  "('time_required', 'classification_required') "
+                  "ORDER BY video_id",
+                  (category,),
+              )]
+
+          def write_checkpoint(summary: dict) -> None:
+              temporary = OUTPUT.with_suffix(".tmp")
+              temporary.write_text(json.dumps(summary, ensure_ascii=False))
+              temporary.replace(OUTPUT)
+
+          with sqlite3.connect(MASTER) as connection:
+              counts = {category: len(pending_ids(connection, category))
+                        for category in ALLOWED}
+          order_index = {category: index for index, category in enumerate(ALLOWED)}
+          ordered = sorted(ALLOWED, key=lambda category: (-counts[category], order_index[category]))
+          summary = {
+              "mode": "ocr-scale",
+              "batch_size": BATCH_SIZE,
+              "max_parallel_batches": MAX_PARALLEL,
+              "order": ordered,
+              "selected": sum(counts.values()),
+              "processed": 0,
+              "matched": 0,
+              "failed": 0,
+              "no_consensus": 0,
+              "results": [],
+              "dungeons": {},
+          }
+          write_checkpoint(summary)
+          print("OCR order:", [(category, counts[category]) for category in ordered], flush=True)
+
+          def run_batch(category: str, batch_index: int, ids: list[str]) -> dict:
+              directory = SHARDS / f"{category}-{batch_index:03d}"
+              directory.mkdir(parents=True, exist_ok=True)
+              database = directory / "gc_radar.sqlite3"
+              report = directory / "report.json"
+              shutil.copy2(MASTER, database)
+              command = [
+                  sys.executable, "-m", "gc_radar.cli", "--db", str(database),
+                  "ocr-queue", "--limit", "0", "--workers", "1",
+                  "--all-missing", "--retry-no-consensus",
+              ]
+              command.extend(f"--video-id={video_id}" for video_id in ids)
+              started = time.monotonic()
+              with report.open("w") as output:
+                  subprocess.run(command, stdout=output, check=True)
+              result = json.loads(report.read_text())
+              result.pop("candidates", None)
+              result["category"] = category
+              result["batch"] = batch_index
+              result["video_ids"] = ids
+              result["duration_seconds"] = round(time.monotonic() - started, 1)
+              return {"database": database, "directory": directory, "report": result}
+
+          def merge_batch(master: sqlite3.Connection, completed: dict) -> None:
+              shard = sqlite3.connect(completed["database"])
+              shard.row_factory = sqlite3.Row
+              try:
+                  for video_id in completed["report"]["video_ids"]:
+                      row = shard.execute(
+                          "SELECT time_ms, confidence, status, raw_metadata, updated_at "
+                          "FROM candidates WHERE video_id = ?", (video_id,)
+                      ).fetchone()
+                      if row is None:
+                          continue
+                      master.execute(
+                          "UPDATE candidates SET time_ms = ?, confidence = ?, status = ?, "
+                          "raw_metadata = ?, updated_at = ? WHERE video_id = ?",
+                          (*row, video_id),
+                      )
+              finally:
+                  shard.close()
+              source = completed["directory"] / "ocr-evidence"
+              if source.exists():
+                  for evidence in source.iterdir():
+                      if evidence.is_file() and KEEP_EVIDENCE.search(evidence.name):
+                          shutil.copy2(evidence, EVIDENCE / evidence.name)
+
+          with sqlite3.connect(MASTER) as master:
+              for category in ordered:
+                  ids = pending_ids(master, category)
+                  batches = [ids[start:start + BATCH_SIZE]
+                             for start in range(0, len(ids), BATCH_SIZE)]
+                  stats = {
+                      "selected": len(ids), "batches": len(batches),
+                      "processed": 0, "matched": 0, "failed": 0,
+                      "no_consensus": 0, "duration_seconds": 0.0,
+                  }
+                  summary["dungeons"][category] = stats
+                  if not batches:
+                      continue
+                  print(f"Starting {category}: {len(ids)} videos in {len(batches)} batches", flush=True)
+                  category_started = time.monotonic()
+                  with ThreadPoolExecutor(max_workers=MAX_PARALLEL) as executor:
+                      futures = {
+                          executor.submit(run_batch, category, index, batch): index
+                          for index, batch in enumerate(batches)
+                      }
+                      for future in as_completed(futures):
+                          completed = future.result()
+                          merge_batch(master, completed)
+                          master.commit()
+                          report = completed["report"]
+                          no_consensus = sum(
+                              item.get("result") == "no_consensus"
+                              for item in report.get("results", [])
+                          )
+                          for key in ("processed", "matched", "failed"):
+                              stats[key] += int(report.get(key, 0))
+                              summary[key] += int(report.get(key, 0))
+                          stats["no_consensus"] += no_consensus
+                          summary["no_consensus"] += no_consensus
+                          summary["results"].extend(report.get("results", []))
+                          print(
+                              f"Completed {category} batch {report['batch'] + 1}/{len(batches)}: "
+                              f"processed={report.get('processed', 0)} matched={report.get('matched', 0)} "
+                              f"failed={report.get('failed', 0)}",
+                              flush=True,
+                          )
+                          write_checkpoint(summary)
+                  stats["duration_seconds"] = round(time.monotonic() - category_started, 1)
+                  write_checkpoint(summary)
+                  print(f"Finished {category}: {stats}", flush=True)
+
+          queue = json.loads(subprocess.check_output([
+              sys.executable, "-m", "gc_radar.cli", "--db", str(MASTER), "queue"
+          ]))
+          summary["queue_size"] = len(queue)
+          summary["candidates"] = queue
+          summary["unprocessed"] = summary["selected"] - summary["processed"]
+          summary["completed"] = True
+          write_checkpoint(summary)
+          print("OCR_SCALE_RESULT_BEGIN", flush=True)
+          print(json.dumps({key: value for key, value in summary.items()
+                            if key not in ("candidates", "results")}, indent=2), flush=True)
+          print("OCR_SCALE_RESULT_END", flush=True)
+          PY
+
+      - name: Remove temporary YouTube session
+        if: ${{ always() }}
+        run: rm -f -- "$RUNNER_TEMP/youtube-cookies.txt"
+
+      - name: Publish consolidated queue
+        if: ${{ success() && env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
+        run: |
+          total=$(jq '.candidates | length' data/last-run.json)
+          for ((start=0; start<total; start+=50)); do
+            jq --argjson start "$start" \
+              '{candidates: .candidates[$start:($start + 50)]}' \
+              data/last-run.json > "$RUNNER_TEMP/candidate-batch.json"
+            curl --fail-with-body --retry 2 \
+              -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
+              -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data-binary @"$RUNNER_TEMP/candidate-batch.json" \
+              https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
+          done
+
+      - name: Refresh public rankings
+        if: ${{ success() && env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
+        run: |
+          curl --fail-with-body --retry 2 \
+            -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
+            https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates \
+            | jq '{candidates: [], rankings: (.rankings // []), history: (.history // []), processing: (.processing // null)}' \
+            > vercel-app/public/candidates.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vercel-app/public/candidates.json
+          if ! git diff --cached --quiet; then
+            git commit -m "[skip-run] Refresh public rankings"
+            git pull --rebase origin main
+            git push
+          fi
+
+      - name: Save consolidated database
+        if: ${{ always() && hashFiles('data/gc_radar.sqlite3') != '' }}
+        uses: actions/cache/save@v4
+        with:
+          path: data/gc_radar.sqlite3
+          key: gc-radar-db-${{ github.run_id }}
+
+      - name: Upload compact OCR checkpoint
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: gc-radar-scale-${{ github.run_number }}
+          path: |
+            data/gc_radar.sqlite3
+            data/last-run.json
+            data/ocr-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6
