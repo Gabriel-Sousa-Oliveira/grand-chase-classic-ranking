@@ -261,11 +261,11 @@ jobs:
             GC_OCR_VISUAL_EVENTS=1 GC_OCR_DEBUG_TEXT=1 \
               GC_OCR_LOOKBACK_SECONDS=300 \
               python -m gc_radar.ocr_validation --workers 3 --tolerance-ms 1500 \
-              --case=6ljAMGvQq-8=48450 \
-              --case=CD3mVzdsp0M=87000 \
-              --case=J0d_G_jQj7s=155000 \
-              --case=89HH0WYIjUY=208000 \
-              --case=rHudrDdfL64=86000 \
+              --case=WZeUJAw4pmU=92000 \
+              --case=Nu2g_yTv3ew=198000 \
+              --case=mPUPnWBctKk=69000 \
+              --case=_TEuJdQS0ic=98000 \
+              --case=Rk9kGTIY-6U=117000 \
               > ../data/last-run.json
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sample]"* ]]; then
             GC_OCR_VISUAL_EVENTS=1 GC_OCR_DEBUG_TEXT=1 \
