@@ -93,6 +93,19 @@
       "approved_at": "2026-09-10 13:28:58"
     },
     {
+      "id": 28864,
+      "character": "Ereb",
+      "category": "berkas_lair",
+      "floor": 0,
+      "time_ms": 30000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yBAOX1MeTB4",
+      "channel": "Borkaz",
+      "published_at": "2026-09-21T09:00:12Z",
+      "approved_at": "2026-09-21 17:04:39"
+    },
+    {
       "id": 5939,
       "character": "Rin/Lin",
       "category": "berkas_lair",
@@ -5098,20 +5111,33 @@
       "channel": "Borkaz",
       "published_at": "2026-09-14T09:38:31Z",
       "approved_at": "2026-09-14 17:14:25"
+    },
+    {
+      "id": 28864,
+      "character": "Ereb",
+      "category": "berkas_lair",
+      "floor": 0,
+      "time_ms": 30000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yBAOX1MeTB4",
+      "channel": "Borkaz",
+      "published_at": "2026-09-21T09:00:12Z",
+      "approved_at": "2026-09-21 17:04:39"
     }
   ],
   "processing": {
-    "discovered": 510,
-    "classified": 395,
-    "timed": 218,
-    "approved": 216,
-    "ranked": 216,
+    "discovered": 511,
+    "classified": 396,
+    "timed": 219,
+    "approved": 217,
+    "ranked": 217,
     "pending_manual": 172,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 144,
+    "title_times": 145,
     "human_times": 33,
-    "last_updated": "2026-09-21 16:06:13"
+    "last_updated": "2026-09-21 17:05:24"
   }
 }
