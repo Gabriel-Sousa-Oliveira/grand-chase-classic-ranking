@@ -257,6 +257,16 @@ jobs:
           summary["unprocessed"] = summary["selected"] - summary["processed"]
           Path("../data/last-run.json").write_text(json.dumps(summary))
           PY
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[validation]"* ]]; then
+            GC_OCR_VISUAL_EVENTS=1 GC_OCR_DEBUG_TEXT=1 \
+              GC_OCR_LOOKBACK_SECONDS=300 \
+              python -m gc_radar.ocr_validation --workers 3 --tolerance-ms 1500 \
+              --case=6ljAMGvQq-8=48450 \
+              --case=CD3mVzdsp0M=87000 \
+              --case=J0d_G_jQj7s=155000 \
+              --case=89HH0WYIjUY=208000 \
+              --case=rHudrDdfL64=86000 \
+              > ../data/last-run.json
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sample]"* ]]; then
             GC_OCR_VISUAL_EVENTS=1 GC_OCR_DEBUG_TEXT=1 \
               GC_OCR_LOOKBACK_SECONDS=300 \
@@ -307,7 +317,7 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Send candidates to hosted queue
-        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
+        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' && !(github.event_name == 'push' && contains(github.event.head_commit.message, '[validation]')) }}
         run: |
           total=$(jq '.candidates | length' data/last-run.json)
           for ((start=0; start<total; start+=50)); do
@@ -323,7 +333,7 @@ jobs:
           done
 
       - name: Refresh public Vercel rankings
-        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
+        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' && !(github.event_name == 'push' && contains(github.event.head_commit.message, '[validation]')) }}
         run: |
           git fetch origin main
           git rebase origin/main
