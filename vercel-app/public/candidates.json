@@ -262,6 +262,19 @@
       "approved_at": "2026-09-10 02:51:18"
     },
     {
+      "id": 38394,
+      "character": "Sieghart",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 62000,
+      "player_nick": "user000",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=jqaG3mIPVFI",
+      "channel": "user000",
+      "published_at": "2026-10-05T04:18:15Z",
+      "approved_at": "2026-10-05 16:18:24"
+    },
+    {
       "id": 4166,
       "character": "Sieghart",
       "category": "duel_4",
@@ -5124,20 +5137,33 @@
       "channel": "Borkaz",
       "published_at": "2026-09-21T09:00:12Z",
       "approved_at": "2026-09-21 17:04:39"
+    },
+    {
+      "id": 38394,
+      "character": "Sieghart",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 62000,
+      "player_nick": "user000",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=jqaG3mIPVFI",
+      "channel": "user000",
+      "published_at": "2026-10-05T04:18:15Z",
+      "approved_at": "2026-10-05 16:18:24"
     }
   ],
   "processing": {
-    "discovered": 519,
-    "classified": 404,
-    "timed": 219,
-    "approved": 217,
-    "ranked": 217,
-    "pending_manual": 180,
+    "discovered": 521,
+    "classified": 406,
+    "timed": 220,
+    "approved": 218,
+    "ranked": 218,
+    "pending_manual": 181,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 145,
+    "title_times": 146,
     "human_times": 33,
-    "last_updated": "2026-10-05 02:02:50"
+    "last_updated": "2026-10-05 16:19:02"
   }
 }
