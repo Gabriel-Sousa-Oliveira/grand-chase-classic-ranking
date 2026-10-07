@@ -210,6 +210,19 @@
       "approved_at": "2026-09-10 02:51:28"
     },
     {
+      "id": 40989,
+      "character": "Jin",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 56000,
+      "player_nick": "Wixmix",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yd0_pLl_8Jo",
+      "channel": "Wixmix",
+      "published_at": "2026-10-05T22:16:42Z",
+      "approved_at": "2026-10-07 15:27:41"
+    },
+    {
       "id": 4162,
       "character": "Kallia",
       "category": "duel_4",
@@ -5150,20 +5163,33 @@
       "channel": "user000",
       "published_at": "2026-10-05T04:18:15Z",
       "approved_at": "2026-10-05 16:18:24"
+    },
+    {
+      "id": 40989,
+      "character": "Jin",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 56000,
+      "player_nick": "Wixmix",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yd0_pLl_8Jo",
+      "channel": "Wixmix",
+      "published_at": "2026-10-05T22:16:42Z",
+      "approved_at": "2026-10-07 15:27:41"
     }
   ],
   "processing": {
-    "discovered": 523,
-    "classified": 408,
-    "timed": 220,
-    "approved": 218,
-    "ranked": 218,
+    "discovered": 524,
+    "classified": 409,
+    "timed": 221,
+    "approved": 219,
+    "ranked": 219,
     "pending_manual": 183,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 146,
+    "title_times": 147,
     "human_times": 33,
-    "last_updated": "2026-10-07 15:23:18"
+    "last_updated": "2026-10-07 15:28:58"
   }
 }
