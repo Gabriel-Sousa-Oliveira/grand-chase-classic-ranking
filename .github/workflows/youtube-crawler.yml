@@ -233,7 +233,7 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Store crawler funnel in admin panel
-        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent')) }}
+        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' && (github.event_name == 'push' || github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent')) }}
         run: |
           jq --argjson run_number "${{ github.run_number }}" \
             '{run_number: $run_number, created_at: now | todate,
