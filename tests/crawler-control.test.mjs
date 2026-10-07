@@ -49,5 +49,15 @@ test("crawler route keeps credentials server-side and restricts the administrato
   assert.match(source, /actions\/workflows\/\$\{WORKFLOW\}\/dispatches/);
   assert.match(source, /mode: "recent"/);
   assert.match(source, /origin !== new URL\(request\.url\)\.origin/);
+  assert.match(source, /Could not connect to GitHub Actions/);
+  assert.match(source, /Crawler status failed unexpectedly/);
+  assert.match(source, /crawler_reports/);
+  assert.match(source, /INGEST_API_TOKEN/);
   assert.doesNotMatch(source, /github_pat_[A-Za-z0-9_]+/);
+});
+
+test("crawler client handles non-JSON API failures", async () => {
+  const source = await readFile(new URL("../app/crawler-control.tsx", import.meta.url), "utf8");
+  assert.match(source, /content-type/);
+  assert.match(source, /Crawler API returned HTTP/);
 });

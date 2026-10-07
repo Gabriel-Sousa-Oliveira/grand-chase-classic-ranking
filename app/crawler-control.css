@@ -1,0 +1,34 @@
+.crawlerFunnel {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.crawlerFunnel div {
+  min-width: 0;
+  padding: 10px 6px;
+  border: 1px solid #253244;
+  border-radius: 10px;
+  background: #0e1622;
+  text-align: center;
+}
+
+.crawlerFunnel b {
+  display: block;
+  color: #66e2df;
+  font-size: 18px;
+}
+
+.crawlerFunnel span {
+  display: block;
+  margin-top: 3px;
+  color: #8b98aa;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+@media (max-width: 560px) {
+  .crawlerFunnel { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

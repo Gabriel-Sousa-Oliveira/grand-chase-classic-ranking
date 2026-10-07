@@ -34,6 +34,12 @@ DEFAULT_SEARCH_QUERIES = (
     "แกรนด์เชส คลาสสิก วอยด์ เทนต์",
     "แกรนด์เชส คลาสสิก วอยด์ ไนต์แมร์",
     "แกรนด์เชส คลาสสิก วอยด์ อะพอคคาลิปส์",
+    "GCC Void Invasion",
+    "GCC Void Taint",
+    "GCC Void Nightmare",
+    "GCC Void Apocalypse",
+    "GCC Duel 4",
+    "GC Classic Infinity Cloister",
 )
 
 CHARACTER_SEARCH_NAMES = (
@@ -195,15 +201,87 @@ def search_videos(query: str, *, api_key: str | None = None, days: int = 3,
     return {"videos": videos, "next_page_token": payload.get("nextPageToken")}
 
 
+def recent_channel_uploads(channel_id: str, *, api_key: str | None = None,
+                           days: int = 3, max_results: int = 50,
+                           opener: Callable = urlopen,
+                           now: datetime | None = None) -> list[dict]:
+    """Read recent uploads from a discovered channel at low quota cost."""
+    if not channel_id:
+        raise ValueError("channel_id is required")
+    if not 1 <= max_results <= 100:
+        raise ValueError("max_results must be between 1 and 100")
+    key = _api_key(api_key)
+    params = {"part": "contentDetails", "id": channel_id, "key": key}
+    with opener("https://www.googleapis.com/youtube/v3/channels?" +
+                urlencode(params), timeout=20) as response:
+        payload = json.load(response)
+    items = payload.get("items", [])
+    if not items:
+        return []
+    uploads_id = items[0].get("contentDetails", {}).get(
+        "relatedPlaylists", {}).get("uploads")
+    if not uploads_id:
+        return []
+
+    cutoff = _published_after(days, now)
+    videos: list[dict] = []
+    page_token = None
+    while len(videos) < max_results:
+        page_size = min(50, max_results - len(videos))
+        page_params = {"part": "snippet", "playlistId": uploads_id,
+                       "maxResults": page_size, "key": key}
+        if page_token:
+            page_params["pageToken"] = page_token
+        with opener("https://www.googleapis.com/youtube/v3/playlistItems?" +
+                    urlencode(page_params), timeout=20) as response:
+            page = json.load(response)
+        reached_cutoff = False
+        for item in page.get("items", []):
+            snippet = item.get("snippet", {})
+            published_at = snippet.get("publishedAt") or ""
+            if published_at and published_at < cutoff:
+                reached_cutoff = True
+                continue
+            video_id = snippet.get("resourceId", {}).get("videoId")
+            title = snippet.get("title", "")
+            if not video_id or title in {"Deleted video", "Private video"}:
+                continue
+            videos.append({
+                "video_id": video_id,
+                "url": f"https://www.youtube.com/watch?v={video_id}",
+                "title": title,
+                "channel": snippet.get("videoOwnerChannelTitle") or
+                           snippet.get("channelTitle"),
+                "published_at": published_at or None,
+                "raw": item,
+                "query": f"recent-channel:{channel_id}",
+            })
+        page_token = page.get("nextPageToken")
+        if reached_cutoff or not page_token:
+            break
+    return videos
+
+
 def discover_videos(queries: Iterable[str] = DEFAULT_SEARCH_QUERIES, *,
                     api_key: str | None = None, days: int = 3,
                     max_results: int = 50, opener: Callable = urlopen,
-                    now: datetime | None = None) -> list[dict]:
-    """Search each query once and merge repeated results by YouTube video ID."""
+                    now: datetime | None = None,
+                    max_pages_per_query: int = 2) -> list[dict]:
+    """Search and merge results, paging only when a full first page warrants it."""
+    if not 1 <= max_pages_per_query <= 2:
+        raise ValueError("max_pages_per_query must be between 1 and 2")
     discovered: dict[str, dict] = {}
     for query in queries:
-        result = search_videos(query, api_key=api_key, days=days,
-                               max_results=max_results, opener=opener, now=now)
-        for video in result["videos"]:
-            discovered.setdefault(video["video_id"], video)
+        page_token = None
+        for page_index in range(max_pages_per_query):
+            result = search_videos(
+                query, api_key=api_key, days=days, max_results=max_results,
+                page_token=page_token, opener=opener, now=now,
+            )
+            for video in result["videos"]:
+                discovered.setdefault(video["video_id"], video)
+            page_token = result["next_page_token"]
+            if (not page_token or len(result["videos"]) < max_results
+                    or page_index + 1 >= max_pages_per_query):
+                break
     return list(discovered.values())

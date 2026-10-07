@@ -7,12 +7,14 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from .database import CandidateRepository
-from .ocr import infer_chapter_time, read_video_time
+from .ocr import read_video_time
 from .parser import parse_title
-from .relevance import description_from_metadata, evaluate_video_relevance
+from .relevance import (description_from_metadata, evaluate_video_relevance,
+                        rejection_reason)
 from .syntaxii import import_syntaxii
 from .youtube import (DEFAULT_SEARCH_QUERIES, channel_archive, discover_videos,
-                      extract_video_id, fetch_video, fill_ranking_queries)
+                      extract_video_id, fetch_video, fill_ranking_queries,
+                      recent_channel_uploads)
 from .video_pipeline import triage_ocr_result
 
 
@@ -49,7 +51,6 @@ def main() -> None:
     ocr_cmd.add_argument("--all-missing", action="store_true")
     ocr_cmd.add_argument("--retry-no-consensus", action="store_true")
     ocr_cmd.add_argument("--character", action="append", dest="characters")
-    ocr_cmd.add_argument("--video-id", action="append", dest="video_ids")
     commands.add_parser("queue")
     commands.add_parser("prune-irrelevant")
     args = parser.parse_args()
@@ -120,13 +121,49 @@ def main() -> None:
         elif args.command in {"crawl", "fill-ranking"}:
             ranking_mode = args.command == "fill-ranking"
             queries = fill_ranking_queries() if ranking_mode else (args.queries or DEFAULT_SEARCH_QUERIES)
-            videos = discover_videos(queries,
-                                     days=args.days, max_results=args.max_results)
+            seed_videos = discover_videos(
+                queries, days=args.days, max_results=args.max_results,
+            )
+            channel_counts: dict[str, int] = {}
+            if not ranking_mode:
+                for metadata in seed_videos:
+                    parsed = parse_title(metadata["title"])
+                    decision = evaluate_video_relevance(
+                        metadata["title"],
+                        description_from_metadata(metadata["raw"]), parsed,
+                    )
+                    channel_id = metadata.get("raw", {}).get(
+                        "snippet", {}).get("channelId")
+                    if decision.accepted and channel_id:
+                        channel_counts[channel_id] = channel_counts.get(channel_id, 0) + 1
+            selected_channels = [
+                channel_id for channel_id, _ in sorted(
+                    channel_counts.items(), key=lambda item: (-item[1], item[0])
+                )[:12]
+            ]
+            channel_videos: list[dict] = []
+            expansion_errors: list[dict] = []
+            for channel_id in selected_channels:
+                try:
+                    channel_videos.extend(recent_channel_uploads(
+                        channel_id, days=args.days, max_results=50,
+                    ))
+                except Exception as error:
+                    expansion_errors.append({
+                        "channel_id": channel_id,
+                        "error": type(error).__name__,
+                    })
+            videos_by_id = {
+                metadata["video_id"]: metadata
+                for metadata in [*seed_videos, *channel_videos]
+            }
+            videos = list(videos_by_id.values())
             created = 0
             duplicates = 0
             ignored = 0
             statuses: dict[str, int] = {}
             ignored_reasons: dict[str, int] = {}
+            ignored_samples: list[dict] = []
             for metadata in videos:
                 parsed = parse_title(metadata["title"])
                 decision = evaluate_video_relevance(
@@ -139,10 +176,18 @@ def main() -> None:
                     accepted = decision.accepted
                 if not accepted:
                     ignored += 1
-                    reason = decision.reasons[0] if decision.reasons else "outside_target"
+                    reason = rejection_reason(decision)
                     if ranking_mode and decision.accepted:
                         reason = "outside_target"
                     ignored_reasons[reason] = ignored_reasons.get(reason, 0) + 1
+                    if len(ignored_samples) < 25:
+                        ignored_samples.append({
+                            "video_id": metadata["video_id"],
+                            "title": metadata["title"],
+                            "channel": metadata.get("channel"),
+                            "query": metadata.get("query"),
+                            "reason": reason,
+                        })
                     continue
                 candidate, was_created = repo.add(
                     metadata["video_id"], metadata["url"], parsed,
@@ -161,9 +206,14 @@ def main() -> None:
                 "mode": "fill-ranking" if ranking_mode else "recent",
                 "target": "void_invasion_3f" if ranking_mode else "all_supported_dungeons",
                 "queries": len(queries),
+                "seed_discovered_unique": len(seed_videos),
+                "channels_expanded": len(selected_channels),
+                "channel_uploads_scanned": len(channel_videos),
+                "expansion_errors": expansion_errors,
                 "discovered_unique": len(videos), "created": created,
                 "duplicates": duplicates, "ignored": ignored,
-                "ignored_reasons": ignored_reasons, "statuses": statuses,
+                "ignored_reasons": ignored_reasons,
+                "ignored_samples": ignored_samples, "statuses": statuses,
                 "queue_size": len(repo.queue()), "candidates": exported,
             }, ensure_ascii=False, indent=2))
         elif args.command == "ocr-queue":
@@ -172,17 +222,11 @@ def main() -> None:
             evidence_directory = Path(args.db).resolve().parent / "ocr-evidence"
             candidates = repo.ocr_candidates(
                 args.limit, args.all_missing, args.retry_no_consensus,
-                args.characters, args.video_ids,
+                args.characters,
             )
 
             def inspect(candidate: dict) -> tuple[dict, object | None, Exception | None]:
                 try:
-                    chapter_time = infer_chapter_time(
-                        description_from_metadata(candidate.get("raw_metadata")),
-                        candidate.get("floor"),
-                    )
-                    if chapter_time is not None:
-                        return candidate, chapter_time, None
                     return candidate, read_video_time(
                         candidate["video_url"], evidence_directory,
                         candidate["video_id"],
@@ -198,10 +242,7 @@ def main() -> None:
                     triage = triage_ocr_result(ocr, error)
                     if triage.processing_reason == "technical_error":
                         failed += 1
-                        repo.record_ocr_attempt(candidate["id"], "error", {
-                            "error_type": type(error).__name__,
-                            "error_detail": str(error)[:1200],
-                        })
+                        repo.record_ocr_attempt(candidate["id"], "error")
                         results.append({"video_id": candidate["video_id"], "result": "error",
                                         "error": str(error)[:240]})
                         continue
@@ -217,7 +258,7 @@ def main() -> None:
                         results.append({"video_id": candidate["video_id"], "result": "no_consensus"})
                         continue
                     repo.set_ocr_time(candidate["id"], ocr.time_ms, ocr.confidence, {
-                        "engine": ocr.source, "matching_frames": ocr.matching_frames,
+                        "engine": "tesseract+opencv", "matching_frames": ocr.matching_frames,
                         "observations": ocr.observations,
                         "evidence_frame": ocr.evidence_frame,
                         "evidence_seconds_from_end": ocr.evidence_seconds_from_end,
@@ -226,22 +267,17 @@ def main() -> None:
                     })
                     matched += 1
                     results.append({"video_id": candidate["video_id"], "result": "matched",
-                                    "time_ms": ocr.time_ms, "confidence": ocr.confidence,
-                                    "source": ocr.source})
+                                    "time_ms": ocr.time_ms, "confidence": ocr.confidence})
             exported = [{key: candidate[key] for key in (
                 "video_id", "video_url", "title", "channel", "player_nick",
                 "published_at", "character", "category", "floor", "time_ms",
                 "confidence", "status", "era_key", "raw_metadata"
             )} for candidate in repo.queue()]
             print(json.dumps({"mode": "ocr", "processed": processed, "matched": matched,
-                              "matched_by_source": {
-                                  source: sum(r.get("source") == source for r in results)
-                                  for source in sorted({r["source"] for r in results if "source" in r})
-                              },
                               "failed": failed, "results": results,
                               "remaining_ocr": repo.ocr_remaining(
                                   args.all_missing, args.retry_no_consensus,
-                                  args.characters, args.video_ids,
+                                  args.characters,
                               ),
                               "queue_size": len(exported), "candidates": exported},
                              ensure_ascii=False, indent=2))

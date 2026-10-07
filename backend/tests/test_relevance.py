@@ -2,7 +2,7 @@ import unittest
 
 from gc_radar.parser import parse_title
 from gc_radar.relevance import (description_from_metadata,
-                                evaluate_video_relevance)
+                                evaluate_video_relevance, rejection_reason)
 
 
 class RelevanceTests(unittest.TestCase):
@@ -88,6 +88,13 @@ class RelevanceTests(unittest.TestCase):
         self.assertFalse(decision.accepted)
         self.assertFalse(decision.hard_reject)
         self.assertIn("missing_run_context", decision.reasons)
+        self.assertEqual(rejection_reason(decision), "missing_run_context")
+
+    def test_rejection_reason_skips_positive_character_signal(self):
+        decision = self.decide("Ronan speedrun")
+        self.assertFalse(decision.accepted)
+        self.assertIn("character", decision.reasons)
+        self.assertEqual(rejection_reason(decision), "missing_dungeon")
 
     def test_accepts_korean_and_thai_run_language(self):
         titles = (

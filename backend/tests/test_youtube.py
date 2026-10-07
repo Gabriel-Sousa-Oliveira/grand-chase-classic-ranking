@@ -5,7 +5,8 @@ from datetime import datetime, timezone
 from urllib.parse import parse_qs, urlparse
 
 from gc_radar.youtube import (DEFAULT_SEARCH_QUERIES, channel_archive,
-                              discover_videos, fill_ranking_queries, search_videos)
+                              discover_videos, fill_ranking_queries,
+                              recent_channel_uploads, search_videos)
 
 
 class FakeResponse(io.BytesIO):
@@ -69,6 +70,63 @@ class YouTubeSearchTests(unittest.TestCase):
         self.assertIn("Grand Chase Classic Duel 4", DEFAULT_SEARCH_QUERIES)
         self.assertIn("Grand Chase Classic Tower of Disappearance", DEFAULT_SEARCH_QUERIES)
         self.assertIn("Grand Chase Classic LoJ Unlimited", DEFAULT_SEARCH_QUERIES)
+        self.assertIn("GCC Duel 4", DEFAULT_SEARCH_QUERIES)
+
+    def test_discovery_pages_only_after_a_full_page(self):
+        calls = []
+
+        def opener(url, timeout):
+            query = parse_qs(urlparse(url).query)
+            calls.append(query.get("pageToken", [None])[0])
+            page = len(calls)
+            count = 2 if page == 1 else 1
+            payload = {
+                "items": [{
+                    "id": {"videoId": f"video{page}{index:05d}"[-11:]},
+                    "snippet": {"title": "Ereb Void Invasion speedrun",
+                                "channelTitle": "Runner",
+                                "publishedAt": "2026-09-08T10:00:00Z"},
+                } for index in range(count)],
+                "nextPageToken": "page-two" if page == 1 else None,
+            }
+            return FakeResponse(json.dumps(payload).encode())
+
+        videos = discover_videos(
+            ["query"], api_key="test-key", max_results=2,
+            max_pages_per_query=2, opener=opener,
+        )
+        self.assertEqual(calls, [None, "page-two"])
+        self.assertEqual(len(videos), 3)
+
+    def test_recent_channel_uploads_stops_at_date_cutoff(self):
+        requested_paths = []
+
+        def opener(url, timeout):
+            parsed = urlparse(url)
+            requested_paths.append(parsed.path)
+            if parsed.path.endswith("/channels"):
+                payload = {"items": [{"contentDetails": {
+                    "relatedPlaylists": {"uploads": "UU-runner"}
+                }}]}
+            else:
+                payload = {"items": [
+                    {"snippet": {"title": "Ereb Void Invasion speedrun",
+                                  "publishedAt": "2026-09-07T09:00:00Z",
+                                  "videoOwnerChannelTitle": "Runner",
+                                  "resourceId": {"videoId": "recent00001"}}},
+                    {"snippet": {"title": "Old run",
+                                  "publishedAt": "2026-08-01T09:00:00Z",
+                                  "resourceId": {"videoId": "oldvideo001"}}},
+                ], "nextPageToken": "unused"}
+            return FakeResponse(json.dumps(payload).encode())
+
+        videos = recent_channel_uploads(
+            "UC-runner", api_key="test-key", days=3, opener=opener,
+            now=datetime(2026, 9, 8, tzinfo=timezone.utc),
+        )
+        self.assertEqual(requested_paths,
+                         ["/youtube/v3/channels", "/youtube/v3/playlistItems"])
+        self.assertEqual([video["video_id"] for video in videos], ["recent00001"])
 
     def test_channel_archive_resolves_uploads_from_a_reference_video(self):
         requested_paths = []

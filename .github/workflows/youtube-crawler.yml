@@ -36,9 +36,7 @@ permissions:
 
 concurrency:
   group: youtube-crawler
-  # Iterative OCR experiments replace stale scans; scheduled discovery runs
-  # continue to wait normally and are never cancelled by another schedule.
-  cancel-in-progress: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr]') }}
+  cancel-in-progress: false
 
 jobs:
   discover:
@@ -48,9 +46,6 @@ jobs:
     env:
       SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
       SITE_ACCESS_TOKEN: ${{ secrets.SITE_ACCESS_TOKEN }}
-      OMP_THREAD_LIMIT: "1"
-      OMP_NUM_THREADS: "1"
-      OPENBLAS_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -201,78 +196,9 @@ jobs:
           YOUTUBE_USE_PO_TOKEN: "1"
         run: |
           cd backend
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[dungeon-batches]"* ]]; then
-            python - <<'PY'
-          import json
-          import sqlite3
-          import subprocess
-          import sys
-          from pathlib import Path
-          
-          db = "../data/gc_radar.sqlite3"
-          categories = ["duel_4", "tower_of_disappearance", "void_apocalypse",
-                        "void_taint", "void_nightmare", "void_invasion"]
-          with sqlite3.connect(db) as conn:
-              selected = {
-                  category: [row[0] for row in conn.execute(
-                      "SELECT video_id FROM candidates WHERE category = ? "
-                      "AND time_ms IS NULL AND status IN "
-                      "('time_required', 'classification_required') ORDER BY video_id",
-                      (category,))]
-                  for category in categories
-              }
-          summary = {"mode": "ocr-selected-dungeons", "processed": 0, "matched": 0,
-                     "failed": 0, "results": [], "dungeons": {},
-                     "selected": sum(map(len, selected.values()))}
-          report_dir = Path("../data/ocr-batches")
-          report_dir.mkdir(parents=True, exist_ok=True)
-          print("Selected:", {key: len(value) for key, value in selected.items()}, flush=True)
-          for category, ids in selected.items():
-              stats = {"selected": len(ids), "processed": 0, "matched": 0, "failed": 0}
-              summary["dungeons"][category] = stats
-              for start in range(0, len(ids), 8):
-                  batch = ids[start:start + 8]
-                  command = [sys.executable, "-m", "gc_radar.cli", "--db", db,
-                             "ocr-queue", "--limit", "0", "--workers", "4",
-                             "--all-missing", "--retry-no-consensus"]
-                  for video_id in batch:
-                      command.append(f"--video-id={video_id}")
-                  print(f"{category}: {start + 1}-{start + len(batch)}/{len(ids)}", flush=True)
-                  report = report_dir / f"{category}-{start:03d}.json"
-                  with report.open("w") as output:
-                      subprocess.run(command, stdout=output, check=True)
-                  result = json.loads(report.read_text())
-                  for key in ("processed", "matched", "failed"):
-                      summary[key] += result[key]
-                      stats[key] += result[key]
-                  summary["results"].extend(result["results"])
-                  summary["candidates"] = result["candidates"]
-                  summary["queue_size"] = result["queue_size"]
-                  Path("../data/last-run.json").write_text(json.dumps(summary))
-                  print("Completed:", stats, flush=True)
-          if "candidates" not in summary:
-              summary["candidates"] = json.loads(subprocess.check_output(
-                  [sys.executable, "-m", "gc_radar.cli", "--db", db, "queue"]))
-              summary["queue_size"] = len(summary["candidates"])
-          summary["unprocessed"] = summary["selected"] - summary["processed"]
-          Path("../data/last-run.json").write_text(json.dumps(summary))
-          PY
-          elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[validation]"* ]]; then
-            GC_OCR_VISUAL_EVENTS=1 GC_OCR_DEBUG_TEXT=1 \
-              GC_OCR_LOOKBACK_SECONDS=300 \
-              python -m gc_radar.ocr_validation --workers 3 --tolerance-ms 1500 \
-              --case=WZeUJAw4pmU=92000 \
-              --case=Nu2g_yTv3ew=198000 \
-              --case=mPUPnWBctKk=69000 \
-              --case=_TEuJdQS0ic=98000 \
-              --case=Rk9kGTIY-6U=117000 \
-              > ../data/last-run.json
-          elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sample]"* ]]; then
-            GC_OCR_VISUAL_EVENTS=1 GC_OCR_DEBUG_TEXT=1 \
-              GC_OCR_LOOKBACK_SECONDS=300 \
-              python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
-              --limit 2 --workers 2 --retry-no-consensus \
-              --video-id=6ljAMGvQq-8 --video-id=9dlG5iMzGv0 \
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[sample]"* ]]; then
+            python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
+              --limit 3 --workers 2 --retry-no-consensus \
               > ../data/last-run.json
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" == *"[targeted]"* ]]; then
             python -m gc_radar.cli --db ../data/gc_radar.sqlite3 ocr-queue \
@@ -301,23 +227,28 @@ jobs:
 
       - name: Add report to workflow summary
         run: |
-          diagnostic=$(find data/ocr-evidence -name '*-no-consensus.png' -print -quit 2>/dev/null || true)
-          if [[ -n "$diagnostic" ]]; then
-            echo 'OCR_DIAGNOSTIC_BEGIN'
-            base64 -w 0 "$diagnostic"
-            echo
-            echo 'OCR_DIAGNOSTIC_END'
-          fi
-          echo 'OCR_RESULT_BEGIN'
-          jq 'del(.candidates)' data/last-run.json
-          echo 'OCR_RESULT_END'
           echo '## GC Run Radar — descoberta do YouTube' >> "$GITHUB_STEP_SUMMARY"
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
           cat data/last-run.json >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Store crawler funnel in admin panel
+        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'recent')) }}
+        run: |
+          jq --argjson run_number "${{ github.run_number }}" \
+            '{run_number: $run_number, created_at: now | todate,
+              queries, seed_discovered_unique, channels_expanded,
+              channel_uploads_scanned, discovered_unique, duplicates,
+              ignored, created}' data/last-run.json > "$RUNNER_TEMP/crawler-report.json"
+          curl --fail-with-body --retry 2 -X PUT \
+            -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
+            -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @"$RUNNER_TEMP/crawler-report.json" \
+            https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/crawler
+
       - name: Send candidates to hosted queue
-        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' && !(github.event_name == 'push' && contains(github.event.head_commit.message, '[validation]')) }}
+        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
         run: |
           total=$(jq '.candidates | length' data/last-run.json)
           for ((start=0; start<total; start+=50)); do
@@ -333,7 +264,7 @@ jobs:
           done
 
       - name: Refresh public Vercel rankings
-        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' && !(github.event_name == 'push' && contains(github.event.head_commit.message, '[validation]')) }}
+        if: ${{ env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
         run: |
           git fetch origin main
           git rebase origin/main
@@ -358,15 +289,6 @@ jobs:
           path: data/gc_radar.sqlite3
           key: gc-radar-db-${{ github.run_id }}
 
-      - name: Upload OCR report
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: gc-radar-report-${{ github.run_number }}
-          path: data/last-run.json
-          if-no-files-found: error
-          retention-days: 30
-
       - name: Upload validation data
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -377,6 +299,5 @@ jobs:
             data/last-run.json
             data/prune-result.json
             data/ocr-evidence/
-            data/ocr-batches/
           if-no-files-found: warn
           retention-days: 30

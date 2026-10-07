@@ -82,6 +82,19 @@ class RelevanceDecision:
     hard_reject: bool = False
 
 
+def rejection_reason(decision: RelevanceDecision) -> str:
+    """Return the actionable cause instead of the first positive scoring signal."""
+    priorities = (
+        "multi_character_title", "non_run_title", "cooperative_title",
+        "editorial_title", "multiple_named_characters",
+        "multi_character_chapters", "non_run_description",
+        "cooperative_description", "editorial_description",
+        "missing_character", "missing_dungeon", "missing_run_context",
+    )
+    return next((reason for reason in priorities if reason in decision.reasons),
+                "low_relevance")
+
+
 def evaluate_video_relevance(title: str, description: str,
                              parsed: ParsedRun) -> RelevanceDecision:
     """Decide whether an automatically discovered video looks like one run.
