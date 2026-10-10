@@ -626,6 +626,19 @@
       "approved_at": "2026-09-09 20:49:02"
     },
     {
+      "id": 42880,
+      "character": "Sieghart",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 157000,
+      "player_nick": "user000",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=r2lplGmHJNU",
+      "channel": "user000",
+      "published_at": "2026-10-10T06:36:27Z",
+      "approved_at": "2026-10-10 16:14:38"
+    },
+    {
       "id": 1,
       "character": "Ai",
       "category": "void_invasion",
@@ -5176,20 +5189,33 @@
       "channel": "Wixmix",
       "published_at": "2026-10-05T22:16:42Z",
       "approved_at": "2026-10-07 15:27:41"
+    },
+    {
+      "id": 42880,
+      "character": "Sieghart",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 157000,
+      "player_nick": "user000",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=r2lplGmHJNU",
+      "channel": "user000",
+      "published_at": "2026-10-10T06:36:27Z",
+      "approved_at": "2026-10-10 16:14:38"
     }
   ],
   "processing": {
-    "discovered": 526,
-    "classified": 411,
-    "timed": 221,
-    "approved": 219,
-    "ranked": 219,
+    "discovered": 527,
+    "classified": 412,
+    "timed": 222,
+    "approved": 220,
+    "ranked": 220,
     "pending_manual": 185,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 147,
+    "title_times": 148,
     "human_times": 33,
-    "last_updated": "2026-10-10 02:21:34"
+    "last_updated": "2026-10-10 16:15:40"
   }
 }
