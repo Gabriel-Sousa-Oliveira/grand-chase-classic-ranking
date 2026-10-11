@@ -522,6 +522,19 @@
       "approved_at": "2026-09-10 02:51:18"
     },
     {
+      "id": 43173,
+      "character": "Sieghart",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 94000,
+      "player_nick": "user000",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=cWNIQi0rN00",
+      "channel": "user000",
+      "published_at": "2026-10-11T00:01:16Z",
+      "approved_at": "2026-10-11 01:53:56"
+    },
+    {
       "id": 4173,
       "character": "Sieghart",
       "category": "tower_of_disappearance",
@@ -5202,20 +5215,33 @@
       "channel": "user000",
       "published_at": "2026-10-10T06:36:27Z",
       "approved_at": "2026-10-10 16:14:38"
+    },
+    {
+      "id": 43173,
+      "character": "Sieghart",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 94000,
+      "player_nick": "user000",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=cWNIQi0rN00",
+      "channel": "user000",
+      "published_at": "2026-10-11T00:01:16Z",
+      "approved_at": "2026-10-11 01:53:56"
     }
   ],
   "processing": {
-    "discovered": 527,
-    "classified": 412,
-    "timed": 222,
-    "approved": 220,
-    "ranked": 220,
+    "discovered": 528,
+    "classified": 413,
+    "timed": 223,
+    "approved": 221,
+    "ranked": 221,
     "pending_manual": 185,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 148,
+    "title_times": 149,
     "human_times": 33,
-    "last_updated": "2026-10-10 16:15:40"
+    "last_updated": "2026-10-11 01:54:53"
   }
 }
