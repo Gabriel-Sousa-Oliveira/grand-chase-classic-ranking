@@ -1731,17 +1731,17 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
-      "id": 1732,
+      "id": 44139,
       "character": "Ereb",
       "category": "void_nightmare",
       "floor": 4,
-      "time_ms": 264000,
+      "time_ms": 211000,
       "player_nick": "Borkaz",
       "era_key": "current",
-      "video_url": "https://youtu.be/V6O_9x6QTvw",
+      "video_url": "https://www.youtube.com/watch?v=ZOqwtN4NePc",
       "channel": "Borkaz",
-      "published_at": null,
-      "approved_at": "2026-09-09 20:59:07"
+      "published_at": "2026-10-12T09:03:47Z",
+      "approved_at": "2026-10-12 20:18:07"
     },
     {
       "id": 22053,
@@ -5228,20 +5228,33 @@
       "channel": "user000",
       "published_at": "2026-10-11T00:01:16Z",
       "approved_at": "2026-10-11 01:53:56"
+    },
+    {
+      "id": 44139,
+      "character": "Ereb",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 211000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ZOqwtN4NePc",
+      "channel": "Borkaz",
+      "published_at": "2026-10-12T09:03:47Z",
+      "approved_at": "2026-10-12 20:18:07"
     }
   ],
   "processing": {
-    "discovered": 528,
-    "classified": 413,
-    "timed": 223,
-    "approved": 221,
-    "ranked": 221,
+    "discovered": 529,
+    "classified": 414,
+    "timed": 224,
+    "approved": 222,
+    "ranked": 222,
     "pending_manual": 185,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 149,
+    "title_times": 150,
     "human_times": 33,
-    "last_updated": "2026-10-12 02:25:21"
+    "last_updated": "2026-10-12 20:18:36"
   }
 }
