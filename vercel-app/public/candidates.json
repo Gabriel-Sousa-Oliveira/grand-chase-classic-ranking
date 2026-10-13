@@ -5244,17 +5244,17 @@
     }
   ],
   "processing": {
-    "discovered": 529,
-    "classified": 414,
+    "discovered": 530,
+    "classified": 415,
     "timed": 224,
     "approved": 222,
     "ranked": 222,
-    "pending_manual": 185,
+    "pending_manual": 186,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
     "title_times": 150,
     "human_times": 33,
-    "last_updated": "2026-10-12 20:18:36"
+    "last_updated": "2026-10-13 03:37:12"
   }
 }
