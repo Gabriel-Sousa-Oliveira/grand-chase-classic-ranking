@@ -548,6 +548,19 @@
       "approved_at": "2026-09-10 02:51:18"
     },
     {
+      "id": 44944,
+      "character": "Amy",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 177000,
+      "player_nick": "nana FATEJJ",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=IYgJwkJfGRE",
+      "channel": "nana FATEJJ",
+      "published_at": "2026-10-13T21:19:54Z",
+      "approved_at": "2026-10-14 01:54:53"
+    },
+    {
       "id": 9794,
       "character": "Arme",
       "category": "void_apocalypse",
@@ -5241,20 +5254,33 @@
       "channel": "Borkaz",
       "published_at": "2026-10-12T09:03:47Z",
       "approved_at": "2026-10-12 20:18:07"
+    },
+    {
+      "id": 44944,
+      "character": "Amy",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 177000,
+      "player_nick": "nana FATEJJ",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=IYgJwkJfGRE",
+      "channel": "nana FATEJJ",
+      "published_at": "2026-10-13T21:19:54Z",
+      "approved_at": "2026-10-14 01:54:53"
     }
   ],
   "processing": {
-    "discovered": 530,
-    "classified": 415,
-    "timed": 224,
-    "approved": 222,
-    "ranked": 222,
-    "pending_manual": 186,
+    "discovered": 540,
+    "classified": 425,
+    "timed": 225,
+    "approved": 223,
+    "ranked": 223,
+    "pending_manual": 195,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 150,
+    "title_times": 151,
     "human_times": 33,
-    "last_updated": "2026-10-13 18:20:01"
+    "last_updated": "2026-10-14 01:55:54"
   }
 }
