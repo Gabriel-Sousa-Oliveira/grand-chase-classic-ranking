@@ -5270,17 +5270,17 @@
     }
   ],
   "processing": {
-    "discovered": 540,
-    "classified": 425,
+    "discovered": 542,
+    "classified": 427,
     "timed": 225,
     "approved": 223,
     "ranked": 223,
-    "pending_manual": 195,
+    "pending_manual": 197,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
     "title_times": 151,
     "human_times": 33,
-    "last_updated": "2026-10-14 01:55:54"
+    "last_updated": "2026-10-14 15:51:06"
   }
 }
