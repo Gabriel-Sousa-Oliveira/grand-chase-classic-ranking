@@ -1198,17 +1198,17 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
-      "id": 53,
+      "id": 45625,
       "character": "Rin/Lin",
       "category": "void_invasion",
       "floor": 3,
-      "time_ms": 81000,
+      "time_ms": 60000,
       "player_nick": "Borkaz",
       "era_key": "current",
-      "video_url": "https://www.youtube.com/watch?v=tt4-bEt6Zps",
+      "video_url": "https://www.youtube.com/watch?v=-bKKze55LkE",
       "channel": "Borkaz",
-      "published_at": "2026-05-08T09:06:26Z",
-      "approved_at": "2026-09-09 17:50:38"
+      "published_at": "2026-10-14T16:19:32Z",
+      "approved_at": "2026-10-15 01:29:08"
     },
     {
       "id": 54,
@@ -5267,20 +5267,33 @@
       "channel": "nana FATEJJ",
       "published_at": "2026-10-13T21:19:54Z",
       "approved_at": "2026-10-14 01:54:53"
+    },
+    {
+      "id": 45625,
+      "character": "Rin/Lin",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 60000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=-bKKze55LkE",
+      "channel": "Borkaz",
+      "published_at": "2026-10-14T16:19:32Z",
+      "approved_at": "2026-10-15 01:29:08"
     }
   ],
   "processing": {
-    "discovered": 542,
-    "classified": 427,
-    "timed": 225,
-    "approved": 223,
-    "ranked": 223,
+    "discovered": 543,
+    "classified": 428,
+    "timed": 226,
+    "approved": 224,
+    "ranked": 224,
     "pending_manual": 197,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 151,
+    "title_times": 152,
     "human_times": 33,
-    "last_updated": "2026-10-14 15:51:06"
+    "last_updated": "2026-10-15 01:29:37"
   }
 }
