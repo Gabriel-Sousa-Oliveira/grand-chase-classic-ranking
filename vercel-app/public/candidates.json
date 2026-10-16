@@ -626,17 +626,17 @@
       "approved_at": "2026-09-17 15:33:08"
     },
     {
-      "id": 51,
+      "id": 46441,
       "character": "Rin/Lin",
       "category": "void_apocalypse",
       "floor": 3,
-      "time_ms": 198000,
+      "time_ms": 162000,
       "player_nick": "Borkaz",
       "era_key": "current",
-      "video_url": "https://www.youtube.com/watch?v=Nu2g_yTv3ew",
-      "channel": "Bork",
-      "published_at": "2026-07-02",
-      "approved_at": "2026-09-09 17:50:38"
+      "video_url": "https://www.youtube.com/watch?v=cdlgs_bADp0",
+      "channel": "Borkaz",
+      "published_at": "2026-10-16T09:03:44Z",
+      "approved_at": "2026-10-16 15:23:04"
     },
     {
       "id": 1727,
@@ -5280,20 +5280,33 @@
       "channel": "Borkaz",
       "published_at": "2026-10-14T16:19:32Z",
       "approved_at": "2026-10-15 01:29:08"
+    },
+    {
+      "id": 46441,
+      "character": "Rin/Lin",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 162000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=cdlgs_bADp0",
+      "channel": "Borkaz",
+      "published_at": "2026-10-16T09:03:44Z",
+      "approved_at": "2026-10-16 15:23:04"
     }
   ],
   "processing": {
-    "discovered": 546,
-    "classified": 430,
-    "timed": 226,
-    "approved": 224,
-    "ranked": 224,
-    "pending_manual": 200,
+    "discovered": 548,
+    "classified": 431,
+    "timed": 227,
+    "approved": 225,
+    "ranked": 225,
+    "pending_manual": 201,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 152,
-    "human_times": 34,
-    "last_updated": "2026-10-16 01:21:54"
+    "title_times": 153,
+    "human_times": 35,
+    "last_updated": "2026-10-16 15:24:27"
   }
 }
