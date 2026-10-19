@@ -496,17 +496,17 @@
       "approved_at": "2026-09-10 02:51:18"
     },
     {
-      "id": 4260,
+      "id": 48345,
       "character": "Rin/Lin",
       "category": "tower_of_disappearance",
       "floor": 0,
-      "time_ms": 86000,
+      "time_ms": 80000,
       "player_nick": "Borkaz",
       "era_key": "current",
-      "video_url": "https://www.youtube.com/watch?v=rHudrDdfL64",
+      "video_url": "https://www.youtube.com/watch?v=DDzlbGAOo2I",
       "channel": "Borkaz",
-      "published_at": "2026-05-28T09:17:50Z",
-      "approved_at": "2026-09-10 02:51:28"
+      "published_at": "2026-10-19T09:39:03Z",
+      "approved_at": "2026-10-19 17:29:21"
     },
     {
       "id": 61,
@@ -5332,20 +5332,33 @@
       "channel": "nana FATEJJ",
       "published_at": "2026-10-18T21:13:03Z",
       "approved_at": "2026-10-19 01:17:08"
+    },
+    {
+      "id": 48345,
+      "character": "Rin/Lin",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 80000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=DDzlbGAOo2I",
+      "channel": "Borkaz",
+      "published_at": "2026-10-19T09:39:03Z",
+      "approved_at": "2026-10-19 17:29:21"
     }
   ],
   "processing": {
-    "discovered": 550,
-    "classified": 433,
-    "timed": 229,
-    "approved": 227,
-    "ranked": 227,
-    "pending_manual": 201,
+    "discovered": 553,
+    "classified": 436,
+    "timed": 230,
+    "approved": 228,
+    "ranked": 228,
+    "pending_manual": 203,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 155,
+    "title_times": 156,
     "human_times": 35,
-    "last_updated": "2026-10-19 01:18:13"
+    "last_updated": "2026-10-19 17:30:11"
   }
 }
