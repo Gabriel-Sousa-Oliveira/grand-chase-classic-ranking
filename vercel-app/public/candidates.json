@@ -418,6 +418,19 @@
       "approved_at": "2026-09-10 02:51:28"
     },
     {
+      "id": 47952,
+      "character": "Amy",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 85000,
+      "player_nick": "nana FATEJJ",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Ob8PJdl9La0",
+      "channel": "nana FATEJJ",
+      "published_at": "2026-10-18T21:13:03Z",
+      "approved_at": "2026-10-19 01:17:08"
+    },
+    {
       "id": 14,
       "character": "Dio",
       "category": "tower_of_disappearance",
@@ -5293,20 +5306,46 @@
       "channel": "Borkaz",
       "published_at": "2026-10-16T09:03:44Z",
       "approved_at": "2026-10-16 15:23:04"
+    },
+    {
+      "id": 47953,
+      "character": "Amy",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 92000,
+      "player_nick": "nana FATEJJ",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=2jTk0wFbswU",
+      "channel": "nana FATEJJ",
+      "published_at": "2026-10-18T18:55:18Z",
+      "approved_at": "2026-10-19 01:17:09"
+    },
+    {
+      "id": 47952,
+      "character": "Amy",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 85000,
+      "player_nick": "nana FATEJJ",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=Ob8PJdl9La0",
+      "channel": "nana FATEJJ",
+      "published_at": "2026-10-18T21:13:03Z",
+      "approved_at": "2026-10-19 01:17:08"
     }
   ],
   "processing": {
-    "discovered": 548,
-    "classified": 431,
-    "timed": 227,
-    "approved": 225,
-    "ranked": 225,
+    "discovered": 550,
+    "classified": 433,
+    "timed": 229,
+    "approved": 227,
+    "ranked": 227,
     "pending_manual": 201,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 153,
+    "title_times": 155,
     "human_times": 35,
-    "last_updated": "2026-10-18 14:36:11"
+    "last_updated": "2026-10-19 01:18:13"
   }
 }
