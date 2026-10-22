@@ -626,6 +626,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 49890,
+      "character": "Mari",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 202000,
+      "player_nick": "삭제",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yXPqN3mFwog",
+      "channel": "삭제",
+      "published_at": "2026-10-21T17:32:07Z",
+      "approved_at": "2026-10-22 01:32:37"
+    },
+    {
       "id": 25434,
       "character": "Mari",
       "category": "void_apocalypse",
@@ -5345,20 +5358,33 @@
       "channel": "Borkaz",
       "published_at": "2026-10-19T09:39:03Z",
       "approved_at": "2026-10-19 17:29:21"
+    },
+    {
+      "id": 49890,
+      "character": "Mari",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 202000,
+      "player_nick": "삭제",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=yXPqN3mFwog",
+      "channel": "삭제",
+      "published_at": "2026-10-21T17:32:07Z",
+      "approved_at": "2026-10-22 01:32:37"
     }
   ],
   "processing": {
-    "discovered": 554,
-    "classified": 437,
-    "timed": 230,
-    "approved": 228,
-    "ranked": 228,
+    "discovered": 555,
+    "classified": 438,
+    "timed": 231,
+    "approved": 229,
+    "ranked": 229,
     "pending_manual": 204,
     "ocr_attempted": 118,
     "ocr_matched": 47,
     "ocr_unresolved": 71,
-    "title_times": 156,
+    "title_times": 157,
     "human_times": 35,
-    "last_updated": "2026-10-21 15:58:50"
+    "last_updated": "2026-10-22 01:33:26"
   }
 }
