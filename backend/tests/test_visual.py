@@ -7,7 +7,7 @@ from unittest.mock import patch
 import cv2
 import numpy as np
 
-from gc_radar.visual import Anchor, Sample, load_anchors, locate_anchor, propose_windows, write_inspection
+from gc_radar.visual import (Anchor, Sample, ensure_tail_window, load_anchors, locate_anchor, propose_windows, write_inspection)
 from gc_radar.ocr import _download_excerpt, _read_event_video, _anchors
 from gc_radar.inspect_frames import survey
 
@@ -98,6 +98,22 @@ class VisualTests(unittest.TestCase):
         self.assertLessEqual(len(windows), 3)
         for a, b in zip(windows, windows[1:]):
             self.assertLessEqual(a["end"], b["start"])
+
+    def test_tail_window_is_added_when_scene_changes_exist(self):
+        windows = [{"start": 20, "end": 32, "reason": "scene_change",
+                    "anchors": [], "score": 0.5}]
+        result = ensure_tail_window(windows, 100, tail_seconds=45)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[-1]["reason"], "tail_window")
+        self.assertEqual((result[-1]["start"], result[-1]["end"]), (55, 100))
+
+    def test_tail_window_merges_with_an_event_near_the_end(self):
+        windows = [{"start": 60, "end": 72, "reason": "scene_change",
+                    "anchors": [], "score": 0.7}]
+        result = ensure_tail_window(windows, 100, tail_seconds=45)
+        self.assertEqual(len(result), 1)
+        self.assertEqual((result[0]["start"], result[0]["end"]), (55, 100))
+        self.assertEqual(result[0]["reason"], "scene_change+tail")
 
     def test_download_window_bounded(self):
         with self.assertRaises(ValueError):
