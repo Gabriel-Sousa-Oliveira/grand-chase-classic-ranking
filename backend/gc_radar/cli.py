@@ -244,8 +244,12 @@ def main() -> None:
                     if triage.processing_reason == "technical_error":
                         failed += 1
                         repo.record_ocr_attempt(candidate["id"], "error")
-                        results.append({"video_id": candidate["video_id"], "result": "error",
-                                        "error": str(error)[:240]})
+                        results.append({
+                            "video_id": candidate["video_id"],
+                            "result": "error",
+                            "error_type": type(error).__name__,
+                            "error": str(error)[:240],
+                        })
                         continue
                     if triage.destination == "manual_review":
                         diagnostic = evidence_directory / (
@@ -256,7 +260,13 @@ def main() -> None:
                             if diagnostic.exists() else None,
                             "processing_reason": "timer_not_frozen_or_not_readable",
                         })
-                        results.append({"video_id": candidate["video_id"], "result": "no_consensus"})
+                        results.append({
+                            "video_id": candidate["video_id"],
+                            "result": "no_consensus",
+                            "reason": "timer_not_frozen_or_not_readable",
+                            "evidence_image": str(Path("ocr-evidence") / diagnostic.name)
+                            if diagnostic.exists() else None,
+                        })
                         continue
                     repo.set_ocr_time(candidate["id"], ocr.time_ms, ocr.confidence, {
                         "engine": "tesseract+opencv", "matching_frames": ocr.matching_frames,
@@ -267,8 +277,17 @@ def main() -> None:
                         "roi": ocr.roi,
                     })
                     matched += 1
-                    results.append({"video_id": candidate["video_id"], "result": "matched",
-                                    "time_ms": ocr.time_ms, "confidence": ocr.confidence})
+                    results.append({
+                        "video_id": candidate["video_id"],
+                        "result": "matched",
+                        "time_ms": ocr.time_ms,
+                        "confidence": ocr.confidence,
+                        "matching_frames": ocr.matching_frames,
+                        "evidence_frame": ocr.evidence_frame,
+                        "evidence_seconds_from_end": ocr.evidence_seconds_from_end,
+                        "evidence_image": ocr.evidence_image,
+                        "roi": ocr.roi,
+                    })
             exported = [{key: candidate[key] for key in (
                 "video_id", "video_url", "title", "channel", "player_nick",
                 "published_at", "character", "category", "floor", "time_ms",
