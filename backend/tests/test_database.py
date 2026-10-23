@@ -1,9 +1,14 @@
+import contextlib
+import io
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from gc_radar.database import CandidateRepository, canonical_player_nick
 from gc_radar.parser import parse_title
+from gc_radar import cli
 
 
 class DatabaseTests(unittest.TestCase):
@@ -185,6 +190,26 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(self.repo.ocr_remaining(
             retry_no_consensus=True, video_ids=["reference-a"]
         ), 1)
+
+    def test_ocr_cli_forwards_targeted_video_ids(self):
+        repository = None
+        with patch("gc_radar.cli.CandidateRepository") as repository_factory:
+            repository = repository_factory.return_value
+            repository.ocr_candidates.return_value = []
+            repository.ocr_remaining.return_value = 0
+            with patch.object(sys, "argv", [
+                "gc-radar", "--db", "test.sqlite3", "ocr-queue",
+                "--limit", "0", "--video-id", "video-a",
+            ]), contextlib.redirect_stdout(io.StringIO()):
+                cli.main()
+
+        repository.ocr_candidates.assert_called_once_with(
+            0, False, False, None, ["video-a"]
+        )
+        repository.ocr_remaining.assert_called_once_with(
+            False, False, None, ["video-a"]
+        )
+        repository.close.assert_called_once()
 
 
 if __name__ == "__main__":

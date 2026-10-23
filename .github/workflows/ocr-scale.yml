@@ -1,13 +1,16 @@
 name: Scalable OCR queue
 
 on:
+  schedule:
+    - cron: "47 18 * * *"
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - ".github/workflows/ocr-scale.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: youtube-crawler
@@ -15,12 +18,10 @@ concurrency:
 
 jobs:
   process:
-    if: ${{ contains(github.event.head_commit.message, '[ocr-scale]') }}
+    if: ${{ github.event_name != 'push' || contains(github.event.head_commit.message, '[ocr-scale]') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 60
     env:
-      SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
-      SITE_ACCESS_TOKEN: ${{ secrets.SITE_ACCESS_TOKEN }}
       OMP_THREAD_LIMIT: "1"
       OMP_NUM_THREADS: "1"
       OPENBLAS_NUM_THREADS: "1"
@@ -84,6 +85,7 @@ jobs:
           SHARDS = Path(os.environ["RUNNER_TEMP"]) / "gc-ocr-shards"
           BATCH_SIZE = 8
           MAX_PARALLEL = 4
+          MAX_VIDEOS_PER_RUN = 12
           ALLOWED = (
               "duel_4",
               "tower_of_disappearance",
@@ -120,8 +122,10 @@ jobs:
               "mode": "ocr-scale",
               "batch_size": BATCH_SIZE,
               "max_parallel_batches": MAX_PARALLEL,
+              "max_videos_per_run": MAX_VIDEOS_PER_RUN,
               "order": ordered,
-              "selected": sum(counts.values()),
+              "backlog": sum(counts.values()),
+              "selected": min(sum(counts.values()), MAX_VIDEOS_PER_RUN),
               "processed": 0,
               "matched": 0,
               "failed": 0,
@@ -179,9 +183,11 @@ jobs:
                       if evidence.is_file() and KEEP_EVIDENCE.search(evidence.name):
                           shutil.copy2(evidence, EVIDENCE / evidence.name)
 
+          budget_remaining = MAX_VIDEOS_PER_RUN
           with sqlite3.connect(MASTER) as master:
               for category in ordered:
-                  ids = pending_ids(master, category)
+                  ids = pending_ids(master, category)[:budget_remaining]
+                  budget_remaining -= len(ids)
                   batches = [ids[start:start + BATCH_SIZE]
                              for start in range(0, len(ids), BATCH_SIZE)]
                   stats = {
@@ -245,6 +251,9 @@ jobs:
 
       - name: Publish consolidated queue
         if: ${{ success() && env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
+        env:
+          SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
+          SITE_ACCESS_TOKEN: ${{ secrets.SITE_ACCESS_TOKEN }}
         run: |
           total=$(jq '.candidates | length' data/last-run.json)
           for ((start=0; start<total; start+=50)); do
@@ -259,39 +268,9 @@ jobs:
               https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
           done
 
-      - name: Refresh public rankings
-        if: ${{ success() && env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
-        run: |
-          curl --fail-with-body --retry 2 \
-            -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
-            https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates \
-            | jq '{candidates: [], rankings: (.rankings // []), history: (.history // []), processing: (.processing // null)}' \
-            > vercel-app/public/candidates.json
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add vercel-app/public/candidates.json
-          if ! git diff --cached --quiet; then
-            git commit -m "[skip-run] Refresh public rankings"
-            git pull --rebase origin main
-            git push
-          fi
-
       - name: Save consolidated database
         if: ${{ always() && hashFiles('data/gc_radar.sqlite3') != '' }}
         uses: actions/cache/save@v4
         with:
           path: data/gc_radar.sqlite3
           key: gc-radar-db-${{ github.run_id }}
-
-      - name: Upload compact OCR checkpoint
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: gc-radar-scale-${{ github.run_number }}
-          path: |
-            data/gc_radar.sqlite3
-            data/last-run.json
-            data/ocr-evidence/
-          if-no-files-found: warn
-          retention-days: 30
-          compression-level: 6
