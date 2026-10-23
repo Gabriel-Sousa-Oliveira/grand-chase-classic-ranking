@@ -919,7 +919,8 @@ def _read_event_video(video_url: str, directory: Path,
         for index, window in enumerate(windows):
             start, length = window["start"], window["end"] - window["start"]
             frames = _window_frames(video, directory, f"event{index}", start, length, 1)
-            roi_names = ["anchor_" + name for name in window["anchors"]] or list(OCR_ACCEPT_ROIS)
+            # Anchors may propose the event window, but only the labeled Clear Time panel can provide an accepted value.
+            roi_names = list(OCR_ACCEPT_ROIS)
             for roi_name in roi_names:
                 result, sightings = _scan_frames(frames, directory, roi_name,
                                                  length, 1, seconds_offset=duration-window["end"])
