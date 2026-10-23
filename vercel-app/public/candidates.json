@@ -1549,6 +1549,19 @@
       "approved_at": "2026-10-23 21:10:34"
     },
     {
+      "id": 51937,
+      "character": "Ryan",
+      "category": "void_invasion",
+      "floor": 4,
+      "time_ms": 344000,
+      "player_nick": "lilxmuha",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=FFrohtgvKCk",
+      "channel": "lilxmuha",
+      "published_at": "2026-10-03T05:16:59Z",
+      "approved_at": "2026-10-23 21:38:06"
+    },
+    {
       "id": 22050,
       "character": "Uno",
       "category": "void_invasion",
@@ -2706,6 +2719,19 @@
       "channel": "Borkaz",
       "published_at": "2024-04-05T09:22:47Z",
       "approved_at": "2026-09-21 16:06:04"
+    },
+    {
+      "id": 51933,
+      "character": "Rufus/Lupus",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 386000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=HCZAHRf3qNs",
+      "channel": "Borkaz",
+      "published_at": "2024-04-08T10:22:47Z",
+      "approved_at": "2026-10-23 21:38:05"
     },
     {
       "id": 28572,
@@ -5295,6 +5321,19 @@
       "approved_at": "2026-09-21 17:04:39"
     },
     {
+      "id": 51937,
+      "character": "Ryan",
+      "category": "void_invasion",
+      "floor": 4,
+      "time_ms": 344000,
+      "player_nick": "lilxmuha",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=FFrohtgvKCk",
+      "channel": "lilxmuha",
+      "published_at": "2026-10-03T05:16:59Z",
+      "approved_at": "2026-10-23 21:38:06"
+    },
+    {
       "id": 38394,
       "character": "Sieghart",
       "category": "duel_4",
@@ -5452,17 +5491,17 @@
     }
   ],
   "processing": {
-    "discovered": 557,
-    "classified": 439,
-    "timed": 235,
-    "approved": 233,
-    "ranked": 233,
+    "discovered": 559,
+    "classified": 441,
+    "timed": 237,
+    "approved": 235,
+    "ranked": 235,
     "pending_manual": 202,
-    "ocr_attempted": 119,
-    "ocr_matched": 51,
-    "ocr_unresolved": 68,
+    "ocr_attempted": 120,
+    "ocr_matched": 53,
+    "ocr_unresolved": 67,
     "title_times": 157,
     "human_times": 36,
-    "last_updated": "2026-10-23 21:13:01"
+    "last_updated": "2026-10-23 21:40:30"
   }
 }
