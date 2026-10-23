@@ -1,5 +1,6 @@
 import contextlib
 import io
+import json
 import sys
 import tempfile
 import unittest
@@ -210,6 +211,36 @@ class DatabaseTests(unittest.TestCase):
             False, False, None, ["video-a"]
         )
         repository.close.assert_called_once()
+
+    def test_ocr_cli_reports_technical_failure_details(self):
+        candidate = {
+            "id": 7, "video_id": "video-a", "video_url": "https://youtu.be/video-a",
+            "title": "Ai Void Invasion 3F", "channel": "player",
+            "player_nick": "player", "published_at": None, "character": "Ai",
+            "category": "void_invasion", "floor": 3, "time_ms": None,
+            "confidence": None, "status": "time_required", "era_key": "current",
+            "raw_metadata": "{}",
+        }
+        output = io.StringIO()
+        with patch("gc_radar.cli.CandidateRepository") as repository_factory, \
+                patch("gc_radar.cli.read_video_time",
+                      side_effect=RuntimeError("video download timed out")):
+            repository = repository_factory.return_value
+            repository.ocr_candidates.return_value = [candidate]
+            repository.ocr_remaining.return_value = 1
+            repository.queue.return_value = []
+            with patch.object(sys, "argv", [
+                "gc-radar", "--db", "test.sqlite3", "ocr-queue", "--limit", "1",
+            ]), contextlib.redirect_stdout(output):
+                cli.main()
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(payload["results"], [{
+            "video_id": "video-a",
+            "result": "error",
+            "error_type": "RuntimeError",
+            "error": "video download timed out",
+        }])
 
 
 if __name__ == "__main__":
