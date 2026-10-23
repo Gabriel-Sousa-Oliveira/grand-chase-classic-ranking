@@ -1,4 +1,5 @@
 name: Scalable OCR queue
+# Initial bounded OCR MVP run; routine runs remain capped at 12 videos.
 
 on:
   schedule:
