@@ -87,6 +87,42 @@ def locate_anchor(image, anchor: Anchor):
     return best
 
 
+def ensure_tail_window(windows: list[dict], duration: float,
+                       tail_seconds: float = 45) -> list[dict]:
+    """Always retain a scan window at the end of the excerpt.
+
+    Scene-change scouting can find unrelated cuts and previously displaced the
+    only guaranteed view of the final results screen. Merge the tail with an
+    overlapping event window; otherwise append it as a bounded extra window.
+    """
+    if not math.isfinite(duration) or duration <= 0:
+        raise ValueError("Video duration must be positive")
+    if not math.isfinite(tail_seconds) or tail_seconds <= 0:
+        raise ValueError("Tail window must be positive")
+    tail_start = max(0.0, duration - tail_seconds)
+    result = []
+    merged_tail = False
+    for window in windows:
+        start = float(window["start"])
+        end = float(window["end"])
+        if end > tail_start and start < duration:
+            result.append({
+                **window,
+                "start": min(start, tail_start),
+                "end": duration,
+                "reason": f"{window.get('reason', 'event')}+tail",
+            })
+            merged_tail = True
+        else:
+            result.append(window)
+    if not merged_tail:
+        result.append({
+            "start": tail_start, "end": duration,
+            "reason": "tail_window", "anchors": [], "score": 0,
+        })
+    return sorted(result, key=lambda window: window["start"])
+
+
 def propose_windows(samples: list[Sample], anchors: list[Anchor], duration: float,
                     max_windows: int = 3) -> list[dict]:
     """Rank persistent anchor appearances and cuts followed by stable scenes."""

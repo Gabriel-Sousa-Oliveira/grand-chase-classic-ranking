@@ -896,16 +896,18 @@ def _read_video_time(video_url: str, evidence_directory: Path | None = None,
 
 def _read_event_video(video_url: str, directory: Path,
                       evidence_directory: Path | None, evidence_name: str | None):
-    from .visual import load_anchors, propose_windows, write_inspection
+    from .visual import ensure_tail_window, load_anchors, propose_windows, write_inspection
     lookback = int(os.environ.get("GC_OCR_LOOKBACK_SECONDS", "300"))
     manifest = os.environ.get("GC_OCR_ANCHORS")
     anchors = load_anchors(Path(manifest) if manifest else None)
     video = _download_excerpt(video_url, directory, lookback)
     samples, duration = scout_video(video, directory, lookback)
-    windows = propose_windows(samples, anchors, duration)
-    if not windows:
-        windows = [{"start": max(0, duration-20), "end": duration,
-                    "reason": "fallback_tail", "anchors": [], "score": 0}]
+    # Scene changes are only hints. Reserve one slot for the end of the
+    # excerpt, where Grand Chase most often shows its frozen clear timer.
+    windows = ensure_tail_window(
+        propose_windows(samples, anchors, duration, max_windows=2),
+        duration, tail_seconds=45,
+    )
     # Save full-frame evidence before OCR, including if the subsequent scan fails.
     if evidence_directory is not None:
         write_inspection(samples, evidence_directory, evidence_name or "video", windows)
