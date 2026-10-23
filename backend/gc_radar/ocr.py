@@ -34,6 +34,9 @@ TIMER_ROIS = {
     "top_center_timer_wide": (0.42, 0.08, 0.64, 0.21),
     "results_panel": (0.79, 0.31, 0.97, 0.42),
 }
+# Only the results screen labels a time as the actual completed clear time.
+# HUD clocks can be countdowns, so keep them diagnostic-only for auto extraction.
+OCR_ACCEPT_ROIS = ("results_panel",)
 
 
 @dataclass(frozen=True)
@@ -859,7 +862,7 @@ def _read_video_time(video_url: str, evidence_directory: Path | None = None,
             write_inspection([Sample(p, i / COARSE_FPS) for i, p in enumerate(coarse_frames)],
                              evidence_directory, evidence_name or "video", [], max_frames=8)
         dense_frames: list[Path] | None = None
-        for roi_name in TIMER_ROIS:
+        for roi_name in OCR_ACCEPT_ROIS:
             result, sightings = _scan_frames(
                 coarse_frames, directory, roi_name,
                 COARSE_WINDOW_SECONDS, COARSE_FPS,
@@ -916,7 +919,8 @@ def _read_event_video(video_url: str, directory: Path,
         for index, window in enumerate(windows):
             start, length = window["start"], window["end"] - window["start"]
             frames = _window_frames(video, directory, f"event{index}", start, length, 1)
-            roi_names = ["anchor_" + name for name in window["anchors"]] or list(TIMER_ROIS)
+            # Anchors may propose the event window, but only the labeled Clear Time panel can provide an accepted value.
+            roi_names = list(OCR_ACCEPT_ROIS)
             for roi_name in roi_names:
                 result, sightings = _scan_frames(frames, directory, roi_name,
                                                  length, 1, seconds_offset=duration-window["end"])
