@@ -132,6 +132,8 @@ class VisualTests(unittest.TestCase):
             result = _read_event_video("test", self.directory, self.directory / "out", "video")
             self.assertIsNone(result)
             self.assertEqual(frames.call_count, 1)
+            scan.assert_called_once()
+            self.assertEqual(scan.call_args.args[2], "results_panel")
             self.assertEqual(_anchors.get(), {})
 
 
