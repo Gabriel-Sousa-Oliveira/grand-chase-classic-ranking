@@ -9,6 +9,10 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/ocr-scale.yml"
+      - "backend/gc_radar/ocr.py"
+      - "backend/gc_radar/visual.py"
+      - "backend/tests/test_ocr.py"
+      - "backend/tests/test_visual.py"
 
 permissions:
   contents: read
@@ -28,7 +32,7 @@ jobs:
       OPENBLAS_NUM_THREADS: "1"
       YOUTUBE_USE_PO_TOKEN: "1"
       GC_OCR_VISUAL_EVENTS: "1"
-      GC_OCR_LOOKBACK_SECONDS: "300"
+      GC_OCR_LOOKBACK_SECONDS: "180"
 
     steps:
       - uses: actions/checkout@v4
@@ -295,7 +299,7 @@ jobs:
           name: gc-ocr-diagnostics-${{ github.run_number }}
           path: |
             data/ocr-diagnostics.json
-            data/ocr-evidence/*.png
+            data/ocr-evidence/*
           if-no-files-found: warn
           retention-days: 7
           compression-level: 6
