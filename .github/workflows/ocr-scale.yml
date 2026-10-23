@@ -100,7 +100,7 @@ jobs:
               "void_nightmare",
               "void_invasion",
           )
-          KEEP_EVIDENCE = re.compile(r"-(?:\d+|no-consensus)\.png$")
+          KEEP_EVIDENCE = re.compile(r"-(?:\d+|no-consensus)\.png$|-(?:mosaic\.jpg|inspection\.json)$")
 
           EVIDENCE.mkdir(parents=True, exist_ok=True)
           SHARDS.mkdir(parents=True, exist_ok=True)
