@@ -32,7 +32,9 @@ TIMER_ROIS = {
     # Every crop remains below 4% of the source frame.
     "top_center_timer": (0.45, 0.10, 0.61, 0.19),
     "top_center_timer_wide": (0.42, 0.08, 0.64, 0.21),
-    "results_panel": (0.79, 0.31, 0.97, 0.42),
+    # Keep the ROI on the Clear Time row; the following Best Time row can
+    # otherwise enter the crop and compete with the current run time.
+    "results_panel": (0.79, 0.31, 0.97, 0.40),
 }
 # Only the results screen labels a time as the actual completed clear time.
 # HUD clocks can be countdowns, so keep them diagnostic-only for auto extraction.
