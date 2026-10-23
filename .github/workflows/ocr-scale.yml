@@ -22,6 +22,80 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-labeled-samples:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[ocr-validation]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OMP_THREAD_LIMIT: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      YOUTUBE_USE_PO_TOKEN: "1"
+      GC_OCR_VISUAL_EVENTS: "1"
+      GC_OCR_LOOKBACK_SECONDS: "180"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install bounded OCR tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr
+          python -m pip install --disable-pip-version-check --upgrade --pre \
+            "yt-dlp[default,curl-cffi]" "yt-dlp-getpot-wpc" \
+            "opencv-python-headless==4.10.0.84"
+
+      - name: Configure YouTube access
+        env:
+          YOUTUBE_COOKIES_B64: ${{ secrets.YOUTUBE_COOKIES_B64 }}
+        run: |
+          browser_path="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$browser_path"
+          echo "YOUTUBE_PO_BROWSER_PATH=$browser_path" >> "$GITHUB_ENV"
+          if [ -n "$YOUTUBE_COOKIES_B64" ]; then
+            echo "$YOUTUBE_COOKIES_B64" | base64 --decode > "$RUNNER_TEMP/youtube-cookies.txt"
+            chmod 600 "$RUNNER_TEMP/youtube-cookies.txt"
+            echo "YOUTUBE_COOKIES_FILE=$RUNNER_TEMP/youtube-cookies.txt" >> "$GITHUB_ENV"
+          fi
+
+      - name: Run three labeled video cases
+        run: |
+          cd backend
+          python -m gc_radar.ocr_validation \
+            --case tCfudbb88dU=184000 \
+            --case DDzlbGAOo2I=80000 \
+            --case 93GrHzU6FmY=363000 \
+            --workers 3 \
+            --evidence-dir ../data/ocr-validation-evidence \
+            | tee ../data/ocr-validation-report.json
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          report = json.loads(Path("../data/ocr-validation-report.json").read_text())
+          print(
+              "OCR validation:",
+              report["matched_expected"], "matched,",
+              report["mismatched"], "mismatched,",
+              report["no_consensus"], "without consensus,",
+              report["error"], "errors",
+          )
+          if not report["passed"]:
+              sys.exit(1)
+          PY
+
+      - name: Upload labeled OCR evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gc-ocr-validation-${{ github.run_number }}
+          path: |
+            data/ocr-validation-report.json
+            data/ocr-validation-evidence/
+          if-no-files-found: warn
+          retention-days: 7
+
   process:
     if: ${{ github.event_name != 'push' || contains(github.event.head_commit.message, '[ocr-scale]') }}
     runs-on: ubuntu-latest
