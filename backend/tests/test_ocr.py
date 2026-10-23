@@ -5,7 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from gc_radar.ocr import (TIMER_ROIS, OcrObservation, _download_excerpt,
+from gc_radar.ocr import (OCR_ACCEPT_ROIS, TIMER_ROIS, OcrObservation, _download_excerpt,
                           _parse_tesseract_tsv, _read_timer_frame,
                           choose_consensus,
                           choose_frozen_consensus,
@@ -80,6 +80,10 @@ class OcrTextTests(unittest.TestCase):
         result = choose_consensus([("010", 92), ("011", 92), ("011", 92)])
         self.assertEqual(result.evidence_frame, "frame-011")
         self.assertEqual(result.evidence_seconds_from_end, 15)
+
+    def test_only_clear_time_panel_can_produce_auto_time(self):
+        self.assertEqual(OCR_ACCEPT_ROIS, ("results_panel",))
+        self.assertNotIn("top_center_timer", OCR_ACCEPT_ROIS)
 
     def test_relative_timer_roi_reduces_area_by_more_than_ninety_percent(self):
         self.assertEqual(
