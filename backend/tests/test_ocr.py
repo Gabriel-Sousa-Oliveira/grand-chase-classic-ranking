@@ -95,6 +95,11 @@ class OcrTextTests(unittest.TestCase):
             area_ratio = ((right - left) * (bottom - top)) / (1920 * 1080)
             self.assertLess(area_ratio, 0.04)
 
+    def test_results_panel_roi_covers_clear_time_without_best_time_row(self):
+        _, _, _, bottom = roi_bounds(1536, 710, TIMER_ROIS["results_panel"])
+        self.assertGreater(bottom, round(0.39 * 710))
+        self.assertLess(bottom, round(0.41 * 710))
+
     def test_accepts_fractional_ocr_jitter_inside_a_frozen_second(self):
         observations = [
             OcrObservation(f"top_right-coarse-{index:04d}", time_ms,
