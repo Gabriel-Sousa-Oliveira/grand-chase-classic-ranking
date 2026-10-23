@@ -173,9 +173,9 @@ def extract_time_values(text: str) -> set[int]:
 def extract_result_time_values(text: str) -> set[int]:
     """Parse GCC's Clear Time notation only inside the results-panel ROI.
 
-    The panel uses racing-style notation: 48'4 means 48.4 seconds, while a
-    minute-bearing result can appear as 1'23"4. Keeping this contextual avoids
-    changing the legacy title parser where 2'56 means two minutes 56 seconds.
+    A two-digit seconds field is minutes:seconds (01'20 = 80 seconds), while
+    a one-digit field can be a fractional second (48'4 = 48.4 seconds).
+    Keeping this contextual avoids changing the legacy title parser.
     """
     normalized = text.translate(str.maketrans({
         "’": "'", "′": "'", "＇": "'", "“": '"', "”": '"',
@@ -191,6 +191,12 @@ def extract_result_time_values(text: str) -> set[int]:
                                   10 if len(fraction) == 2 else 1)
         value = (minutes * 60 + seconds) * 1000 + millis
         return {value} if seconds < 60 and _valid_ms(value) else set()
+    minute_seconds = re.fullmatch(r"(\d{1,2})\s*'\s*(\d{2})", normalized)
+    if minute_seconds:
+        minutes, seconds = map(int, minute_seconds.groups())
+        if minutes <= 20:
+            value = (minutes * 60 + seconds) * 1000
+            return {value} if seconds < 60 and _valid_ms(value) else set()
     seconds_only = re.fullmatch(r"(\d{1,3})\s*[':]\s*(\d{1,3})", normalized)
     if seconds_only:
         seconds, fraction = seconds_only.groups()

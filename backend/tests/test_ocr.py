@@ -41,6 +41,9 @@ class OcrTextTests(unittest.TestCase):
     def test_parses_clear_time_result_notation_contextually(self):
         self.assertEqual(extract_result_time_values("48'4"), {48_400})
         self.assertEqual(extract_result_time_values("1'23\"45"), {83_450})
+        self.assertEqual(extract_result_time_values("01'20"), {80_000})
+        self.assertEqual(extract_result_time_values("01'02"), {62_000})
+        self.assertEqual(extract_result_time_values("03'04"), {184_000})
         self.assertEqual(extract_result_time_values("48:4."), {48_400})
         self.assertEqual(extract_result_time_values("4845"), {48_450})
         self.assertEqual(extract_result_time_values("14845"), {108_450})
