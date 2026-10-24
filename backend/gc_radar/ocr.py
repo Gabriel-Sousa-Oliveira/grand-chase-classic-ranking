@@ -591,6 +591,27 @@ def _isolate_digit_band(pixels):
     return band, binary
 
 
+def _has_results_panel(image, destination: Path, frame_stem: str) -> bool:
+    """Require panel labels, never infer a results screen from stable digits."""
+    import cv2
+
+    height, width = image.shape[:2]
+    left, top, right, bottom = roi_bounds(width, height, (.5, .10, 1., .47))
+    labels = cv2.cvtColor(image[top:bottom, left:right], cv2.COLOR_BGR2GRAY)
+    labels = cv2.resize(labels, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    target = destination / f"{frame_stem}-panel-labels.png"
+    if not cv2.imwrite(str(target), labels):
+        raise RuntimeError(f"OpenCV could not write {target.name}")
+    output = _run(["tesseract", str(target), "stdout", "--psm", "11",
+                   "-l", "eng"], timeout=20).stdout
+    normalized = re.sub(r"[^a-z]", "", output.lower())
+    # Both the heading and a timer-row label are needed. Inventory, HUD,
+    # lobby and reward numbers alone cannot establish completed-run evidence.
+    return "results" in normalized and (
+        "cleartime" in normalized or "besttime" in normalized
+    )
+
+
 def _preprocess_roi(frame: Path, destination: Path,
                     roi_name: str) -> list[Path]:
     """Crop the timer and create contrast-safe variants with OpenCV."""
@@ -600,6 +621,8 @@ def _preprocess_roi(frame: Path, destination: Path,
     if image is None:
         raise RuntimeError(f"OpenCV could not read {frame.name}")
     height, width = image.shape[:2]
+    if roi_name == "results_panel" and not _has_results_panel(image, destination, frame.stem):
+        return []
     if roi_name.startswith("anchor_"):
         from .visual import locate_anchor
         match = locate_anchor(image, _anchors.get()[roi_name])
