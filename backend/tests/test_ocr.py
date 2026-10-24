@@ -261,6 +261,20 @@ class OcrTextTests(unittest.TestCase):
                     "*195.000-220.000",
                 )
 
+    def test_manual_hint_runs_dense_scan_even_without_coarse_sightings(self):
+        from gc_radar.ocr import _read_event_video, OcrResult
+        expected = OcrResult(80_000, .9, 8, 8)
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch("gc_radar.ocr._download_excerpt", return_value=Path("video.mp4")), \
+                patch("gc_radar.ocr.scout_video", return_value=([], 25.0)), \
+                patch("gc_radar.ocr._window_frames", return_value=[]) as frames, \
+                patch("gc_radar.ocr._scan_frames", side_effect=[(None, 0), (expected, 8)]) as scan, \
+                patch("gc_radar.ocr._preserve_evidence", return_value=expected):
+            result = _read_event_video("test", Path(temporary), None, "test", 90)
+        self.assertEqual(result.time_ms, 80_000)
+        self.assertEqual(frames.call_args.args[-1], 4)
+        self.assertTrue(scan.call_args.kwargs["exhaustive"])
+
     def test_timestamp_hint_rejects_invalid_values(self):
         with tempfile.TemporaryDirectory() as temporary:
             with self.assertRaises(ValueError):
