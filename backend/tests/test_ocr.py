@@ -330,6 +330,44 @@ class OcrTextTests(unittest.TestCase):
                 self.assertEqual(run.call_count, 1)
                 self.assertNotIn("tsv", run.call_args.args[0])
 
+    def test_hinted_excerpt_is_preserved_for_offline_replay(self):
+        import json
+        from gc_radar.ocr import _preserve_hinted_excerpt
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            video = root / "video.mp4"
+            video.write_bytes(b"public video excerpt")
+            output = root / "evidence"
+            _preserve_hinted_excerpt(video, output, "DDzlbGAOo2I", 90)
+            self.assertEqual((output / "DDzlbGAOo2I-excerpt.mp4").read_bytes(),
+                             video.read_bytes())
+            metadata = json.loads((output / "DDzlbGAOo2I-excerpt.json").read_text())
+            self.assertEqual(metadata["requested_start_seconds"], 80)
+            self.assertEqual(metadata["requested_end_seconds"], 105)
+            self.assertEqual(metadata["status"], "saved")
+
+    def test_non_hinted_queue_does_not_copy_video_evidence(self):
+        from gc_radar.ocr import _preserve_hinted_excerpt
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "evidence"
+            _preserve_hinted_excerpt(Path("not-downloaded.mp4"), output, "test", None)
+            self.assertFalse(output.exists())
+
+    def test_oversized_excerpt_is_reported_without_copying(self):
+        import json
+        from gc_radar.ocr import _preserve_hinted_excerpt
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            video = root / "video.mp4"
+            with video.open("wb") as stream:
+                stream.truncate(50 * 1024 * 1024 + 1)
+            output = root / "evidence"
+            _preserve_hinted_excerpt(video, output, "test", 5)
+            metadata = json.loads((output / "test-excerpt.json").read_text())
+            self.assertEqual(metadata["status"], "size_limit_exceeded")
+            self.assertEqual(metadata["requested_start_seconds"], 0)
+            self.assertFalse((output / "test-excerpt.mp4").exists())
+
     def test_timestamp_hint_rejects_invalid_values(self):
         with tempfile.TemporaryDirectory() as temporary:
             with self.assertRaises(ValueError):
