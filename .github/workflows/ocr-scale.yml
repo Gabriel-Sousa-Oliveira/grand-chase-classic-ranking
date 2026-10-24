@@ -69,10 +69,14 @@ jobs:
 
       - name: Run three labeled video cases
         run: |
+          set -o pipefail
+          mkdir -p data
           cd backend
           python -m gc_radar.ocr_validation \
             --case tCfudbb88dU=184000 \
             --case DDzlbGAOo2I=80000 \
+            --time-hint tCfudbb88dU=205 \
+            --time-hint DDzlbGAOo2I=90 \
             --case 93GrHzU6FmY=363000 \
             --workers 3 \
             --evidence-dir ../data/ocr-validation-evidence \
