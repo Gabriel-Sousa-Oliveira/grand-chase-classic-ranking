@@ -300,7 +300,7 @@ def choose_consensus(observations: list[tuple[str, int]]) -> OcrResult | None:
 
 
 def _stable_sequence(observations: list[OcrObservation], max_gap: float,
-                     minimum_span: float) -> list[OcrObservation]:
+                     minimum_span: float, minimum_frames: int = 2) -> list[OcrObservation]:
     """Return the newest sequence whose identical timer spans long enough."""
     ordered = sorted(observations, key=lambda item: item.seconds_from_end)
     sequences: list[list[OcrObservation]] = []
@@ -315,7 +315,7 @@ def _stable_sequence(observations: list[OcrObservation], max_gap: float,
             current = [observation]
     if current:
         sequences.append(current)
-    qualified = [sequence for sequence in sequences if len(sequence) >= 2 and (
+    qualified = [sequence for sequence in sequences if len(sequence) >= minimum_frames and (
         max(item.seconds_from_end for item in sequence)
         - min(item.seconds_from_end for item in sequence)
     ) >= minimum_span]
@@ -327,7 +327,9 @@ def _stable_sequence(observations: list[OcrObservation], max_gap: float,
 
 
 def choose_frozen_consensus(observations: list[OcrObservation],
-                            sample_interval: float) -> OcrResult | None:
+                            sample_interval: float,
+                            minimum_span_override: float | None = None,
+                            minimum_frames: int = 2) -> OcrResult | None:
     """Accept a timer only after it remains frozen across temporal frames."""
     by_time: dict[int, list[OcrObservation]] = defaultdict(list)
     for observation in observations:
@@ -337,9 +339,10 @@ def choose_frozen_consensus(observations: list[OcrObservation],
     max_gap = sample_interval * 1.6
     # A running MM:SS timer can repeat inside a one-second bucket. Requiring
     # almost two seconds prevents that normal tick from looking "frozen".
-    minimum_span = max(1.8, sample_interval)
+    minimum_span = (max(1.8, sample_interval) if minimum_span_override is None
+                    else max(sample_interval, minimum_span_override))
     for time_ms, values in by_time.items():
-        sequence = _stable_sequence(values, max_gap, minimum_span)
+        sequence = _stable_sequence(values, max_gap, minimum_span, minimum_frames)
         if sequence:
             stable[time_ms] = sequence
     if len(stable) == 1:
@@ -357,7 +360,7 @@ def choose_frozen_consensus(observations: list[OcrObservation],
     second_stable = {
         second: sequence
         for second, values in by_second.items()
-        if (sequence := _stable_sequence(values, max_gap, minimum_span))
+        if (sequence := _stable_sequence(values, max_gap, minimum_span, minimum_frames))
     }
     if len(second_stable) != 1:
         return None
@@ -806,7 +809,15 @@ def _scan_frames(frames: list[Path], destination: Path, roi_name: str,
             if timeouts >= 3:
                 raise RuntimeError("tesseract_repeated_timeout")
             continue
-        consensus = choose_frozen_consensus(observations, 1 / fps)
+        # The manually labeled Results panel displays a short count-up, then
+        # freezes the Clear Time. Require four identical readings across at
+        # least 0.75 s on hinted 4 FPS scans; retain the stricter gameplay rule.
+        is_hinted_results = roi_name == "results_panel" and fps >= 4
+        consensus = choose_frozen_consensus(
+            observations, 1 / fps,
+            minimum_span_override=0.75 if is_hinted_results else None,
+            minimum_frames=4 if is_hinted_results else 2,
+        )
         if consensus is not None and first_consensus_at is None:
             first_consensus_at = reverse_index
         # Inspect four additional seconds around a first match. This keeps the
@@ -817,7 +828,12 @@ def _scan_frames(frames: list[Path], destination: Path, roi_name: str,
     if timeouts:
         # Preserve retryability rather than mislabel an incomplete scan as final.
         raise RuntimeError("tesseract_incomplete_scan_timeout")
-    return choose_frozen_consensus(observations, 1 / fps), len(observations)
+    is_hinted_results = roi_name == "results_panel" and fps >= 4
+    return choose_frozen_consensus(
+        observations, 1 / fps,
+        minimum_span_override=0.75 if is_hinted_results else None,
+        minimum_frames=4 if is_hinted_results else 2,
+    ), len(observations)
 
 
 def _preserve_evidence(result: OcrResult, evidence_directory: Path | None,
@@ -1044,3 +1060,4 @@ def _read_event_video(video_url: str, directory: Path,
         return None
     finally:
         _anchors.reset(token)
+

@@ -141,6 +141,25 @@ class OcrTextTests(unittest.TestCase):
         ]
         self.assertIsNone(choose_frozen_consensus(conflict, 1.0))
 
+    def test_hinted_results_consensus_accepts_four_repeat_reads_in_075_seconds(self):
+        # Both preserved hints have a stable results timer for less than the
+        # generic gameplay requirement of 1.8 seconds.
+        observations = [
+            OcrObservation(f"results_panel-frame-{index:04d}", 80_000,
+                           index * .25, .9, f"frame-{index}.png")
+            for index in range(6)
+        ]
+        self.assertIsNone(choose_frozen_consensus(observations, .25))
+        result = choose_frozen_consensus(
+            observations, .25, minimum_span_override=.75, minimum_frames=4
+        )
+        self.assertIsNotNone(result)
+        self.assertEqual(result.time_ms, 80_000)
+        self.assertEqual(result.matching_frames, 6)
+        self.assertIsNone(choose_frozen_consensus(
+            observations[:3], .25, minimum_span_override=.75, minimum_frames=4
+        ))
+
     def test_reads_text_and_real_confidence_from_tesseract_tsv(self):
         tsv = ("level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\t"
                "left\ttop\twidth\theight\tconf\ttext\n"
@@ -390,3 +409,4 @@ class OcrTextTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
