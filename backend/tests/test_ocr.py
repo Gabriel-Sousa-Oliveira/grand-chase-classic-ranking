@@ -249,6 +249,23 @@ class OcrTextTests(unittest.TestCase):
             self.assertEqual(command[command.index("-S") + 1], "res:720,+size,+br")
             self.assertEqual(command[command.index("--download-sections") + 1], "*-120-inf")
 
+    def test_download_can_target_a_short_video_timestamp_window(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            with patch.dict(os.environ, {}, clear=True), patch("gc_radar.ocr._run") as run:
+                video = Path(temporary) / "video.mp4"
+                video.touch()
+                _download_excerpt("https://youtu.be/example", Path(temporary), at_seconds=205)
+                command = run.call_args.args[0]
+                self.assertEqual(
+                    command[command.index("--download-sections") + 1],
+                    "*195.000-220.000",
+                )
+
+    def test_timestamp_hint_rejects_invalid_values(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            with self.assertRaises(ValueError):
+                _download_excerpt("https://youtu.be/example", Path(temporary), at_seconds=-1)
+
     def test_browser_po_token_uses_configured_chrome(self):
         environment = {
             "YOUTUBE_USE_PO_TOKEN": "1",
