@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import shutil
@@ -427,16 +428,25 @@ def _require_tools() -> None:
 
 
 def _download_excerpt(video_url: str, destination: Path,
-                      window_seconds: int = DOWNLOAD_WINDOW_SECONDS) -> Path:
+                      window_seconds: int = DOWNLOAD_WINDOW_SECONDS,
+                      at_seconds: float | None = None) -> Path:
     if not 30 <= window_seconds <= 900:
         raise ValueError("Lookback must be between 30 and 900 seconds")
+    if at_seconds is not None:
+        if not math.isfinite(at_seconds) or at_seconds < 0:
+            raise ValueError("Video timestamp hint must be finite and non-negative")
+        section_start = max(0.0, at_seconds - 10.0)
+        section_end = at_seconds + 15.0
+        section = f"*{section_start:.3f}-{section_end:.3f}"
+    else:
+        section = f"*-{window_seconds}-inf"
     output = destination / "video.%(ext)s"
     command = [
         "yt-dlp", "--no-playlist", "--no-warnings", "--quiet",
         "--js-runtimes", "node", "--remote-components", "ejs:npm",
         "--impersonate", "chrome", "-f", "bv*",
         "-S", "res:720,+size,+br",
-        "--download-sections", f"*-{window_seconds}-inf",
+        "--download-sections", section,
         "-o", str(output),
     ]
     if os.environ.get("YOUTUBE_USE_PO_TOKEN") == "1":
@@ -845,22 +855,26 @@ def _preserve_diagnostic(directory: Path, evidence_directory: Path | None,
 
 
 def read_video_time(video_url: str, evidence_directory: Path | None = None,
-                    evidence_name: str | None = None) -> OcrResult | None:
+                    evidence_name: str | None = None,
+                    at_seconds: float | None = None) -> OcrResult | None:
     token = _deadline.set(time.monotonic() + VIDEO_BUDGET_SECONDS)
     try:
-        return _read_video_time(video_url, evidence_directory, evidence_name)
+        return _read_video_time(video_url, evidence_directory, evidence_name,
+                                at_seconds)
     finally:
         _deadline.reset(token)
 
 
 def _read_video_time(video_url: str, evidence_directory: Path | None = None,
-                     evidence_name: str | None = None) -> OcrResult | None:
+                     evidence_name: str | None = None,
+                     at_seconds: float | None = None) -> OcrResult | None:
     """Find a stable completion timer using adaptive temporal and spatial OCR."""
     _require_tools()
     with tempfile.TemporaryDirectory(prefix="gc-radar-ocr-") as temporary:
         directory = Path(temporary)
         if os.environ.get("GC_OCR_VISUAL_EVENTS") == "1":
-            return _read_event_video(video_url, directory, evidence_directory, evidence_name)
+            return _read_event_video(video_url, directory, evidence_directory,
+                                     evidence_name, at_seconds)
         video = _download_excerpt(video_url, directory)
         coarse_frames = _extract_frames(
             video, directory, "coarse", COARSE_WINDOW_SECONDS, COARSE_FPS
@@ -906,19 +920,27 @@ def _read_video_time(video_url: str, evidence_directory: Path | None = None,
 
 
 def _read_event_video(video_url: str, directory: Path,
-                      evidence_directory: Path | None, evidence_name: str | None):
+                      evidence_directory: Path | None, evidence_name: str | None,
+                      at_seconds: float | None = None):
     from .visual import ensure_tail_window, load_anchors, propose_windows, write_inspection
     lookback = int(os.environ.get("GC_OCR_LOOKBACK_SECONDS", "300"))
     manifest = os.environ.get("GC_OCR_ANCHORS")
     anchors = load_anchors(Path(manifest) if manifest else None)
-    video = _download_excerpt(video_url, directory, lookback)
+    video = _download_excerpt(video_url, directory, lookback, at_seconds)
     samples, duration = scout_video(video, directory, lookback)
-    # Scene changes are only hints. Reserve one slot for the end of the
-    # excerpt, where Grand Chase most often shows its frozen clear timer.
-    windows = ensure_tail_window(
-        propose_windows(samples, anchors, duration, max_windows=2),
-        duration, tail_seconds=45,
-    )
+    if at_seconds is not None:
+        # The manually labeled timestamp is stronger than a generic tail heuristic.
+        windows = [{
+            "start": 0.0, "end": duration, "reason": "manual_time_hint",
+            "anchors": [], "score": 1,
+        }]
+    else:
+        # Scene changes are only hints. Reserve one slot for the end of the
+        # excerpt, where Grand Chase most often shows its frozen clear timer.
+        windows = ensure_tail_window(
+            propose_windows(samples, anchors, duration, max_windows=2),
+            duration, tail_seconds=45,
+        )
     # Save full-frame evidence before OCR, including if the subsequent scan fails.
     if evidence_directory is not None:
         write_inspection(samples, evidence_directory, evidence_name or "video", windows)
