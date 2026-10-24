@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from gc_radar.ocr import (OCR_ACCEPT_ROIS, TIMER_ROIS, OcrObservation, _download_excerpt,
-                          _parse_tesseract_tsv, _read_timer_frame,
+                          _parse_tesseract_tsv, _read_timer_frame, _preprocess_roi,
                           choose_consensus,
                           choose_frozen_consensus,
                           extract_compact_time_values,
@@ -274,6 +274,28 @@ class OcrTextTests(unittest.TestCase):
         self.assertEqual(result.time_ms, 80_000)
         self.assertEqual(frames.call_args.args[-1], 4)
         self.assertTrue(scan.call_args.kwargs["exhaustive"])
+
+    def test_gold_crop_excludes_time_label_and_keeps_rightmost_digit(self):
+        import cv2
+        import numpy as np
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            image = np.zeros((720, 1280, 3), dtype=np.uint8)
+            cv2.putText(image, "Time", (1020, 270), cv2.FONT_HERSHEY_SIMPLEX,
+                        .5, (220, 220, 180), 1)
+            for x in (1130, 1165, 1210, 1250):
+                cv2.rectangle(image, (x, 250), (x + 12, 275), (0, 220, 255), -1)
+            frame = directory / "frame.png"
+            cv2.imwrite(str(frame), image)
+            outputs = _preprocess_roi(frame, directory, "results_panel")
+            self.assertEqual(len(outputs), 1)
+            self.assertTrue(outputs[0].stem.endswith("-yellow-digits"))
+            pixels = cv2.imread(str(outputs[0]), cv2.IMREAD_GRAYSCALE)
+            # The old crop ended at x=1242 and cut the last digit.
+            self.assertEqual(roi_bounds(1280, 720, TIMER_ROIS["results_panel"])[2], 1280)
+            self.assertTrue((pixels[:, -100:] < 100).any())
+            # The cyan label occupies the left part of the ROI.
+            self.assertTrue((pixels[:, :300] == 255).all())
 
     def test_timestamp_hint_rejects_invalid_values(self):
         with tempfile.TemporaryDirectory() as temporary:
