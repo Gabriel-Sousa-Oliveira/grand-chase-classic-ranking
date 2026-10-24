@@ -683,7 +683,7 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
             result = _run([
                 "tesseract", str(processed), "stdout", "--psm",
                 str(page_mode), "-l", "eng", "-c",
-                "tessedit_char_whitelist=0123456789:.", "tsv",
+                ("tessedit_char_whitelist=0123456789:." + ("'\"" if roi_name == "results_panel" else "")), "tsv",
             ], timeout=20)
         except RuntimeError as error:
             # Tesseract may exit non-zero for an empty/tiny connected
@@ -806,8 +806,10 @@ def _preserve_diagnostic(directory: Path, evidence_directory: Path | None,
         roi_candidates = sorted(directory.glob(f"dense-*-{roi_name}-clahe.png"))
         if not roi_candidates:
             roi_candidates = sorted(directory.glob(
-                f"coarse-*-{roi_name}-clahe.png"
+                f"event*-{roi_name}-clahe.png"
             ))
+        if not roi_candidates:
+            roi_candidates = sorted(directory.glob(f"coarse-*-{roi_name}-clahe.png"))
         if roi_candidates:
             count = min(4, len(roi_candidates))
             candidates.extend(roi_candidates[round(
@@ -956,10 +958,14 @@ def _read_event_video(video_url: str, directory: Path,
                                                  length, 1, seconds_offset=duration-window["end"])
                 if result:
                     return _preserve_evidence(result, evidence_directory, evidence_name)
-                if sightings < 2:
+                if sightings < 2 and at_seconds is None:
                     continue
-                dense = _window_frames(video, directory, f"dense-event{index}-{roi_name}", start, length, 2)
-                result, _ = _scan_frames(dense, directory, roi_name, length, 2,
+                # A manual hint must receive a dense scan even if the cheap
+                # pass misses every digit. Four samples/s still fits the
+                # 181-frame bound for the 25-second hinted excerpt.
+                dense_fps = 4 if at_seconds is not None else 2
+                dense = _window_frames(video, directory, f"dense-event{index}-{roi_name}", start, length, dense_fps)
+                result, _ = _scan_frames(dense, directory, roi_name, length, dense_fps,
                                          exhaustive=True, seconds_offset=duration-window["end"])
                 if result:
                     return _preserve_evidence(result, evidence_directory, evidence_name)
