@@ -287,7 +287,8 @@ class OcrTextTests(unittest.TestCase):
                 cv2.rectangle(image, (x, 250), (x + 12, 275), (0, 220, 255), -1)
             frame = directory / "frame.png"
             cv2.imwrite(str(frame), image)
-            outputs = _preprocess_roi(frame, directory, "results_panel")
+            with patch("gc_radar.ocr._has_results_panel", return_value=True):
+                outputs = _preprocess_roi(frame, directory, "results_panel")
             self.assertEqual(len(outputs), 1)
             self.assertTrue(outputs[0].stem.endswith("-yellow-digits"))
             pixels = cv2.imread(str(outputs[0]), cv2.IMREAD_GRAYSCALE)
@@ -296,6 +297,38 @@ class OcrTextTests(unittest.TestCase):
             self.assertTrue((pixels[:, -100:] < 100).any())
             # The cyan label occupies the left part of the ROI.
             self.assertTrue((pixels[:, :300] == 255).all())
+
+    def test_results_panel_requires_heading_and_time_label(self):
+        import numpy as np
+        from gc_radar.ocr import _has_results_panel
+        image = np.zeros((720, 1280, 3), dtype=np.uint8)
+        with tempfile.TemporaryDirectory() as temporary:
+            for text, expected in [
+                ("Results\nClear Time\nTime 01 20\nBest Time", True),
+                ("Results\nBest Time", True),
+                ("Inventory 22:10", False),
+                ("Clear Time 01:20", False),
+                ("Results 01:20", False),
+                ("", False),
+            ]:
+                with self.subTest(text=text), patch("gc_radar.ocr._run",
+                        return_value=SimpleNamespace(stdout=text)):
+                    self.assertEqual(_has_results_panel(
+                        image, Path(temporary), "frame"), expected)
+
+    def test_inventory_is_rejected_before_any_timer_ocr(self):
+        import cv2
+        import numpy as np
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            frame = directory / "inventory.png"
+            cv2.imwrite(str(frame), np.zeros((720, 1280, 3), dtype=np.uint8))
+            with patch("gc_radar.ocr._run",
+                       return_value=SimpleNamespace(stdout="Inventory 22:10")) as run:
+                self.assertEqual(_read_timer_frame(
+                    frame, directory, "results_panel", 0, exhaustive=True), [])
+                self.assertEqual(run.call_count, 1)
+                self.assertNotIn("tsv", run.call_args.args[0])
 
     def test_timestamp_hint_rejects_invalid_values(self):
         with tempfile.TemporaryDirectory() as temporary:
