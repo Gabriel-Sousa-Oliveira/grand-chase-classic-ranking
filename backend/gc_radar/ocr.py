@@ -35,7 +35,7 @@ TIMER_ROIS = {
     "top_center_timer_wide": (0.42, 0.08, 0.64, 0.21),
     # Keep the ROI on the Clear Time row; the following Best Time row can
     # otherwise enter the crop and compete with the current run time.
-    "results_panel": (0.79, 0.31, 0.97, 0.40),
+    "results_panel": (0.79, 0.31, 1.00, 0.40),
 }
 # Only the results screen labels a time as the actual completed clear time.
 # HUD clocks can be countdowns, so keep them diagnostic-only for auto extraction.
@@ -611,6 +611,25 @@ def _preprocess_roi(frame: Path, destination: Path,
     crop = image[top:bottom, left:right]
     if crop.size == 0:
         raise RuntimeError(f"empty OCR ROI for {frame.name}")
+    if roi_name == "results_panel":
+        # Clear Time digits are gold; the cyan/white "Time" label must not
+        # become a leading 1. Preserve the full right edge of the video.
+        hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(hsv, (5, 60, 80), (45, 255, 255))
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        glyphs = [cv2.boundingRect(c) for c in contours]
+        glyphs = [(x, y, w, h) for x, y, w, h in glyphs
+                  if h >= crop.shape[0] * .2 and w >= 3]
+        if len(glyphs) >= 4:
+            # Padding outside the original frame prevents border-touching
+            # digits from being dropped by Tesseract.
+            mask = cv2.resize(mask, None, fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
+            pixels = cv2.copyMakeBorder(cv2.bitwise_not(mask), 20, 20, 20, 20,
+                                        cv2.BORDER_CONSTANT, value=255)
+            output = destination / f"{frame.stem}-{roi_name}-yellow-digits.png"
+            if not cv2.imwrite(str(output), pixels):
+                raise RuntimeError(f"OpenCV could not write {output.name}")
+            return [output]
     gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
     gray = cv2.resize(gray, None, fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
     # CLAHE retains thin timer strokes when attacks make a large part of the
