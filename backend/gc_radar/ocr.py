@@ -963,6 +963,34 @@ def _read_video_time(video_url: str, evidence_directory: Path | None = None,
         return None
 
 
+def _preserve_hinted_excerpt(video: Path, evidence_directory: Path | None,
+                              evidence_name: str | None, at_seconds: float | None) -> None:
+    """Retain a bounded public-video excerpt so failures can be replayed offline."""
+    if evidence_directory is None or at_seconds is None:
+        return
+    evidence_directory.mkdir(parents=True, exist_ok=True)
+    safe = re.sub(r"[^A-Za-z0-9_.-]+", "-", evidence_name or "video")
+    size = video.stat().st_size
+    # Keep diagnostic artifacts bounded even if a downloader misbehaves.
+    metadata = {
+        "video": evidence_name or "video",
+        "video_time_hint_seconds": at_seconds,
+        "requested_start_seconds": max(0.0, at_seconds - 10.0),
+        "requested_end_seconds": at_seconds + 15.0,
+        "timestamp_precision": "approximate_download_section",
+        "size_bytes": size,
+    }
+    if size <= 50 * 1024 * 1024:
+        target = evidence_directory / f"{safe}-excerpt{video.suffix}"
+        shutil.copyfile(video, target)
+        metadata.update(status="saved", excerpt=target.name)
+    else:
+        metadata.update(status="size_limit_exceeded", excerpt=None)
+    (evidence_directory / f"{safe}-excerpt.json").write_text(
+        json.dumps(metadata, indent=2), encoding="utf-8"
+    )
+
+
 def _read_event_video(video_url: str, directory: Path,
                       evidence_directory: Path | None, evidence_name: str | None,
                       at_seconds: float | None = None):
@@ -971,6 +999,7 @@ def _read_event_video(video_url: str, directory: Path,
     manifest = os.environ.get("GC_OCR_ANCHORS")
     anchors = load_anchors(Path(manifest) if manifest else None)
     video = _download_excerpt(video_url, directory, lookback, at_seconds)
+    _preserve_hinted_excerpt(video, evidence_directory, evidence_name, at_seconds)
     samples, duration = scout_video(video, directory, lookback)
     if at_seconds is not None:
         # The manually labeled timestamp is stronger than a generic tail heuristic.
