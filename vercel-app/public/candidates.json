@@ -2251,6 +2251,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 52490,
+      "character": "Rufus/Lupus",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 146000,
+      "player_nick": "XX",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=_mKPLb7Z-U0",
+      "channel": "XX",
+      "published_at": "2026-10-24T06:06:04Z",
+      "approved_at": "2026-10-24 07:47:11"
+    },
+    {
       "id": 63,
       "character": "Rufus/Lupus",
       "category": "void_taint",
@@ -5488,20 +5501,33 @@
       "channel": "삭제",
       "published_at": "2026-10-21T17:32:07Z",
       "approved_at": "2026-10-22 01:32:37"
+    },
+    {
+      "id": 52490,
+      "character": "Rufus/Lupus",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 146000,
+      "player_nick": "XX",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=_mKPLb7Z-U0",
+      "channel": "XX",
+      "published_at": "2026-10-24T06:06:04Z",
+      "approved_at": "2026-10-24 07:47:11"
     }
   ],
   "processing": {
-    "discovered": 559,
-    "classified": 441,
-    "timed": 237,
-    "approved": 235,
-    "ranked": 235,
+    "discovered": 560,
+    "classified": 442,
+    "timed": 238,
+    "approved": 236,
+    "ranked": 236,
     "pending_manual": 202,
-    "ocr_attempted": 120,
+    "ocr_attempted": 124,
     "ocr_matched": 53,
-    "ocr_unresolved": 67,
-    "title_times": 157,
+    "ocr_unresolved": 71,
+    "title_times": 158,
     "human_times": 36,
-    "last_updated": "2026-10-23 21:40:30"
+    "last_updated": "2026-10-24 07:48:21"
   }
 }
