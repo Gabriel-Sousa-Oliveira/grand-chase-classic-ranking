@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
@@ -35,15 +36,33 @@ def parse_case(value: str) -> ValidationCase:
     return ValidationCase(video_id.strip(), expected_ms)
 
 
-def validate_case(case: ValidationCase, evidence_dir: Path,
-                  tolerance_ms: int) -> dict:
+def parse_time_hint(value: str) -> tuple[str, float]:
     try:
-        result = read_video_time(case.url, evidence_dir, case.video_id)
+        video_id, raw_seconds = value.rsplit("=", 1)
+        seconds = float(raw_seconds)
+    except (ValueError, TypeError) as error:
+        raise argparse.ArgumentTypeError(
+            "time hint must use VIDEO_ID=SECONDS"
+        ) from error
+    if not video_id.strip() or not math.isfinite(seconds) or seconds < 0:
+        raise argparse.ArgumentTypeError(
+            "time hint must use a non-empty video id and non-negative seconds"
+        )
+    return video_id.strip(), seconds
+
+
+def validate_case(case: ValidationCase, evidence_dir: Path,
+                  tolerance_ms: int,
+                  time_hint_seconds: float | None = None) -> dict:
+    try:
+        result = read_video_time(case.url, evidence_dir, case.video_id,
+                                 at_seconds=time_hint_seconds)
     except Exception as error:
         return {
             "video_id": case.video_id,
             "expected_ms": case.expected_ms,
             "status": "error",
+            "video_time_hint_seconds": time_hint_seconds,
             "error_type": type(error).__name__,
             "error": str(error)[:500],
         }
@@ -52,11 +71,13 @@ def validate_case(case: ValidationCase, evidence_dir: Path,
             "video_id": case.video_id,
             "expected_ms": case.expected_ms,
             "status": "no_consensus",
+            "video_time_hint_seconds": time_hint_seconds,
         }
     delta_ms = result.time_ms - case.expected_ms
     return {
         "video_id": case.video_id,
         "expected_ms": case.expected_ms,
+        "video_time_hint_seconds": time_hint_seconds,
         "detected_ms": result.time_ms,
         "delta_ms": delta_ms,
         "status": (
@@ -96,6 +117,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="gc-ocr-validation")
     parser.add_argument("--case", action="append", type=parse_case,
                         dest="cases", required=True)
+    parser.add_argument("--time-hint", action="append", type=parse_time_hint,
+                        default=[], metavar="VIDEO_ID=SECONDS",
+                        help="Scan a 25-second excerpt around a known video time")
     parser.add_argument("--tolerance-ms", type=int, default=1_500)
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--evidence-dir", type=Path,
@@ -104,11 +128,19 @@ def main() -> None:
     if args.tolerance_ms < 0:
         parser.error("--tolerance-ms must be non-negative")
     args.evidence_dir.mkdir(parents=True, exist_ok=True)
+    time_hints = dict(args.time_hint)
+    case_ids = {case.video_id for case in args.cases}
+    unknown_hints = set(time_hints) - case_ids
+    if unknown_hints:
+        parser.error("time hints must reference a --case video id: "
+                     + ", ".join(sorted(unknown_hints)))
     workers = max(1, min(args.workers, 4, len(args.cases)))
     with ThreadPoolExecutor(max_workers=workers) as executor:
         results = list(executor.map(
-            lambda case: validate_case(case, args.evidence_dir,
-                                       args.tolerance_ms),
+            lambda case: validate_case(
+                case, args.evidence_dir, args.tolerance_ms,
+                time_hints.get(case.video_id),
+            ),
             args.cases,
         ))
     print(json.dumps(summarize(results, args.tolerance_ms),
