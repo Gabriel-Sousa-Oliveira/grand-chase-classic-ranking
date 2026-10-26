@@ -5517,17 +5517,17 @@
     }
   ],
   "processing": {
-    "discovered": 560,
-    "classified": 442,
+    "discovered": 561,
+    "classified": 443,
     "timed": 238,
     "approved": 236,
     "ranked": 236,
-    "pending_manual": 202,
+    "pending_manual": 203,
     "ocr_attempted": 124,
     "ocr_matched": 53,
     "ocr_unresolved": 71,
     "title_times": 158,
     "human_times": 36,
-    "last_updated": "2026-10-26 01:11:30"
+    "last_updated": "2026-10-26 17:24:37"
   }
 }
