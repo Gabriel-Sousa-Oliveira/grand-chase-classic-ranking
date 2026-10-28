@@ -125,14 +125,18 @@ class CandidateRepository:
                 refreshed_confidence = parsed.confidence
                 refreshed_status = parsed.status
                 refreshed_metadata = metadata or {}
-                same_run = (
-                    existing["character"], existing["category"],
-                    existing["floor"], existing["era_key"],
-                ) == (parsed.character, parsed.category, parsed.floor, era_key)
+                compatible_run = existing["era_key"] == era_key and all(
+                    old is None or old == new
+                    for old, new in zip(
+                        (existing["character"], existing["category"], existing["floor"]),
+                        (parsed.character, parsed.category, parsed.floor),
+                    )
+                )
                 # A metadata refresh is not evidence that a resolved time or
-                # its OCR history disappeared. Preserve them only for the same
-                # run classification, when the title offers no replacement.
-                if same_run and parsed.time_ms is None:
+                # its OCR history disappeared. Filling a previously unknown
+                # field is compatible; changing or dropping a known field or
+                # changing the era is not. An explicit title time still wins.
+                if compatible_run and parsed.time_ms is None:
                     refreshed_metadata = {
                         **json.loads(existing["raw_metadata"] or "{}"),
                         **refreshed_metadata,

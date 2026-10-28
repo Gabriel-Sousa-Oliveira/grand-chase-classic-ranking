@@ -87,20 +87,64 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(updated["time_ms"], 80_000)
         self.assertEqual(updated["status"], "ready_for_review")
 
+    def test_classification_refinement_preserves_resolved_time(self):
+        for old_title in ("Ronan Void Invasion", "Void Invasion 3F",
+                          "Ronan Grand Chase Classic"):
+            for source in ("manual", "ocr"):
+                with self.subTest(title=old_title, source=source):
+                    video_id = f"refine-{source}-{old_title}"
+                    candidate, _ = self.repo.add(video_id, "https://youtu.be/refine",
+                                                 parse_title(old_title))
+                    if source == "manual":
+                        self.repo.set_time(candidate["id"], 80_000)
+                    else:
+                        self.repo.set_ocr_time(candidate["id"], 80_000, .72,
+                                               {"roi": "results_panel"})
+                    updated, _ = self.repo.add(video_id, "https://youtu.be/refine",
+                        parse_title("Ronan Void Invasion 3F"), enrich_existing=True)
+                    self.assertEqual(updated["time_ms"], 80_000)
+                    self.assertEqual(updated["status"], "ready_for_review")
+                    if source == "ocr":
+                        self.assertEqual(json.loads(updated["raw_metadata"])["ocr_time_ms"], 80_000)
+
+    def test_partial_refinement_keeps_classification_required(self):
+        candidate, _ = self.repo.add("partial", "https://youtu.be/partial",
+                                     parse_title("Ronan Grand Chase Classic"))
+        self.repo.set_time(candidate["id"], 80_000)
+        updated, _ = self.repo.add("partial", "https://youtu.be/partial",
+            parse_title("Ronan Void Invasion"), enrich_existing=True)
+        self.assertEqual(updated["time_ms"], 80_000)
+        self.assertEqual(updated["status"], "classification_required")
+        self.assertIsNone(updated["floor"])
+
+    def test_classification_refinement_without_time_still_requires_time(self):
+        self.repo.add("untimed", "https://youtu.be/untimed",
+                       parse_title("Ronan Void Invasion"))
+        updated, _ = self.repo.add("untimed", "https://youtu.be/untimed",
+            parse_title("Ronan Void Invasion 3F"), enrich_existing=True)
+        self.assertIsNone(updated["time_ms"])
+        self.assertEqual(updated["status"], "time_required")
+
     def test_metadata_refresh_invalidates_time_when_run_identity_changes(self):
         original = parse_title("Ronan Void Invasion 3F")
         for field, replacement in (("character", "Arme"), ("floor", 2),
-                                   ("category", "void_nightmare"), ("era_key", "new-era")):
+                                   ("category", "void_nightmare"), ("era_key", "new-era"),
+                                   ("character", None), ("category", None), ("floor", None)):
             with self.subTest(field=field):
-                video_id = f"changed-{field}"
+                video_id = f"changed-{field}-{replacement}"
                 candidate, _ = self.repo.add(video_id, f"https://youtu.be/{video_id}", original)
                 self.repo.set_ocr_time(candidate["id"], 80_000, .72, {"roi": "results_panel"})
                 refreshed = original if field == "era_key" else replace(original, **{field: replacement})
                 options = {"era_key": replacement} if field == "era_key" else {}
                 updated, _ = self.repo.add(video_id, f"https://youtu.be/{video_id}",
-                                            refreshed, enrich_existing=True, **options)
+                                            refreshed, metadata={"description": "new"},
+                                            enrich_existing=True, **options)
                 self.assertIsNone(updated["time_ms"])
-                self.assertNotIn("ocr_time_ms", json.loads(updated["raw_metadata"]))
+                metadata = json.loads(updated["raw_metadata"])
+                self.assertEqual(metadata["description"], "new")
+                for key in ("ocr", "ocr_time_ms", "ocr_confidence", "evidence_frame",
+                            "evidence_image", "ocr_outcome", "ocr_attempts"):
+                    self.assertNotIn(key, metadata)
 
     def test_metadata_refresh_can_take_an_explicit_new_title_time(self):
         candidate, _ = self.repo.add("title-time", "https://youtu.be/title-time",

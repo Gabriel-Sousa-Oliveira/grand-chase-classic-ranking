@@ -50,13 +50,14 @@ Reprodução local antes da nova correção:
 
 ## Correção proposta, separada do PR #15
 
-Quando o título atualizado não oferece tempo e a classificação é idêntica
-(personagem, categoria, andar e era), preservar tempo resolvido, confiança e
+Quando o título atualizado não oferece tempo e a classificação é compatível
+(campos desconhecidos podem ser preenchidos, campos conhecidos não podem ser
+contraditos ou removidos, e a era deve continuar igual), preservar tempo resolvido, confiança e
 histórico OCR, mesclando os metadados novos sobre os antigos. O status continua
 ready_for_review se a classificação estiver completa. Valores manuais também
 são preservados. Sem tempo resolvido, manter o histórico de tentativas.
 
-Uma classificação diferente invalida esse reaproveitamento, e um tempo explícito
+Um conflito ou perda de classificação conhecida invalida esse reaproveitamento, e um tempo explícito
 novo no título mantém a precedência anterior. Entradas aprovadas/rejeitadas
 continuam protegidas pela cláusula SQL original.
 
@@ -72,3 +73,31 @@ Procure perda de evidência, preservação indevida de tempos em outra classific
 regressão na proteção de aprovados/rejeitados e comportamento de atualização
 dos metadados. Apresente apenas problemas demonstráveis, com reprodução e teste.
 Esta proposta não foi incorporada a main nem executada na fila real.
+
+
+## Segunda rodada do PR #16: completar campos ausentes
+
+A auditoria do Gemini apresentou um caso real: uma entrada com tempo manual
+de 80000 ms e título `Ronan Void Invasion` perdia o tempo ao ganhar `3F`.
+O teste reproduziu a falha para tempo manual e OCR ao preencher personagem,
+categoria ou andar antes desconhecidos. A regra foi ajustada para aceitar
+esses refinamentos sem perder tempo, confiança ou histórico.
+
+Regras verificadas após o ajuste:
+
+- Completar os campos restantes com tempo preservado resulta em ready_for_review.
+- Se a classificação continua parcial, manter classification_required e o tempo.
+- Completar classificação sem tempo continua em time_required; não foi reproduzido
+  ready_for_review com time_ms NULL. O defeito real era a perda de tempo.
+- Contradizer um valor conhecido, removê-lo ou alterar a era invalida o reaproveitamento.
+- A sugestão de resíduos antigos de OCR não se confirmou no cenário descrito:
+  o ramo incompatível não mescla o JSON antigo. Os testes verificam ausência de
+  ocr, ocr_time_ms, ocr_confidence, evidence_frame, evidence_image, ocr_outcome
+  e ocr_attempts, preservando os novos metadados de descrição. Isso não é uma
+  garantia sobre chaves OCR que um chamador forneça explicitamente como dados novos.
+
+Novos testes de preservação falharam antes do ajuste. A suíte completa após o
+ajuste passou com **131 testes**. O ambiente isolado usou OpenCV 4.10.0.84 e
+NumPy abaixo de 2, conforme as dependências do projeto. A primeira tentativa
+da suíte completa no Python sem OpenCV falhou por dependência ausente; foi
+reexecutada no ambiente preparado. Não houve nova execução em produção.
