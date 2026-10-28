@@ -4,6 +4,7 @@ import json
 import sys
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -55,6 +56,73 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(updated["category"], "duel_4")
         self.assertEqual(updated["floor"], 0)
         self.assertEqual(updated["status"], "time_required")
+
+    def test_metadata_refresh_preserves_ocr_time_and_evidence_for_same_run(self):
+        parsed = parse_title("Ronan Void Invasion 3F")
+        candidate, _ = self.repo.add("refresh", "https://youtu.be/refresh", parsed,
+                                     metadata={"description": "old"})
+        self.repo.set_ocr_time(candidate["id"], 80_000, .72,
+                               {"roi": "results_panel", "matching_frames": 6})
+        updated, created = self.repo.add(
+            "refresh", "https://youtu.be/refresh", parsed,
+            metadata={"description": "new"}, enrich_existing=True,
+        )
+        self.assertFalse(created)
+        self.assertEqual(updated["time_ms"], 80_000)
+        self.assertEqual(updated["status"], "ready_for_review")
+        self.assertEqual(updated["confidence"], .72)
+        metadata = json.loads(updated["raw_metadata"])
+        self.assertEqual(metadata["description"], "new")
+        self.assertEqual(metadata["ocr_time_ms"], 80_000)
+        self.assertEqual(metadata["ocr"]["matching_frames"], 6)
+        self.assertEqual(metadata["ocr_attempts"], 1)
+        self.assertNotIn("refresh", {c["video_id"] for c in self.repo.ocr_candidates(0)})
+
+    def test_metadata_refresh_preserves_manually_entered_time(self):
+        parsed = parse_title("Ronan Void Invasion 3F")
+        candidate, _ = self.repo.add("manual", "https://youtu.be/manual", parsed)
+        self.repo.set_time(candidate["id"], 80_000)
+        updated, _ = self.repo.add("manual", "https://youtu.be/manual", parsed,
+                                    enrich_existing=True)
+        self.assertEqual(updated["time_ms"], 80_000)
+        self.assertEqual(updated["status"], "ready_for_review")
+
+    def test_metadata_refresh_invalidates_time_when_run_identity_changes(self):
+        original = parse_title("Ronan Void Invasion 3F")
+        for field, replacement in (("character", "Arme"), ("floor", 2),
+                                   ("category", "void_nightmare"), ("era_key", "new-era")):
+            with self.subTest(field=field):
+                video_id = f"changed-{field}"
+                candidate, _ = self.repo.add(video_id, f"https://youtu.be/{video_id}", original)
+                self.repo.set_ocr_time(candidate["id"], 80_000, .72, {"roi": "results_panel"})
+                refreshed = original if field == "era_key" else replace(original, **{field: replacement})
+                options = {"era_key": replacement} if field == "era_key" else {}
+                updated, _ = self.repo.add(video_id, f"https://youtu.be/{video_id}",
+                                            refreshed, enrich_existing=True, **options)
+                self.assertIsNone(updated["time_ms"])
+                self.assertNotIn("ocr_time_ms", json.loads(updated["raw_metadata"]))
+
+    def test_metadata_refresh_can_take_an_explicit_new_title_time(self):
+        candidate, _ = self.repo.add("title-time", "https://youtu.be/title-time",
+                                     parse_title("Ronan Void Invasion 3F"))
+        self.repo.set_ocr_time(candidate["id"], 80_000, .72, {"roi": "results_panel"})
+        updated, _ = self.repo.add("title-time", "https://youtu.be/title-time",
+                                    parse_title("Ronan Void Invasion 3F 01:30"),
+                                    enrich_existing=True)
+        self.assertEqual(updated["time_ms"], 90_000)
+        self.assertNotIn("ocr_time_ms", json.loads(updated["raw_metadata"]))
+
+    def test_metadata_refresh_preserves_unresolved_ocr_attempt_history(self):
+        parsed = parse_title("Ronan Void Invasion 3F")
+        candidate, _ = self.repo.add("unresolved", "https://youtu.be/unresolved", parsed)
+        self.repo.record_ocr_attempt(candidate["id"], "no_consensus")
+        updated, _ = self.repo.add("unresolved", "https://youtu.be/unresolved", parsed,
+                                    metadata={"description": "updated"}, enrich_existing=True)
+        metadata = json.loads(updated["raw_metadata"])
+        self.assertIsNone(updated["time_ms"])
+        self.assertEqual(metadata["ocr_outcome"], "no_consensus")
+        self.assertEqual(metadata["ocr_attempts"], 1)
+        self.assertEqual(metadata["description"], "updated")
 
     def test_missing_time_blocks_approval_until_filled(self):
         parsed = parse_title("Lupus | Vazio (Apocalipse) 3F Solo Sem poções")
