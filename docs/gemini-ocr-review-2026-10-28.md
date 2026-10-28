@@ -133,3 +133,13 @@ frames agora reserva tokens com `:'` ao parser contextual, evitando esse
 candidato extra de 1185000 ms; o único resultado nesse caso é 79450 ms.
 O replay citado foi executado antes desse último bloqueio; os testes finais
 cobrem sua integração e os formatos inteiros dos dois trechos.
+
+## Terceira rodada: ponto decimal
+
+O Gemini não identificou bloqueadores na segunda rodada e apontou uma
+limitação de baixa gravidade: o separador duplicado com fração decimal
+`01:'20.450` era rejeitado. Reproduzido em teste do parser e do leitor de
+frames; corrigido incluindo o ponto entre os delimitadores da fração.
+`01 : ' 20 . 45` também retorna 80450 ms. Frações com quatro dígitos continuam
+rejeitadas. Todos os **123 testes** passaram após o ajuste. Não houve novo
+replay completo dos vídeos para esta ampliação pontual da gramática.

@@ -186,7 +186,7 @@ def extract_result_time_values(text: str) -> set[int]:
     # Return directly so an invalid minute field cannot fall through to the
     # seconds-only grammar (21:'00 must not turn into 21 seconds).
     duplicated_separator = re.fullmatch(
-        r"(\d{1,2})\s*:\s*'\s*(\d{2})(?:\s*[\":]\s*(\d{1,3}))?",
+        r"(\d{1,2})\s*:\s*'\s*(\d{2})(?:\s*[\":.]\s*(\d{1,3}))?",
         normalized,
     )
     if duplicated_separator:

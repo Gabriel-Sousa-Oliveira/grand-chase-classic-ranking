@@ -65,12 +65,14 @@ class OcrTextTests(unittest.TestCase):
 
     def test_duplicate_separator_preserves_complete_fractional_fields(self):
         for text, expected in (("01:'20:450", 80_450),
+                               ("01:'20.450", 80_450),
+                               ("01 : ' 20 . 45", 80_450),
                                ('01:\'20"450', 80_450),
                                ("01 : ' 20 : 45", 80_450),
                                ("01:'20:4", 80_400)):
             with self.subTest(text=text):
                 self.assertEqual(extract_result_time_values(text), {expected})
-        for text in ("01:'20:4500", "01:'20:", "01:'20:45 trailing",
+        for text in ("01:'20:4500", "01:'20.4500", "01:'20:", "01:'20:45 trailing",
                      "Time 01:'20:450", "01:'99:450", "21:'00",
                      "20:'01", "20:'00:001"):
             with self.subTest(text=text):
@@ -275,7 +277,8 @@ class OcrTextTests(unittest.TestCase):
                     )
 
     def test_duplicate_result_separator_cannot_leak_a_suffix_as_another_timer(self):
-        for text, expected in (("01:'19:45", [79_450]), ("21:'00", []),
+        for text, expected in (("01:'19:45", [79_450]),
+                               ("01:'20.450", [80_450]), ("21:'00", []),
                                ("01:'19:4500", [])):
             with self.subTest(text=text), tempfile.TemporaryDirectory() as temporary, \
                     patch("gc_radar.ocr._preprocess_roi") as preprocess, \
