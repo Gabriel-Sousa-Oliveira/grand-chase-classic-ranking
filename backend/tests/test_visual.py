@@ -128,7 +128,7 @@ class VisualTests(unittest.TestCase):
         with patch("gc_radar.ocr._download_excerpt", return_value=Path("video.mp4")), \
              patch("gc_radar.ocr.scout_video", return_value=(samples, 25)), \
              patch("gc_radar.ocr._window_frames", return_value=[samples[0].path]) as frames, \
-             patch("gc_radar.ocr._scan_frames", return_value=(None, 0)):
+             patch("gc_radar.ocr._scan_frames", return_value=(None, 0)) as scan:
             result = _read_event_video("test", self.directory, self.directory / "out", "video")
             self.assertIsNone(result)
             self.assertEqual(frames.call_count, 1)
