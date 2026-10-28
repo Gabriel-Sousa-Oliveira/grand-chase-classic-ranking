@@ -3,7 +3,8 @@ name: Scalable OCR queue
 
 on:
   schedule:
-    - cron: "47 18 * * *"
+    # Every six hours; 03:47, 09:47, 15:47 and 21:47 in America/Sao_Paulo.
+    - cron: "47 0,6,12,18 * * *"
   workflow_dispatch:
     inputs:
       mode:
