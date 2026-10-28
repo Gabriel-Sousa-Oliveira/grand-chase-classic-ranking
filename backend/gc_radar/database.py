@@ -116,6 +116,39 @@ class CandidateRepository:
             return self.get(cursor.lastrowid), True
         except sqlite3.IntegrityError:
             if enrich_existing:
+                existing = self.connection.execute(
+                    "SELECT * FROM candidates WHERE video_id = ?", (video_id,)
+                ).fetchone()
+                if existing is None:
+                    raise
+                refreshed_time = parsed.time_ms
+                refreshed_confidence = parsed.confidence
+                refreshed_status = parsed.status
+                refreshed_metadata = metadata or {}
+                compatible_run = existing["era_key"] == era_key and all(
+                    old is None or old == new
+                    for old, new in zip(
+                        (existing["character"], existing["category"], existing["floor"]),
+                        (parsed.character, parsed.category, parsed.floor),
+                    )
+                )
+                # A metadata refresh is not evidence that a resolved time or
+                # its OCR history disappeared. Filling a previously unknown
+                # field is compatible; changing or dropping a known field or
+                # changing the era is not. An explicit title time still wins.
+                if compatible_run and parsed.time_ms is None:
+                    refreshed_metadata = {
+                        **json.loads(existing["raw_metadata"] or "{}"),
+                        **refreshed_metadata,
+                    }
+                    if existing["time_ms"] is not None:
+                        refreshed_time = existing["time_ms"]
+                        refreshed_confidence = existing["confidence"]
+                        refreshed_status = (
+                            "ready_for_review" if all(value is not None for value in
+                                (parsed.character, parsed.category, parsed.floor))
+                            else "classification_required"
+                        )
                 self.connection.execute("""UPDATE candidates SET
                     video_url = ?, title = ?, channel = COALESCE(?, channel),
                     player_nick = COALESCE(?, player_nick),
@@ -125,9 +158,9 @@ class CandidateRepository:
                   WHERE video_id = ? AND status NOT IN ('approved', 'rejected')""",
                   (video_url, parsed.title, channel,
                    canonical_player_nick(player_nick or channel), published_at,
-                   parsed.character, parsed.category, parsed.floor, parsed.time_ms,
-                   parsed.confidence, parsed.status, era_key,
-                   json.dumps(metadata or {}, ensure_ascii=False), video_id))
+                   parsed.character, parsed.category, parsed.floor, refreshed_time,
+                   refreshed_confidence, refreshed_status, era_key,
+                   json.dumps(refreshed_metadata, ensure_ascii=False), video_id))
                 self.connection.commit()
             row = self.connection.execute(
                 "SELECT * FROM candidates WHERE video_id = ?", (video_id,)
