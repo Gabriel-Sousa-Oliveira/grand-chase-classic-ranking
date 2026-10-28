@@ -181,6 +181,20 @@ def extract_result_time_values(text: str) -> set[int]:
     normalized = text.translate(str.maketrans({
         "’": "'", "′": "'", "＇": "'", "“": '"', "”": '"',
     })).strip(" .")
+    # Real results-panel replays read the small apostrophe twice as :'.
+    # Accept only a complete MM:'SS token, with an optional complete fraction.
+    # Return directly so an invalid minute field cannot fall through to the
+    # seconds-only grammar (21:'00 must not turn into 21 seconds).
+    duplicated_separator = re.fullmatch(
+        r"(\d{1,2})\s*:\s*'\s*(\d{2})(?:\s*[\":.]\s*(\d{1,3}))?",
+        normalized,
+    )
+    if duplicated_separator:
+        minutes, seconds = map(int, duplicated_separator.group(1, 2))
+        fraction = duplicated_separator.group(3) or "0"
+        millis = int(fraction) * 10 ** (3 - len(fraction))
+        value = (minutes * 60 + seconds) * 1000 + millis
+        return {value} if seconds < 60 and _valid_ms(value) else set()
     minute = re.fullmatch(
         r"(\d{1,2})\s*'\s*(\d{2})\s*(?:\"|:)\s*(\d{1,3})",
         normalized,
@@ -610,9 +624,23 @@ def _has_results_panel(image, destination: Path, frame_stem: str) -> bool:
     normalized = re.sub(r"[^a-z]", "", output.lower())
     # Both the heading and a timer-row label are needed. Inventory, HUD,
     # lobby and reward numbers alone cannot establish completed-run evidence.
-    return "results" in normalized and (
-        "cleartime" in normalized or "besttime" in normalized
-    )
+    has_time_label = "cleartime" in normalized or "besttime" in normalized
+    if not has_time_label:
+        return False
+    if "results" in normalized:
+        return True
+    # The sparse full-panel pass can omit the italic Results heading while
+    # reading the time rows. Retry that heading alone; both labels are still
+    # mandatory, so digits or a time label alone never open the gate.
+    left, top, right, bottom = roi_bounds(width, height, (.65, .13, .98, .23))
+    heading = cv2.cvtColor(image[top:bottom, left:right], cv2.COLOR_BGR2GRAY)
+    heading = cv2.resize(heading, None, fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
+    target = destination / f"{frame_stem}-panel-heading.png"
+    if not cv2.imwrite(str(target), heading):
+        raise RuntimeError(f"OpenCV could not write {target.name}")
+    output = _run(["tesseract", str(target), "stdout", "--psm", "7",
+                   "-l", "eng"], timeout=20).stdout
+    return re.sub(r"[^a-z]", "", output.lower()) == "results"
 
 
 def _preprocess_roi(frame: Path, destination: Path,
@@ -747,6 +775,11 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
         text, confidence = _parse_tesseract_tsv(result.stdout)
         values = extract_time_values(text)
         if roi_name == "results_panel":
+            # A duplicated results separator belongs to the contextual
+            # grammar only. Otherwise its suffix (19:45 in 01:'19:45)
+            # can also become a spurious standalone 19-minute duration.
+            if re.search(r":\s*'", text):
+                values.clear()
             # A separator-free SScc value is valid only in the untouched
             # Clear Time crop. Applying that interpretation to segmented
             # variants turned stable inventory icons (for example ``2383``)

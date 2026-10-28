@@ -54,6 +54,35 @@ class OcrTextTests(unittest.TestCase):
         self.assertEqual(extract_compact_time_values("0123456"), {83_456})
         self.assertEqual(extract_compact_time_values("0132"), {92_000})
 
+    def test_results_parser_handles_duplicate_minute_separator_from_real_replay(self):
+        self.assertEqual(extract_result_time_values("01:'20"), {80_000})
+        self.assertEqual(extract_result_time_values("03:'04"), {184_000})
+        # Do not turn arbitrary repeated punctuation or incomplete digits
+        # into durations, and do not broaden the general timer parser.
+        for text in ("01::20", "01:'2", "Time 01:'20", "01:'99"):
+            self.assertEqual(extract_result_time_values(text), set())
+        self.assertEqual(extract_time_values("01:'20"), set())
+
+    def test_duplicate_separator_preserves_complete_fractional_fields(self):
+        for text, expected in (("01:'20:450", 80_450),
+                               ("01:'20.450", 80_450),
+                               ("01 : ' 20 . 45", 80_450),
+                               ('01:\'20"450', 80_450),
+                               ("01 : ' 20 : 45", 80_450),
+                               ("01:'20:4", 80_400)):
+            with self.subTest(text=text):
+                self.assertEqual(extract_result_time_values(text), {expected})
+        for text in ("01:'20:4500", "01:'20.4500", "01:'20:", "01:'20:45 trailing",
+                     "Time 01:'20:450", "01:'99:450", "21:'00",
+                     "20:'01", "20:'00:001"):
+            with self.subTest(text=text):
+                self.assertEqual(extract_result_time_values(text), set())
+
+    def test_compact_timer_already_enforces_twenty_minute_limit(self):
+        self.assertEqual(extract_compact_time_values("2000"), {1_200_000})
+        for text in ("2001", "2100", "9959", "200001"):
+            self.assertEqual(extract_compact_time_values(text), set())
+
     def test_rejects_ambiguous_compact_numbers(self):
         self.assertEqual(extract_compact_time_values("123"), set())
         self.assertEqual(extract_compact_time_values("016099"), set())
@@ -219,6 +248,53 @@ class OcrTextTests(unittest.TestCase):
             )
             self.assertEqual([item.time_ms for item in observations], [86_000])
 
+    def test_results_panel_recovers_compact_gold_digits_in_both_scan_modes(self):
+        # Gold isolation returns only this variant. No fallback image exists
+        # when the small apostrophe disappears during preprocessing.
+        for exhaustive in (False, True):
+            for text, expected in (("0120", 80_000), ("0304", 184_000),
+                                   ("0603", 363_000), ("2383", None)):
+                with self.subTest(exhaustive=exhaustive, text=text), \
+                        tempfile.TemporaryDirectory() as temporary, \
+                        patch("gc_radar.ocr._preprocess_roi") as preprocess, \
+                        patch("gc_radar.ocr._run") as run:
+                    directory = Path(temporary)
+                    preprocess.return_value = [
+                        directory / "frame-results_panel-yellow-digits.png"
+                    ]
+                    run.return_value = SimpleNamespace(stdout=(
+                        "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\t"
+                        "left\ttop\twidth\theight\tconf\ttext\n"
+                        f"5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t95\t{text}\n"
+                    ))
+                    observations = _read_timer_frame(
+                        directory / "frame.png", directory, "results_panel",
+                        3.0, exhaustive=exhaustive,
+                    )
+                    self.assertEqual(
+                        [item.time_ms for item in observations],
+                        [] if expected is None else [expected],
+                    )
+
+    def test_duplicate_result_separator_cannot_leak_a_suffix_as_another_timer(self):
+        for text, expected in (("01:'19:45", [79_450]),
+                               ("01:'20.450", [80_450]), ("21:'00", []),
+                               ("01:'19:4500", [])):
+            with self.subTest(text=text), tempfile.TemporaryDirectory() as temporary, \
+                    patch("gc_radar.ocr._preprocess_roi") as preprocess, \
+                    patch("gc_radar.ocr._run") as run:
+                directory = Path(temporary)
+                preprocess.return_value = [directory / "frame-results_panel-yellow-digits.png"]
+                run.return_value = SimpleNamespace(stdout=(
+                    "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\t"
+                    "left\ttop\twidth\theight\tconf\ttext\n"
+                    f"5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t95\t{text}\n"
+                ))
+                observations = _read_timer_frame(
+                    directory / "frame.png", directory, "results_panel", 0,
+                )
+                self.assertEqual([item.time_ms for item in observations], expected)
+
     def test_empty_tesseract_component_is_not_a_video_error(self):
         with tempfile.TemporaryDirectory() as temporary, \
                 patch("gc_radar.ocr._preprocess_roi") as preprocess, \
@@ -334,6 +410,20 @@ class OcrTextTests(unittest.TestCase):
                         return_value=SimpleNamespace(stdout=text)):
                     self.assertEqual(_has_results_panel(
                         image, Path(temporary), "frame"), expected)
+
+    def test_results_heading_retry_still_requires_both_labels(self):
+        import numpy as np
+        from gc_radar.ocr import _has_results_panel
+        image = np.zeros((720, 1280, 3), dtype=np.uint8)
+        with tempfile.TemporaryDirectory() as temporary:
+            for heading, expected in (("Results", True), ("Inventory", False),
+                                      ("", False), ("Results inventory", False)):
+                with self.subTest(heading=heading), patch("gc_radar.ocr._run",
+                        side_effect=[SimpleNamespace(stdout="Clear Time"),
+                                     SimpleNamespace(stdout=heading)]) as run:
+                    self.assertEqual(_has_results_panel(
+                        image, Path(temporary), "frame"), expected)
+                    self.assertEqual(run.call_count, 2)
 
     def test_inventory_is_rejected_before_any_timer_ocr(self):
         import cv2
