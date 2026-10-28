@@ -171,6 +171,8 @@ jobs:
           from concurrent.futures import ThreadPoolExecutor, as_completed
           from pathlib import Path
 
+          from gc_radar.ocr_queue import pending_ocr_videos
+
           MASTER = Path("../data/gc_radar.sqlite3").resolve()
           OUTPUT = Path("../data/last-run.json").resolve()
           DIAGNOSTICS = Path("../data/ocr-diagnostics.json").resolve()
@@ -192,15 +194,6 @@ jobs:
           EVIDENCE.mkdir(parents=True, exist_ok=True)
           SHARDS.mkdir(parents=True, exist_ok=True)
 
-          def pending_ids(connection: sqlite3.Connection, category: str) -> list[str]:
-              return [row[0] for row in connection.execute(
-                  "SELECT video_id FROM candidates WHERE category = ? "
-                  "AND time_ms IS NULL AND status IN "
-                  "('time_required', 'classification_required') "
-                  "ORDER BY video_id",
-                  (category,),
-              )]
-
           def write_checkpoint(summary: dict) -> None:
               temporary = OUTPUT.with_suffix(".tmp")
               temporary.write_text(json.dumps(summary, ensure_ascii=False))
@@ -214,8 +207,10 @@ jobs:
               diagnostic_temporary.replace(DIAGNOSTICS)
 
           with sqlite3.connect(MASTER) as connection:
-              counts = {category: len(pending_ids(connection, category))
-                        for category in ALLOWED}
+              pending = pending_ocr_videos(connection, ALLOWED)
+          counts = {category: sum(item[1] == category for item in pending)
+                    for category in ALLOWED}
+          selected = pending[:MAX_VIDEOS_PER_RUN]
           order_index = {category: index for index, category in enumerate(ALLOWED)}
           ordered = sorted(ALLOWED, key=lambda category: (-counts[category], order_index[category]))
           summary = {
@@ -283,11 +278,10 @@ jobs:
                       if evidence.is_file() and KEEP_EVIDENCE.search(evidence.name):
                           shutil.copy2(evidence, EVIDENCE / evidence.name)
 
-          budget_remaining = MAX_VIDEOS_PER_RUN
           with sqlite3.connect(MASTER) as master:
               for category in ordered:
-                  ids = pending_ids(master, category)[:budget_remaining]
-                  budget_remaining -= len(ids)
+                  ids = [video_id for video_id, selected_category in selected
+                         if selected_category == category]
                   batches = [ids[start:start + BATCH_SIZE]
                              for start in range(0, len(ids), BATCH_SIZE)]
                   stats = {
