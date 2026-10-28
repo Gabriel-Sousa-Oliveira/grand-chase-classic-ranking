@@ -63,6 +63,24 @@ class OcrTextTests(unittest.TestCase):
             self.assertEqual(extract_result_time_values(text), set())
         self.assertEqual(extract_time_values("01:'20"), set())
 
+    def test_duplicate_separator_preserves_complete_fractional_fields(self):
+        for text, expected in (("01:'20:450", 80_450),
+                               ('01:\'20"450', 80_450),
+                               ("01 : ' 20 : 45", 80_450),
+                               ("01:'20:4", 80_400)):
+            with self.subTest(text=text):
+                self.assertEqual(extract_result_time_values(text), {expected})
+        for text in ("01:'20:4500", "01:'20:", "01:'20:45 trailing",
+                     "Time 01:'20:450", "01:'99:450", "21:'00",
+                     "20:'01", "20:'00:001"):
+            with self.subTest(text=text):
+                self.assertEqual(extract_result_time_values(text), set())
+
+    def test_compact_timer_already_enforces_twenty_minute_limit(self):
+        self.assertEqual(extract_compact_time_values("2000"), {1_200_000})
+        for text in ("2001", "2100", "9959", "200001"):
+            self.assertEqual(extract_compact_time_values(text), set())
+
     def test_rejects_ambiguous_compact_numbers(self):
         self.assertEqual(extract_compact_time_values("123"), set())
         self.assertEqual(extract_compact_time_values("016099"), set())
@@ -255,6 +273,24 @@ class OcrTextTests(unittest.TestCase):
                         [item.time_ms for item in observations],
                         [] if expected is None else [expected],
                     )
+
+    def test_duplicate_result_separator_cannot_leak_a_suffix_as_another_timer(self):
+        for text, expected in (("01:'19:45", [79_450]), ("21:'00", []),
+                               ("01:'19:4500", [])):
+            with self.subTest(text=text), tempfile.TemporaryDirectory() as temporary, \
+                    patch("gc_radar.ocr._preprocess_roi") as preprocess, \
+                    patch("gc_radar.ocr._run") as run:
+                directory = Path(temporary)
+                preprocess.return_value = [directory / "frame-results_panel-yellow-digits.png"]
+                run.return_value = SimpleNamespace(stdout=(
+                    "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\t"
+                    "left\ttop\twidth\theight\tconf\ttext\n"
+                    f"5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t95\t{text}\n"
+                ))
+                observations = _read_timer_frame(
+                    directory / "frame.png", directory, "results_panel", 0,
+                )
+                self.assertEqual([item.time_ms for item in observations], expected)
 
     def test_empty_tesseract_component_is_not_a_video_error(self):
         with tempfile.TemporaryDirectory() as temporary, \

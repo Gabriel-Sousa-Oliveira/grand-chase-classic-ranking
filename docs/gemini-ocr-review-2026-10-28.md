@@ -28,8 +28,9 @@ separada do título recuperou a palavra. Seus dígitos aparecem como `03:'04`.
 
 ## Alterações
 
-- Parser contextual de resultados: normalizar apenas um token completo
-  `MM:'SS` para a notação já aceita `MM'SS`. Não alterar o parser geral.
+- Parser contextual de resultados: aceitar apenas um token completo
+  `MM:'SS` com fração opcional completa. Calcular e validar diretamente a
+  duração, impedindo fallback para a gramática de segundos. Não alterar o parser geral.
 - Se existe rótulo de tempo, mas falta Results, tentar um recorte separado do
   título. A segunda leitura precisa corresponder exatamente a Results após
   remover espaços/pontuação. Os dois rótulos continuam obrigatórios.
@@ -88,3 +89,47 @@ desse retry e seu custo na fila é parte importante da revisão.
 Nenhum limite de consenso foi reduzido nesta alteração. Não houve alteração no
 banco nem publicação de novos tempos. Esta branch deve ser revisada antes de
 integrar e executar em escala.
+
+
+## Segunda rodada: resposta técnica à auditoria do Gemini
+
+- **Confirmado e corrigido:** a regra de separador duplicado rejeitava frações
+  completas, como `01:'20:450` e `01:'20"450`. Agora ambas retornam 80450 ms.
+  O match continua ancorado no token inteiro: prefixos, sufixos e frações
+  incompletas ou maiores que três dígitos continuam rejeitados. Não foi usada
+  a substituição não ancorada sugerida pelo revisor.
+- **Erro adicional reproduzido e corrigido:** `21:'00` caía na gramática de
+  segundos após a normalização e retornava 21000 ms. A nova regra calcula o
+  token diretamente e aplica os limites de duração, sem esse fallback.
+- **Falso positivo alegado em `12:'34`: não demonstrado.** 12:34 está dentro
+  da faixa configurada de 20 minutos. A presença de um separador duplicado,
+  por si, não comprova truncamento; o token é justamente o ruído observado
+  nos vídeos. Contexto visual e consenso continuam obrigatórios.
+- **Retry de Results:** `Results!`, `Results.` e espaços já são aceitos.
+  `Stage Results` é rejeitado intencionalmente nesse recorte do layout
+  inglês suportado. O teste sintético comprova a restrição, mas não comprova
+  que há um vídeo suportado sendo rejeitado por isso. Manter a regra atual
+  até existir evidência de um novo layout; não ampliar para substring.
+- **Limite do parser compacto:** já aplicado por `_valid_ms`. Testes novos
+  confirmam aceitação de 20:00 e rejeição de 20:01, 21:00, 99:59 e 20:00.01.
+- **Custo do retry:** hipótese válida de trabalho adicional, sem falha de
+  orçamento demonstrada. O retry faz no máximo uma chamada adicional por
+  frame com rótulo de tempo e sem Results no passe principal. `_run` continua
+  limitando cada subprocesso pelo prazo restante dos 300 segundos. Os testes
+  existentes cobrem limite de timeout e proibição de subprocessos após o prazo.
+  Isso não mede a taxa de sucesso nem o custo em toda a fila.
+
+Os testes de frações falharam antes do ajuste; o teste de `21:'00` também
+reproduziu o retorno incorreto antes da correção. Após o ajuste, **123 testes
+passaram**. O novo replay dos dois excerpts é registrado no pacote atualizado.
+
+O replay desta segunda rodada manteve 80000 ms (6 frames) e 184000 ms
+(4 frames); tempos locais de execução concorrente de 66,96 s e 77,75 s,
+respectivamente. Isso é uma medição dos dois trechos, não um benchmark da fila.
+
+Um teste adicional de integração do parser também reproduziu a leitura
+indevida de `19:45` como duração separada dentro de `01:'19:45`. O leitor de
+frames agora reserva tokens com `:'` ao parser contextual, evitando esse
+candidato extra de 1185000 ms; o único resultado nesse caso é 79450 ms.
+O replay citado foi executado antes desse último bloqueio; os testes finais
+cobrem sua integração e os formatos inteiros dos dois trechos.
