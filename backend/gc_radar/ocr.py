@@ -1,4 +1,4 @@
-"""Conservative OCR extraction for completion times shown inside YouTube videos."""
+"""Conservative OCR extraction for labeled Clear Time results in YouTube videos."""
 from __future__ import annotations
 
 import json
