@@ -1042,6 +1042,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 57714,
+      "character": "Jin",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 384000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=RW5E9HCmPz4",
+      "channel": "Borkaz",
+      "published_at": "2024-03-29T09:01:10Z",
+      "approved_at": "2026-10-28 20:30:51"
+    },
+    {
       "id": 34,
       "character": "Kallia",
       "category": "void_invasion",
@@ -1222,6 +1235,19 @@
       "channel": "Thehighest",
       "published_at": "2025-05-04",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 57717,
+      "character": "Mari",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 400000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ZimkBOLrZ2A",
+      "channel": "Borkaz",
+      "published_at": "2024-04-01T10:00:59Z",
+      "approved_at": "2026-10-28 20:30:52"
     },
     {
       "id": 45625,
@@ -2706,6 +2732,32 @@
       "channel": "Borkaz",
       "published_at": "2024-03-27T09:09:45Z",
       "approved_at": "2026-09-14 01:21:35"
+    },
+    {
+      "id": 57714,
+      "character": "Jin",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 384000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=RW5E9HCmPz4",
+      "channel": "Borkaz",
+      "published_at": "2024-03-29T09:01:10Z",
+      "approved_at": "2026-10-28 20:30:51"
+    },
+    {
+      "id": 57717,
+      "character": "Mari",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 400000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ZimkBOLrZ2A",
+      "channel": "Borkaz",
+      "published_at": "2024-04-01T10:00:59Z",
+      "approved_at": "2026-10-28 20:30:52"
     },
     {
       "id": 28579,
@@ -5519,15 +5571,15 @@
   "processing": {
     "discovered": 561,
     "classified": 443,
-    "timed": 238,
-    "approved": 236,
-    "ranked": 236,
-    "pending_manual": 203,
-    "ocr_attempted": 124,
-    "ocr_matched": 53,
-    "ocr_unresolved": 71,
+    "timed": 240,
+    "approved": 238,
+    "ranked": 238,
+    "pending_manual": 201,
+    "ocr_attempted": 125,
+    "ocr_matched": 55,
+    "ocr_unresolved": 70,
     "title_times": 158,
     "human_times": 36,
-    "last_updated": "2026-10-28 20:14:27"
+    "last_updated": "2026-10-28 20:33:40"
   }
 }
