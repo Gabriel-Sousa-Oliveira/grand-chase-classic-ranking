@@ -5575,11 +5575,11 @@
     "approved": 238,
     "ranked": 238,
     "pending_manual": 201,
-    "ocr_attempted": 125,
+    "ocr_attempted": 135,
     "ocr_matched": 55,
-    "ocr_unresolved": 70,
+    "ocr_unresolved": 80,
     "title_times": 158,
     "human_times": 36,
-    "last_updated": "2026-10-29 02:28:44"
+    "last_updated": "2026-10-29 17:27:17"
   }
 }
