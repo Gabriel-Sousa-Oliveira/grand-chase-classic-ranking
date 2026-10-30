@@ -1211,6 +1211,19 @@
       "approved_at": "2026-09-09 21:03:24"
     },
     {
+      "id": 60246,
+      "character": "Lime/Holy",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 423000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=xTBjr7_YjnY",
+      "channel": "Borkaz",
+      "published_at": "2024-04-10T10:06:18Z",
+      "approved_at": "2026-10-30 13:55:27"
+    },
+    {
       "id": 48,
       "character": "Lire",
       "category": "void_invasion",
@@ -1222,6 +1235,19 @@
       "channel": "soup",
       "published_at": "2026-02-18",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 60247,
+      "character": "Lire",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 387000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=xGa0t7zKnSA",
+      "channel": "Borkaz",
+      "published_at": "2024-03-22T09:00:28Z",
+      "approved_at": "2026-10-30 13:55:28"
     },
     {
       "id": 25435,
@@ -2721,6 +2747,19 @@
       "approved_at": "2026-10-23 21:10:34"
     },
     {
+      "id": 60247,
+      "character": "Lire",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 387000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=xGa0t7zKnSA",
+      "channel": "Borkaz",
+      "published_at": "2024-03-22T09:00:28Z",
+      "approved_at": "2026-10-30 13:55:28"
+    },
+    {
       "id": 28575,
       "character": "Ronan",
       "category": "void_invasion",
@@ -2810,6 +2849,19 @@
       "channel": "Borkaz",
       "published_at": "2024-04-08T10:22:47Z",
       "approved_at": "2026-10-23 21:38:05"
+    },
+    {
+      "id": 60246,
+      "character": "Lime/Holy",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 423000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=xTBjr7_YjnY",
+      "channel": "Borkaz",
+      "published_at": "2024-04-10T10:06:18Z",
+      "approved_at": "2026-10-30 13:55:27"
     },
     {
       "id": 28572,
@@ -5595,17 +5647,17 @@
     }
   ],
   "processing": {
-    "discovered": 561,
-    "classified": 443,
-    "timed": 241,
-    "approved": 239,
-    "ranked": 239,
-    "pending_manual": 200,
-    "ocr_attempted": 140,
-    "ocr_matched": 56,
-    "ocr_unresolved": 84,
+    "discovered": 562,
+    "classified": 444,
+    "timed": 243,
+    "approved": 241,
+    "ranked": 241,
+    "pending_manual": 199,
+    "ocr_attempted": 143,
+    "ocr_matched": 58,
+    "ocr_unresolved": 85,
     "title_times": 158,
     "human_times": 36,
-    "last_updated": "2026-10-30 02:38:14"
+    "last_updated": "2026-10-30 17:02:59"
   }
 }
