@@ -236,6 +236,19 @@
       "approved_at": "2026-09-10 02:51:17"
     },
     {
+      "id": 59388,
+      "character": "Lime/Holy",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 284000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=wMcy7KyQNAE",
+      "channel": "Borkaz",
+      "published_at": "2025-07-07T09:01:42Z",
+      "approved_at": "2026-10-29 23:17:10"
+    },
+    {
       "id": 11683,
       "character": "Lire",
       "category": "duel_4",
@@ -3722,6 +3735,19 @@
       "approved_at": "2026-09-18 17:05:36"
     },
     {
+      "id": 59388,
+      "character": "Lime/Holy",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 284000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=wMcy7KyQNAE",
+      "channel": "Borkaz",
+      "published_at": "2025-07-07T09:01:42Z",
+      "approved_at": "2026-10-29 23:17:10"
+    },
+    {
       "id": 11683,
       "character": "Lire",
       "category": "duel_4",
@@ -5571,15 +5597,15 @@
   "processing": {
     "discovered": 561,
     "classified": 443,
-    "timed": 240,
-    "approved": 238,
-    "ranked": 238,
-    "pending_manual": 201,
-    "ocr_attempted": 135,
-    "ocr_matched": 55,
-    "ocr_unresolved": 80,
+    "timed": 241,
+    "approved": 239,
+    "ranked": 239,
+    "pending_manual": 200,
+    "ocr_attempted": 140,
+    "ocr_matched": 56,
+    "ocr_unresolved": 84,
     "title_times": 158,
     "human_times": 36,
-    "last_updated": "2026-10-29 17:27:17"
+    "last_updated": "2026-10-30 02:38:14"
   }
 }
