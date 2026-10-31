@@ -509,6 +509,19 @@
       "approved_at": "2026-09-10 02:51:18"
     },
     {
+      "id": 61515,
+      "character": "Kallia",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 464000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=prI0fxQsrms",
+      "channel": "Borkaz",
+      "published_at": "2024-02-13T10:54:36Z",
+      "approved_at": "2026-10-31 13:33:37"
+    },
+    {
       "id": 48345,
       "character": "Rin/Lin",
       "category": "tower_of_disappearance",
@@ -2017,6 +2030,19 @@
       "approved_at": "2026-09-16 10:10:58"
     },
     {
+      "id": 61708,
+      "character": "Ryan",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 184000,
+      "player_nick": "무의미무의미",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=SsrzpTBUhjM",
+      "channel": "무의미무의미",
+      "published_at": "2026-10-31T15:20:40Z",
+      "approved_at": "2026-10-31 16:06:40"
+    },
+    {
       "id": 65,
       "character": "Ryan",
       "category": "void_nightmare",
@@ -2539,6 +2565,19 @@
       "approved_at": "2026-09-10 13:28:42"
     },
     {
+      "id": 61517,
+      "character": "Rufus/Lupus",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 462000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ooZ6qw5IVJM",
+      "channel": "Borkaz",
+      "published_at": "2023-11-14T10:01:40Z",
+      "approved_at": "2026-10-31 13:33:38"
+    },
+    {
       "id": 5975,
       "character": "Rufus/Lupus",
       "category": "wizards_labyrinth_30",
@@ -2654,6 +2693,19 @@
       "channel": "Borkaz",
       "published_at": "2024-02-09T09:57:13Z",
       "approved_at": "2026-10-23 21:10:33"
+    },
+    {
+      "id": 61515,
+      "character": "Kallia",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 464000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=prI0fxQsrms",
+      "channel": "Borkaz",
+      "published_at": "2024-02-13T10:54:36Z",
+      "approved_at": "2026-10-31 13:33:37"
     },
     {
       "id": 11685,
@@ -5308,6 +5360,19 @@
       "approved_at": "2026-09-17 15:33:08"
     },
     {
+      "id": 61514,
+      "character": "Ereb",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 136000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=tXH23kAQTaM",
+      "channel": "Borkaz",
+      "published_at": "2026-08-16T17:08:47Z",
+      "approved_at": "2026-10-31 13:33:37"
+    },
+    {
       "id": 9794,
       "character": "Arme",
       "category": "void_apocalypse",
@@ -5670,20 +5735,33 @@
       "channel": "XX",
       "published_at": "2026-10-24T06:06:04Z",
       "approved_at": "2026-10-24 07:47:11"
+    },
+    {
+      "id": 61708,
+      "character": "Ryan",
+      "category": "void_nightmare",
+      "floor": 4,
+      "time_ms": 184000,
+      "player_nick": "무의미무의미",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=SsrzpTBUhjM",
+      "channel": "무의미무의미",
+      "published_at": "2026-10-31T15:20:40Z",
+      "approved_at": "2026-10-31 16:06:40"
     }
   ],
   "processing": {
-    "discovered": 564,
-    "classified": 446,
-    "timed": 245,
-    "approved": 243,
-    "ranked": 243,
-    "pending_manual": 199,
-    "ocr_attempted": 144,
-    "ocr_matched": 60,
-    "ocr_unresolved": 84,
-    "title_times": 158,
+    "discovered": 565,
+    "classified": 447,
+    "timed": 249,
+    "approved": 247,
+    "ranked": 247,
+    "pending_manual": 196,
+    "ocr_attempted": 146,
+    "ocr_matched": 63,
+    "ocr_unresolved": 83,
+    "title_times": 159,
     "human_times": 36,
-    "last_updated": "2026-10-31 02:24:28"
+    "last_updated": "2026-10-31 16:07:33"
   }
 }
