@@ -3228,6 +3228,19 @@
       "approved_at": "2026-09-16 10:10:59"
     },
     {
+      "id": 60773,
+      "character": "Dio",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 266000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=0fPxXNOrmsw",
+      "channel": "Borkaz",
+      "published_at": "2024-11-01T09:47:53Z",
+      "approved_at": "2026-10-30 22:59:17"
+    },
+    {
       "id": 51452,
       "character": "Uno",
       "category": "void_invasion",
@@ -4123,6 +4136,19 @@
       "channel": "LinDarkness",
       "published_at": "2025-10-30T12:28:23Z",
       "approved_at": "2026-09-09 20:55:06"
+    },
+    {
+      "id": 60774,
+      "character": "Rin/Lin",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 201000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=jjY50xlj3mA",
+      "channel": "Borkaz",
+      "published_at": "2025-10-31T09:48:17Z",
+      "approved_at": "2026-10-30 22:59:17"
     },
     {
       "id": 44,
@@ -5647,17 +5673,17 @@
     }
   ],
   "processing": {
-    "discovered": 562,
-    "classified": 444,
-    "timed": 243,
-    "approved": 241,
-    "ranked": 241,
+    "discovered": 564,
+    "classified": 446,
+    "timed": 245,
+    "approved": 243,
+    "ranked": 243,
     "pending_manual": 199,
-    "ocr_attempted": 143,
-    "ocr_matched": 58,
-    "ocr_unresolved": 85,
+    "ocr_attempted": 144,
+    "ocr_matched": 60,
+    "ocr_unresolved": 84,
     "title_times": 158,
     "human_times": 36,
-    "last_updated": "2026-10-30 17:02:59"
+    "last_updated": "2026-10-31 02:24:28"
   }
 }
