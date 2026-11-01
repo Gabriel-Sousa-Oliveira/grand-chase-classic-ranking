@@ -2604,6 +2604,32 @@
       "approved_at": "2026-09-10 13:28:46"
     },
     {
+      "id": 62126,
+      "character": "Rin/Lin",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 455000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=MGJeX1lRGN4",
+      "channel": "Borkaz",
+      "published_at": "2023-12-08T10:26:53Z",
+      "approved_at": "2026-10-31 22:18:08"
+    },
+    {
+      "id": 62129,
+      "character": "Sieghart",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 479000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=UlHCXDvox2E",
+      "channel": "Borkaz",
+      "published_at": "2023-12-12T10:02:43Z",
+      "approved_at": "2026-10-31 22:18:09"
+    },
+    {
       "id": 5936,
       "character": "Rufus/Lupus",
       "category": "angry_boss_archimedia",
@@ -2628,6 +2654,19 @@
       "channel": "Borkaz",
       "published_at": "2024-01-09T10:17:01Z",
       "approved_at": "2026-09-10 02:51:18"
+    },
+    {
+      "id": 62128,
+      "character": "Rufus/Lupus",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 536000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=FxpvrNPQtJA",
+      "channel": "Borkaz",
+      "published_at": "2024-01-12T10:01:46Z",
+      "approved_at": "2026-10-31 22:18:09"
     },
     {
       "id": 5937,
@@ -5753,15 +5792,15 @@
   "processing": {
     "discovered": 565,
     "classified": 447,
-    "timed": 249,
-    "approved": 247,
-    "ranked": 247,
-    "pending_manual": 196,
-    "ocr_attempted": 146,
-    "ocr_matched": 63,
-    "ocr_unresolved": 83,
+    "timed": 252,
+    "approved": 250,
+    "ranked": 250,
+    "pending_manual": 193,
+    "ocr_attempted": 147,
+    "ocr_matched": 66,
+    "ocr_unresolved": 81,
     "title_times": 159,
     "human_times": 36,
-    "last_updated": "2026-10-31 16:07:33"
+    "last_updated": "2026-11-01 02:16:03"
   }
 }
