@@ -639,6 +639,19 @@
       "approved_at": "2026-09-10 02:51:28"
     },
     {
+      "id": 62670,
+      "character": "Iris",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 202000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=xY18pzXyZ3k",
+      "channel": "Borkaz",
+      "published_at": "2026-07-08T09:29:21Z",
+      "approved_at": "2026-11-01 07:13:41"
+    },
+    {
       "id": 35,
       "character": "Lass",
       "category": "void_apocalypse",
@@ -5191,6 +5204,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 62670,
+      "character": "Iris",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 202000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=xY18pzXyZ3k",
+      "channel": "Borkaz",
+      "published_at": "2026-07-08T09:29:21Z",
+      "approved_at": "2026-11-01 07:13:41"
+    },
+    {
       "id": 4257,
       "character": "Rin/Lin",
       "category": "duel_4",
@@ -5792,15 +5818,15 @@
   "processing": {
     "discovered": 565,
     "classified": 447,
-    "timed": 252,
-    "approved": 250,
-    "ranked": 250,
-    "pending_manual": 193,
-    "ocr_attempted": 147,
-    "ocr_matched": 66,
-    "ocr_unresolved": 81,
+    "timed": 253,
+    "approved": 251,
+    "ranked": 251,
+    "pending_manual": 192,
+    "ocr_attempted": 153,
+    "ocr_matched": 67,
+    "ocr_unresolved": 86,
     "title_times": 159,
     "human_times": 36,
-    "last_updated": "2026-11-01 02:16:03"
+    "last_updated": "2026-11-01 17:09:23"
   }
 }
