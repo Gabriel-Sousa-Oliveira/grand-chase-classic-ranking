@@ -1744,6 +1744,19 @@
       "approved_at": "2026-09-16 10:10:57"
     },
     {
+      "id": 64259,
+      "character": "Mari",
+      "category": "void_nightmare",
+      "floor": 3,
+      "time_ms": 216000,
+      "player_nick": "삭제",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=y7B_0hDnBUE",
+      "channel": "삭제",
+      "published_at": "2026-11-02T11:11:30Z",
+      "approved_at": "2026-11-02 20:47:12"
+    },
+    {
       "id": 22060,
       "character": "Rin/Lin",
       "category": "void_nightmare",
@@ -5813,20 +5826,33 @@
       "channel": "무의미무의미",
       "published_at": "2026-10-31T15:20:40Z",
       "approved_at": "2026-10-31 16:06:40"
+    },
+    {
+      "id": 64259,
+      "character": "Mari",
+      "category": "void_nightmare",
+      "floor": 3,
+      "time_ms": 216000,
+      "player_nick": "삭제",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=y7B_0hDnBUE",
+      "channel": "삭제",
+      "published_at": "2026-11-02T11:11:30Z",
+      "approved_at": "2026-11-02 20:47:12"
     }
   ],
   "processing": {
-    "discovered": 565,
-    "classified": 447,
-    "timed": 253,
-    "approved": 251,
-    "ranked": 251,
-    "pending_manual": 192,
+    "discovered": 567,
+    "classified": 449,
+    "timed": 254,
+    "approved": 252,
+    "ranked": 252,
+    "pending_manual": 193,
     "ocr_attempted": 153,
     "ocr_matched": 67,
     "ocr_unresolved": 86,
-    "title_times": 159,
+    "title_times": 160,
     "human_times": 36,
-    "last_updated": "2026-11-02 02:33:07"
+    "last_updated": "2026-11-02 20:48:01"
   }
 }
