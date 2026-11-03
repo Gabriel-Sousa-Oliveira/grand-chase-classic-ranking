@@ -5848,11 +5848,11 @@
     "approved": 252,
     "ranked": 252,
     "pending_manual": 193,
-    "ocr_attempted": 153,
+    "ocr_attempted": 154,
     "ocr_matched": 67,
-    "ocr_unresolved": 86,
+    "ocr_unresolved": 87,
     "title_times": 160,
     "human_times": 36,
-    "last_updated": "2026-11-02 20:48:01"
+    "last_updated": "2026-11-03 03:57:44"
   }
 }
