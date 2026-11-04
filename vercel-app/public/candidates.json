@@ -860,6 +860,19 @@
       "approved_at": "2026-09-14 01:22:17"
     },
     {
+      "id": 66620,
+      "character": "Decanee",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 68000,
+      "player_nick": "AngelsFPS",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=c6dC2uJwCCs",
+      "channel": "AngelsFPS",
+      "published_at": "2026-11-04T12:15:30Z",
+      "approved_at": "2026-11-04 18:39:01"
+    },
+    {
       "id": 10,
       "character": "Decanee",
       "category": "void_invasion",
@@ -1250,6 +1263,19 @@
       "approved_at": "2026-10-30 13:55:27"
     },
     {
+      "id": 66621,
+      "character": "Lire",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 65000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ow9iYijaWDc",
+      "channel": "Borkaz",
+      "published_at": "2026-11-04T18:10:12Z",
+      "approved_at": "2026-11-04 18:39:01"
+    },
+    {
       "id": 48,
       "character": "Lire",
       "category": "void_invasion",
@@ -1261,19 +1287,6 @@
       "channel": "soup",
       "published_at": "2026-02-18",
       "approved_at": "2026-09-09 17:50:38"
-    },
-    {
-      "id": 60247,
-      "character": "Lire",
-      "category": "void_invasion",
-      "floor": 3,
-      "time_ms": 387000,
-      "player_nick": "Borkaz",
-      "era_key": "current",
-      "video_url": "https://www.youtube.com/watch?v=xGa0t7zKnSA",
-      "channel": "Borkaz",
-      "published_at": "2024-03-22T09:00:28Z",
-      "approved_at": "2026-10-30 13:55:28"
     },
     {
       "id": 25435,
@@ -5839,20 +5852,46 @@
       "channel": "삭제",
       "published_at": "2026-11-02T11:11:30Z",
       "approved_at": "2026-11-02 20:47:12"
+    },
+    {
+      "id": 66620,
+      "character": "Decanee",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 68000,
+      "player_nick": "AngelsFPS",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=c6dC2uJwCCs",
+      "channel": "AngelsFPS",
+      "published_at": "2026-11-04T12:15:30Z",
+      "approved_at": "2026-11-04 18:39:01"
+    },
+    {
+      "id": 66621,
+      "character": "Lire",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 65000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ow9iYijaWDc",
+      "channel": "Borkaz",
+      "published_at": "2026-11-04T18:10:12Z",
+      "approved_at": "2026-11-04 18:39:01"
     }
   ],
   "processing": {
-    "discovered": 567,
-    "classified": 449,
-    "timed": 254,
-    "approved": 252,
-    "ranked": 252,
+    "discovered": 569,
+    "classified": 451,
+    "timed": 256,
+    "approved": 254,
+    "ranked": 254,
     "pending_manual": 193,
     "ocr_attempted": 154,
     "ocr_matched": 67,
     "ocr_unresolved": 87,
-    "title_times": 160,
+    "title_times": 162,
     "human_times": 36,
-    "last_updated": "2026-11-04 03:01:54"
+    "last_updated": "2026-11-04 18:39:51"
   }
 }
