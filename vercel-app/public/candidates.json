@@ -665,6 +665,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 69022,
+      "character": "Lire",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 158000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=_FATDmYwE-g",
+      "channel": "Borkaz",
+      "published_at": "2026-11-06T12:34:21Z",
+      "approved_at": "2026-11-06 17:58:03"
+    },
+    {
       "id": 49890,
       "character": "Mari",
       "category": "void_apocalypse",
@@ -1313,6 +1326,19 @@
       "channel": "Thehighest",
       "published_at": "2025-05-04",
       "approved_at": "2026-09-09 17:50:38"
+    },
+    {
+      "id": 68863,
+      "character": "Mari",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 304000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ojSabHuJHxU",
+      "channel": "Falonso",
+      "published_at": "2026-09-17T14:00:50Z",
+      "approved_at": "2026-11-06 07:33:51"
     },
     {
       "id": 57717,
@@ -5633,6 +5659,19 @@
       "approved_at": "2026-09-14 17:14:25"
     },
     {
+      "id": 68863,
+      "character": "Mari",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 304000,
+      "player_nick": "Falonso",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=ojSabHuJHxU",
+      "channel": "Falonso",
+      "published_at": "2026-09-17T14:00:50Z",
+      "approved_at": "2026-11-06 07:33:51"
+    },
+    {
       "id": 28864,
       "character": "Ereb",
       "category": "berkas_lair",
@@ -5878,20 +5917,33 @@
       "channel": "Borkaz",
       "published_at": "2026-11-04T18:10:12Z",
       "approved_at": "2026-11-04 18:39:01"
+    },
+    {
+      "id": 69022,
+      "character": "Lire",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 158000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=_FATDmYwE-g",
+      "channel": "Borkaz",
+      "published_at": "2026-11-06T12:34:21Z",
+      "approved_at": "2026-11-06 17:58:03"
     }
   ],
   "processing": {
-    "discovered": 569,
-    "classified": 451,
-    "timed": 256,
-    "approved": 254,
-    "ranked": 254,
-    "pending_manual": 193,
+    "discovered": 570,
+    "classified": 452,
+    "timed": 258,
+    "approved": 256,
+    "ranked": 256,
+    "pending_manual": 192,
     "ocr_attempted": 154,
-    "ocr_matched": 67,
-    "ocr_unresolved": 87,
-    "title_times": 162,
+    "ocr_matched": 68,
+    "ocr_unresolved": 86,
+    "title_times": 163,
     "human_times": 36,
-    "last_updated": "2026-11-06 03:28:05"
+    "last_updated": "2026-11-06 17:58:57"
   }
 }
