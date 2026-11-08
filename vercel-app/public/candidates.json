@@ -5939,11 +5939,11 @@
     "approved": 256,
     "ranked": 256,
     "pending_manual": 195,
-    "ocr_attempted": 154,
+    "ocr_attempted": 157,
     "ocr_matched": 68,
-    "ocr_unresolved": 86,
+    "ocr_unresolved": 89,
     "title_times": 163,
     "human_times": 36,
-    "last_updated": "2026-11-07 16:52:32"
+    "last_updated": "2026-11-08 02:31:05"
   }
 }
