@@ -5933,17 +5933,17 @@
     }
   ],
   "processing": {
-    "discovered": 573,
-    "classified": 455,
+    "discovered": 574,
+    "classified": 456,
     "timed": 258,
     "approved": 256,
     "ranked": 256,
-    "pending_manual": 195,
+    "pending_manual": 196,
     "ocr_attempted": 157,
     "ocr_matched": 68,
     "ocr_unresolved": 89,
     "title_times": 163,
     "human_times": 36,
-    "last_updated": "2026-11-08 02:31:05"
+    "last_updated": "2026-11-08 17:05:40"
   }
 }
