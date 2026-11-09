@@ -40,3 +40,38 @@ class OcrTriageTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OcrDiagnosticsTests(unittest.TestCase):
+    def test_reasons_require_positive_observations(self):
+        from gc_radar.ocr import OcrDiagnostics
+        diagnostic = OcrDiagnostics()
+        self.assertEqual(diagnostic.reason(), 'diagnostic_unavailable')
+        diagnostic.sampled_frames.add('frame-1')
+        self.assertEqual(diagnostic.reason(), 'results_screen_not_found')
+        diagnostic.panel_frames.add('frame-1')
+        self.assertEqual(diagnostic.reason(), 'timer_not_found')
+        diagnostic.read_frames.add('frame-1')
+        diagnostic.values_ms.update([80000, 80450])
+        self.assertEqual(diagnostic.reason(), 'insufficient_stable_frames')
+        diagnostic.values_ms.add(92000)
+        self.assertEqual(diagnostic.reason(), 'conflicting_reads')
+
+    def test_download_and_other_errors_remain_distinguishable(self):
+        from gc_radar.ocr import OcrDiagnostics
+        diagnostic = OcrDiagnostics(stage='downloading')
+        self.assertEqual(diagnostic.reason(TimeoutError()), 'download_error')
+        diagnostic.stage = 'scanning'
+        self.assertEqual(diagnostic.reason(TimeoutError()), 'technical_error')
+
+    def test_workers_do_not_share_diagnostics(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from gc_radar.ocr import collect_ocr_diagnostics, _diagnostics
+        def inspect(index):
+            with collect_ocr_diagnostics() as diagnostic:
+                diagnostic.sampled_frames.add(str(index))
+                self.assertIs(_diagnostics.get(), diagnostic)
+                return diagnostic.payload()['ocr_diagnostics']['sampled_frames']
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            self.assertEqual(list(pool.map(inspect, range(12))), [1] * 12)
+        self.assertIsNone(_diagnostics.get())

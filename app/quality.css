@@ -74,3 +74,14 @@
   .qualityFilters { grid-template-columns: 1fr; }
   .qualityFilters > strong { padding: 5px 1px 0; }
 }
+
+.ocrFailurePanel { margin: 18px 0; padding: 20px; border: 1px solid #273649; border-radius: 12px; background: #111b28; }
+.ocrFailurePanel > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+.ocrFailurePanel h2 { margin: 0; font-size: 17px; }
+.ocrFailurePanel strong { color: #f1bd71; font-size: 13px; }
+.ocrFailurePanel p { color: #9bacc1; font-size: 12px; margin: 10px 0; }
+.ocrFailurePanel ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px; padding: 0; list-style: none; }
+.ocrFailurePanel li { display: flex; justify-content: space-between; gap: 12px; background: #172333; border-radius: 7px; padding: 10px; font-size: 12px; }
+.ocrAttemptDetails { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin: 16px 0; padding: 14px; background: #172333; border-radius: 8px; font-size: 12px; }
+.ocrAttemptDetails dt { color: #9bacc1; }
+.ocrAttemptDetails dd { margin: 0; overflow-wrap: anywhere; }

@@ -339,6 +339,9 @@ class DatabaseTests(unittest.TestCase):
                       side_effect=RuntimeError("video download timed out")):
             repository = repository_factory.return_value
             repository.ocr_candidates.return_value = [candidate]
+            repository.record_ocr_attempt.return_value = {"raw_metadata": json.dumps({
+                "ocr_attempted_at": "2026-11-09T12:00:00+00:00", "ocr_attempts": 1,
+            })}
             repository.ocr_remaining.return_value = 1
             repository.queue.return_value = []
             with patch.object(sys, "argv", [
@@ -352,8 +355,65 @@ class DatabaseTests(unittest.TestCase):
             "result": "error",
             "error_type": "RuntimeError",
             "error": "video download timed out",
+            "failure_reason": "technical_error", "ocr_version": "gc-ocr-diagnostics-v1",
+            "evidence_seconds": None, "ocr_diagnostics": {
+                "sampled_frames": 0, "results_frames": 0, "readable_frames": 0,
+                "distinct_seconds": 0, "stage": "initializing",
+            },
+            "ocr_attempted_at": "2026-11-09T12:00:00+00:00", "ocr_attempts": 1,
         }])
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OcrDiagnosticPersistenceTests(unittest.TestCase):
+    def test_attempt_history_survives_refresh_and_success_clears_latest_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repo = CandidateRepository(Path(directory) / 'diagnostics.sqlite3')
+            self.addCleanup(repo.close)
+            parsed = parse_title('Ronan Void Invasion 3F')
+            candidate, _ = repo.add('diagnostic', 'https://youtu.be/diagnostic', parsed)
+            for _ in range(12):
+                repo.record_ocr_attempt(candidate['id'], 'no_consensus', {
+                    'failure_reason': 'timer_not_found', 'ocr_version': 'test-v1',
+                })
+            refreshed, _ = repo.add('diagnostic', 'https://youtu.be/diagnostic', parsed,
+                                    metadata={'description': 'updated'}, enrich_existing=True)
+            metadata = json.loads(refreshed['raw_metadata'])
+            self.assertEqual(metadata['failure_reason'], 'timer_not_found')
+            self.assertEqual(metadata['ocr_attempts'], 12)
+            self.assertEqual(len(metadata['ocr_history']), 10)
+            resolved = repo.set_ocr_time(candidate['id'], 80000, .9, {'ocr_version': 'test-v2'})
+            metadata = json.loads(resolved['raw_metadata'])
+            self.assertNotIn('failure_reason', metadata)
+            self.assertEqual(metadata['ocr_version'], 'test-v2')
+            self.assertEqual(metadata['ocr_attempts'], 13)
+            self.assertEqual(metadata['ocr_history'][-1]['ocr_outcome'], 'matched')
+
+    def test_cli_exports_the_same_failure_that_it_persists(self):
+        from gc_radar.ocr import _diagnostics
+        with tempfile.TemporaryDirectory() as directory:
+            database = Path(directory) / 'cli.sqlite3'
+            repo = CandidateRepository(database)
+            repo.add('cli-video', 'https://youtu.be/cli-video', parse_title('Ronan Void Invasion 3F'))
+            repo.close()
+            def no_time(*args):
+                diagnostic = _diagnostics.get()
+                diagnostic.sampled_frames.add('frame')
+                diagnostic.panel_frames.add('frame')
+                diagnostic.evidence_seconds = 15
+                return None
+            output = io.StringIO()
+            with patch('gc_radar.cli.read_video_time', side_effect=no_time), \
+                 patch.object(sys, 'argv', ['gc-radar', '--db', str(database), 'ocr-queue']), \
+                 contextlib.redirect_stdout(output):
+                cli.main()
+            report = json.loads(output.getvalue())
+            self.assertEqual(report['results'][0]['failure_reason'], 'timer_not_found')
+            metadata = json.loads(report['candidates'][0]['raw_metadata'])
+            self.assertEqual(metadata['failure_reason'], 'timer_not_found')
+            self.assertEqual(metadata['evidence_seconds'], 15)
+            self.assertEqual(report['results'][0]['ocr_attempted_at'], metadata['ocr_attempted_at'])
+            self.assertEqual(report['results'][0]['ocr_attempts'], metadata['ocr_attempts'])

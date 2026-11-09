@@ -2,6 +2,8 @@ import { env } from "cloudflare:workers";
 import { shouldAutoApproveTitle } from "@/lib/candidate-policy";
 import { canonicalizePlayerNick } from "@/lib/player-nick";
 
+import { mergeMetadataSql, failureAggregationSql } from "@/lib/ocr-diagnostics";
+
 export const dynamic = "force-dynamic";
 
 type IncomingCandidate = {
@@ -41,7 +43,7 @@ async function backfillApprovedTitles() {
 export async function GET() {
   try {
     await backfillApprovedTitles();
-    const [queue, rankings, history, processing] = await Promise.all([
+    const [queue, rankings, history, processing, failures] = await Promise.all([
       db().prepare(`SELECT c.id, c.video_id, c.video_url, c.title, c.channel, c.player_nick,
         c.published_at, c.created_at, c.character, c.category, c.floor, c.time_ms,
         c.confidence, c.status, c.era_key,
@@ -53,6 +55,15 @@ export async function GET() {
         json_extract(c.raw_metadata, '$.evidence_image') AS evidence_image,
         json_extract(c.raw_metadata, '$.ocr_roi') AS ocr_roi,
         json_extract(c.raw_metadata, '$.processing_reason') AS processing_reason,
+        COALESCE(json_extract(c.raw_metadata, '$.failure_reason'),
+          CASE json_extract(c.raw_metadata, '$.ocr_outcome')
+            WHEN 'error' THEN 'technical_error'
+            WHEN 'no_consensus' THEN 'timer_not_frozen_or_not_readable' END) AS failure_reason,
+        json_extract(c.raw_metadata, '$.ocr_attempted_at') AS ocr_attempted_at,
+        json_extract(c.raw_metadata, '$.ocr_attempts') AS ocr_attempts,
+        json_extract(c.raw_metadata, '$.ocr_version') AS ocr_version,
+        json_extract(c.raw_metadata, '$.ocr_diagnostics') AS ocr_diagnostics,
+        json_extract(c.raw_metadata, '$.evidence_seconds') AS evidence_seconds,
         EXISTS(SELECT 1 FROM candidates duplicate
           WHERE duplicate.id <> c.id AND c.time_ms IS NOT NULL
             AND duplicate.time_ms = c.time_ms
@@ -115,12 +126,17 @@ export async function GET() {
           AND confidence < 0.95 THEN 1 ELSE 0 END), 0) AS human_times,
         MAX(updated_at) AS last_updated
         FROM candidates`).first(),
+      db().prepare(failureAggregationSql).all<{ reason: string; count: number }>(),
     ]);
     return Response.json({
       candidates: queue.results,
       rankings: rankings.results,
       history: history.results,
       processing,
+      ocr_failures: {
+        total_failed: failures.results.reduce((sum, row) => sum + row.count, 0),
+        breakdown: Object.fromEntries(failures.results.map(row => [row.reason, row.count])),
+      },
     });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Database error" }, { status: 500 });
@@ -143,9 +159,12 @@ export async function POST(request: Request) {
     const playerNick = canonicalizePlayerNick(item.player_nick ?? item.channel) ?? null;
     const autoApprove = item.status === "ready_for_review" && shouldAutoApproveTitle(item);
     const effectiveStatus = autoApprove ? "approved" : item.status;
-    const rawMetadata = typeof item.raw_metadata === "string"
-      ? item.raw_metadata
-      : JSON.stringify(item.raw_metadata ?? {});
+    let metadata: unknown;
+    try { metadata = typeof item.raw_metadata === "string"
+      ? JSON.parse(item.raw_metadata) : item.raw_metadata ?? {}; }
+    catch { continue; }
+    if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) continue;
+    const rawMetadata = JSON.stringify(metadata);
     const result = await db().prepare(`INSERT OR IGNORE INTO candidates
       (video_id, video_url, title, channel, player_nick, published_at, character,
        category, floor, time_ms, confidence, status, era_key, raw_metadata)
@@ -163,13 +182,11 @@ export async function POST(request: Request) {
           player_nick = COALESCE(?, player_nick), published_at = COALESCE(?, published_at),
           character = ?, category = ?, floor = ?, time_ms = ?, confidence = ?, status = ?,
           raw_metadata = CASE
-            WHEN json_extract(?, '$.ocr_attempted_at') IS NULL
-              AND json_extract(raw_metadata, '$.ocr_attempted_at') IS NOT NULL
-              THEN raw_metadata
-            WHEN COALESCE(json_extract(?, '$.ocr_attempted_at'), '') <
-              COALESCE(json_extract(raw_metadata, '$.ocr_attempted_at'), '')
-              THEN raw_metadata
-            ELSE ? END,
+            WHEN (character IS NOT NULL AND character IS NOT ?)
+              OR (category IS NOT NULL AND category IS NOT ?)
+              OR (floor IS NOT NULL AND floor IS NOT ?)
+              OR era_key IS NOT ? THEN ?
+            ELSE ${mergeMetadataSql} END,
           updated_at = CURRENT_TIMESTAMP
         WHERE video_id = ?
           AND status IN ('ready_for_review','time_required','classification_required')`)
@@ -177,7 +194,9 @@ export async function POST(request: Request) {
           playerNick, item.published_at ?? null,
           item.character ?? null, item.category ?? null, item.floor ?? null,
           item.time_ms ?? null, item.confidence ?? 0, effectiveStatus,
-          rawMetadata, rawMetadata, rawMetadata, item.video_id).run();
+          item.character ?? null, item.category ?? null, item.floor ?? null,
+          item.era_key ?? "current", rawMetadata,
+          rawMetadata, rawMetadata, rawMetadata, rawMetadata, item.video_id).run();
       updated += update.meta.changes ?? 0;
     }
     if (autoApprove) {

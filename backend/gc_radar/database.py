@@ -303,12 +303,24 @@ class CandidateRepository:
         )
         if evidence:
             metadata.update(evidence)
+        self._append_ocr_history(metadata)
         self.connection.execute("""
             UPDATE candidates SET raw_metadata = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         """, (json.dumps(metadata, ensure_ascii=False), candidate_id))
         self.connection.commit()
         return self.get(candidate_id)
+
+    @staticmethod
+    def _append_ocr_history(metadata: dict) -> None:
+        history = metadata.get("ocr_history")
+        history = history if isinstance(history, list) else []
+        metadata["ocr_history"] = [*history[-9:], {
+            key: metadata.get(key) for key in (
+                "ocr_attempted_at", "ocr_outcome", "failure_reason", "ocr_version",
+                "evidence_seconds", "evidence_image", "ocr_diagnostics",
+            )
+        }]
 
     def set_ocr_time(self, candidate_id: int, time_ms: int, confidence: float,
                      evidence: dict) -> dict:
@@ -325,10 +337,14 @@ class CandidateRepository:
         )
         metadata["evidence_image"] = evidence.get("evidence_image")
         metadata["ocr_roi"] = evidence.get("roi")
+        metadata.update({key: evidence.get(key) for key in
+                         ("ocr_version", "evidence_seconds", "ocr_diagnostics")})
+        metadata.pop("failure_reason", None)
         metadata["processing_reason"] = "nearby_frame_consensus"
         metadata["ocr_attempted_at"] = datetime.now(timezone.utc).isoformat()
         metadata["ocr_outcome"] = "matched"
         metadata["ocr_attempts"] = int(metadata.get("ocr_attempts", 0)) + 1
+        self._append_ocr_history(metadata)
         self.connection.execute("""
             UPDATE candidates SET time_ms = ?, confidence = ?, raw_metadata = ?,
               status = CASE
