@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from .database import CandidateRepository
-from .ocr import read_video_time
+from .ocr import read_video_time, collect_ocr_diagnostics
 from .parser import parse_title
 from .relevance import (description_from_metadata, evaluate_video_relevance,
                         rejection_reason)
@@ -226,49 +226,58 @@ def main() -> None:
                 args.characters, args.video_ids,
             )
 
-            def inspect(candidate: dict) -> tuple[dict, object | None, Exception | None]:
-                try:
-                    return candidate, read_video_time(
-                        candidate["video_url"], evidence_directory,
-                        candidate["video_id"],
-                    ), None
-                except Exception as error:
-                    return candidate, None, error
+            def inspect(candidate: dict):
+                with collect_ocr_diagnostics() as diagnostics:
+                    try:
+                        result = read_video_time(candidate["video_url"], evidence_directory,
+                                                 candidate["video_id"])
+                        return candidate, result, None, diagnostics.payload()
+                    except Exception as error:
+                        return candidate, None, error, diagnostics.payload(error)
 
             workers = max(1, min(args.workers, 8))
             with ThreadPoolExecutor(max_workers=workers) as executor:
                 inspections = executor.map(inspect, candidates)
-                for candidate, ocr, error in inspections:
+                for candidate, ocr, error, diagnostic_data in inspections:
                     processed += 1
                     triage = triage_ocr_result(ocr, error)
                     if triage.processing_reason == "technical_error":
                         failed += 1
-                        repo.record_ocr_attempt(candidate["id"], "error")
+                        attempted = repo.record_ocr_attempt(candidate["id"], "error", diagnostic_data)
                         results.append({
                             "video_id": candidate["video_id"],
                             "result": "error",
                             "error_type": type(error).__name__,
                             "error": str(error)[:240],
+                            **diagnostic_data,
+                            **{key: json.loads(attempted["raw_metadata"])[key]
+                               for key in ("ocr_attempted_at", "ocr_attempts")},
                         })
                         continue
                     if triage.destination == "manual_review":
                         diagnostic = evidence_directory / (
                             f"{candidate['video_id']}-no-consensus.png"
                         )
-                        repo.record_ocr_attempt(candidate["id"], "no_consensus", {
+                        attempted = repo.record_ocr_attempt(candidate["id"], "no_consensus", {
+                            **diagnostic_data,
                             "evidence_image": str(Path("ocr-evidence") / diagnostic.name)
                             if diagnostic.exists() else None,
-                            "processing_reason": "timer_not_frozen_or_not_readable",
+                            "processing_reason": diagnostic_data["failure_reason"],
                         })
                         results.append({
                             "video_id": candidate["video_id"],
                             "result": "no_consensus",
+                            **diagnostic_data,
+                            **{key: json.loads(attempted["raw_metadata"])[key]
+                               for key in ("ocr_attempted_at", "ocr_attempts")},
                             "reason": "timer_not_frozen_or_not_readable",
                             "evidence_image": str(Path("ocr-evidence") / diagnostic.name)
                             if diagnostic.exists() else None,
                         })
                         continue
-                    repo.set_ocr_time(candidate["id"], ocr.time_ms, ocr.confidence, {
+                    diagnostic_data["failure_reason"] = None
+                    attempted = repo.set_ocr_time(candidate["id"], ocr.time_ms, ocr.confidence, {
+                        **diagnostic_data,
                         "engine": "tesseract+opencv", "matching_frames": ocr.matching_frames,
                         "observations": ocr.observations,
                         "evidence_frame": ocr.evidence_frame,
@@ -280,6 +289,9 @@ def main() -> None:
                     results.append({
                         "video_id": candidate["video_id"],
                         "result": "matched",
+                        **diagnostic_data,
+                        **{key: json.loads(attempted["raw_metadata"])[key]
+                           for key in ("ocr_attempted_at", "ocr_attempts")},
                         "time_ms": ocr.time_ms,
                         "confidence": ocr.confidence,
                         "matching_frames": ocr.matching_frames,

@@ -12,13 +12,65 @@ import tempfile
 import time
 from contextvars import ContextVar
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from contextlib import contextmanager
 from pathlib import Path
 
 
 MIN_TIME_MS = 20_000
 MAX_TIME_MS = 20 * 60 * 1000
 VIDEO_BUDGET_SECONDS = 300
+OCR_VERSION = "gc-ocr-diagnostics-v1"
+
+
+@dataclass
+class OcrDiagnostics:
+    """Observations from this attempt, never inferred from a missing result."""
+    sampled_frames: set[str] = field(default_factory=set)
+    panel_frames: set[str] = field(default_factory=set)
+    read_frames: set[str] = field(default_factory=set)
+    values_ms: set[int] = field(default_factory=set)
+    evidence_seconds: float | None = None
+    stage: str = "initializing"
+
+    def reason(self, error: Exception | None = None) -> str:
+        if error is not None:
+            return "download_error" if self.stage == "downloading" else "technical_error"
+        if not self.sampled_frames:
+            return "diagnostic_unavailable"
+        if not self.panel_frames:
+            return "results_screen_not_found"
+        if not self.read_frames:
+            return "timer_not_found"
+        if len({value // 1000 for value in self.values_ms}) > 1:
+            return "conflicting_reads"
+        return "insufficient_stable_frames"
+
+    def payload(self, error: Exception | None = None) -> dict:
+        return {
+            "failure_reason": self.reason(error), "ocr_version": OCR_VERSION,
+            "evidence_seconds": self.evidence_seconds,
+            "ocr_diagnostics": {
+                "sampled_frames": len(self.sampled_frames),
+                "results_frames": len(self.panel_frames),
+                "readable_frames": len(self.read_frames),
+                "distinct_seconds": len({value // 1000 for value in self.values_ms}),
+                "stage": self.stage,
+            },
+        }
+
+
+_diagnostics: ContextVar[OcrDiagnostics | None] = ContextVar("ocr_diagnostics", default=None)
+
+
+@contextmanager
+def collect_ocr_diagnostics():
+    diagnostics = OcrDiagnostics()
+    token = _diagnostics.set(diagnostics)
+    try:
+        yield diagnostics
+    finally:
+        _diagnostics.reset(token)
 _deadline: ContextVar[float | None] = ContextVar("ocr_deadline", default=None)
 _anchors: ContextVar[dict] = ContextVar("ocr_anchors", default={})
 DOWNLOAD_WINDOW_SECONDS = 120
@@ -478,11 +530,16 @@ def _download_excerpt(video_url: str, destination: Path,
     if cookies_file:
         command.extend(["--cookies", cookies_file])
     command.append(video_url)
+    diagnostic = _diagnostics.get()
+    if diagnostic is not None:
+        diagnostic.stage = "downloading"
     _run(command, timeout=360)
     videos = [path for path in destination.glob("video.*")
               if path.is_file() and path.suffix.lower() in {".mp4", ".mkv", ".webm", ".mov"}]
     if not videos:
         raise RuntimeError("yt-dlp did not create a video file")
+    if diagnostic is not None:
+        diagnostic.stage = "scanning"
     return videos[0]
 
 
@@ -736,7 +793,14 @@ def _parse_tesseract_tsv(output: str) -> tuple[str, float]:
 def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
                       seconds_from_end: float,
                       exhaustive: bool = False) -> list[OcrObservation]:
+    diagnostic = _diagnostics.get()
+    if diagnostic is not None:
+        diagnostic.stage = "scanning"
+        diagnostic.sampled_frames.add(frame.stem)
     variants = _preprocess_roi(frame, destination, roi_name)
+    if diagnostic is not None and roi_name == "results_panel" and variants:
+        diagnostic.panel_frames.add(frame.stem)
+        diagnostic.evidence_seconds = seconds_from_end
     page_modes = (
         (7, 13) if exhaustive
         else (13,) if roi_name == "results_panel"
@@ -820,6 +884,9 @@ def _read_timer_frame(frame: Path, destination: Path, roi_name: str,
             previous = best_by_time.get(time_ms)
             if previous is None or observation.confidence > previous.confidence:
                 best_by_time[time_ms] = observation
+    if diagnostic is not None and best_by_time:
+        diagnostic.read_frames.add(frame.stem)
+        diagnostic.values_ms.update(best_by_time)
     return list(best_by_time.values())
 
 def _scan_frames(frames: list[Path], destination: Path, roi_name: str,

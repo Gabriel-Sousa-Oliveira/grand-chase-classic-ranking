@@ -173,6 +173,7 @@ jobs:
           from pathlib import Path
 
           from gc_radar.ocr_queue import pending_ocr_videos
+          from gc_radar.ocr import OCR_VERSION
 
           MASTER = Path("../data/gc_radar.sqlite3").resolve()
           OUTPUT = Path("../data/last-run.json").resolve()
@@ -216,6 +217,7 @@ jobs:
           ordered = sorted(ALLOWED, key=lambda category: (-counts[category], order_index[category]))
           summary = {
               "mode": "ocr-scale",
+              "ocr_version": OCR_VERSION,
               "batch_size": BATCH_SIZE,
               "max_parallel_batches": MAX_PARALLEL,
               "max_videos_per_run": MAX_VIDEOS_PER_RUN,
@@ -366,6 +368,20 @@ jobs:
               --data-binary @"$RUNNER_TEMP/candidate-batch.json" \
               https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates
           done
+
+      - name: Persist structured OCR outcomes
+        if: ${{ success() && env.SITE_INGEST_TOKEN != '' && env.SITE_ACCESS_TOKEN != '' }}
+        env:
+          SITE_INGEST_TOKEN: ${{ secrets.SITE_INGEST_TOKEN }}
+          SITE_ACCESS_TOKEN: ${{ secrets.SITE_ACCESS_TOKEN }}
+        run: |
+          jq '{outcomes: .results}' data/last-run.json > "$RUNNER_TEMP/ocr-outcomes.json"
+          curl --fail-with-body --retry 2 \
+            -H "Authorization: Bearer $SITE_INGEST_TOKEN" \
+            -H "OAI-Sites-Authorization: Bearer $SITE_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @"$RUNNER_TEMP/ocr-outcomes.json" \
+            https://gc-run-radar.gabrielsousaol872244.chatgpt.site/api/candidates/ocr-outcomes
 
       - name: Save consolidated database
         if: ${{ always() && hashFiles('data/gc_radar.sqlite3') != '' }}
