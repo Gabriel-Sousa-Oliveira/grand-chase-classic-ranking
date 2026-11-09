@@ -873,6 +873,19 @@
       "approved_at": "2026-09-14 01:22:17"
     },
     {
+      "id": 74622,
+      "character": "Decanee",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 63000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=5jvSNiWsSuU",
+      "channel": "Borkaz",
+      "published_at": "2026-11-09T10:27:51Z",
+      "approved_at": "2026-11-09 21:27:19"
+    },
+    {
       "id": 66620,
       "character": "Decanee",
       "category": "void_invasion",
@@ -897,19 +910,6 @@
       "channel": "Patata",
       "published_at": "2026-04-03",
       "approved_at": "2026-09-09 17:50:38"
-    },
-    {
-      "id": 16452,
-      "character": "Decanee",
-      "category": "void_invasion",
-      "floor": 3,
-      "time_ms": 396000,
-      "player_nick": "Borkaz",
-      "era_key": "current",
-      "video_url": "https://www.youtube.com/watch?v=RBKCFu0Yv6o",
-      "channel": "Borkaz",
-      "published_at": "2024-04-17T09:21:36Z",
-      "approved_at": "2026-09-14 01:22:52"
     },
     {
       "id": 15,
@@ -1443,6 +1443,19 @@
       "channel": "Borkaz",
       "published_at": "2025-03-10T11:30:40Z",
       "approved_at": "2026-09-10 02:51:19"
+    },
+    {
+      "id": 74623,
+      "character": "Ryan",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 59000,
+      "player_nick": "무의미무의미",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=2iXnaV-HSOk",
+      "channel": "무의미무의미",
+      "published_at": "2026-11-09T07:17:11Z",
+      "approved_at": "2026-11-09 21:27:20"
     },
     {
       "id": 64,
@@ -5930,20 +5943,46 @@
       "channel": "Borkaz",
       "published_at": "2026-11-06T12:34:21Z",
       "approved_at": "2026-11-06 17:58:03"
+    },
+    {
+      "id": 74623,
+      "character": "Ryan",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 59000,
+      "player_nick": "무의미무의미",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=2iXnaV-HSOk",
+      "channel": "무의미무의미",
+      "published_at": "2026-11-09T07:17:11Z",
+      "approved_at": "2026-11-09 21:27:20"
+    },
+    {
+      "id": 74622,
+      "character": "Decanee",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 63000,
+      "player_nick": "Borkaz",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=5jvSNiWsSuU",
+      "channel": "Borkaz",
+      "published_at": "2026-11-09T10:27:51Z",
+      "approved_at": "2026-11-09 21:27:19"
     }
   ],
   "processing": {
-    "discovered": 574,
-    "classified": 456,
-    "timed": 258,
-    "approved": 256,
-    "ranked": 256,
-    "pending_manual": 196,
+    "discovered": 577,
+    "classified": 459,
+    "timed": 260,
+    "approved": 258,
+    "ranked": 258,
+    "pending_manual": 197,
     "ocr_attempted": 158,
     "ocr_matched": 68,
     "ocr_unresolved": 90,
-    "title_times": 163,
+    "title_times": 165,
     "human_times": 36,
-    "last_updated": "2026-11-09 02:40:56"
+    "last_updated": "2026-11-09 21:28:31"
   }
 }
