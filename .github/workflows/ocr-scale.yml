@@ -15,6 +15,11 @@ on:
         options:
           - queue
           - labeled-validation
+      video_ids:
+        description: "Optional exact YouTube IDs, comma-separated (maximum 12 eligible videos)"
+        required: false
+        type: string
+        default: ""
   push:
     branches: [main]
     paths:
@@ -156,6 +161,8 @@ jobs:
           fi
 
       - name: Process largest dungeons first
+        env:
+          OCR_VIDEO_IDS: ${{ inputs.video_ids }}
         run: |
           cd backend
           python - <<'PY'
@@ -172,7 +179,7 @@ jobs:
           from concurrent.futures import ThreadPoolExecutor, as_completed
           from pathlib import Path
 
-          from gc_radar.ocr_queue import pending_ocr_videos
+          from gc_radar.ocr_queue import pending_ocr_videos, select_ocr_videos
           from gc_radar.ocr import OCR_VERSION
 
           MASTER = Path("../data/gc_radar.sqlite3").resolve()
@@ -212,7 +219,9 @@ jobs:
               pending = pending_ocr_videos(connection, ALLOWED)
           counts = {category: sum(item[1] == category for item in pending)
                     for category in ALLOWED}
-          selected = pending[:MAX_VIDEOS_PER_RUN]
+          selected = select_ocr_videos(
+              pending, os.environ.get("OCR_VIDEO_IDS", ""), MAX_VIDEOS_PER_RUN,
+          )
           order_index = {category: index for index, category in enumerate(ALLOWED)}
           ordered = sorted(ALLOWED, key=lambda category: (-counts[category], order_index[category]))
           summary = {
@@ -223,7 +232,7 @@ jobs:
               "max_videos_per_run": MAX_VIDEOS_PER_RUN,
               "order": ordered,
               "backlog": sum(counts.values()),
-              "selected": min(sum(counts.values()), MAX_VIDEOS_PER_RUN),
+              "selected": len(selected),
               "processed": 0,
               "matched": 0,
               "failed": 0,

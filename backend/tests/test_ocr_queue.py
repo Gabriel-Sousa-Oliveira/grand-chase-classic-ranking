@@ -3,7 +3,7 @@ import sqlite3
 import unittest
 from pathlib import Path
 
-from gc_radar.ocr_queue import pending_ocr_videos
+from gc_radar.ocr_queue import pending_ocr_videos, select_ocr_videos
 
 
 class OcrQueueTests(unittest.TestCase):
@@ -79,7 +79,9 @@ class OcrQueueTests(unittest.TestCase):
             disk.close()
             namespace = dict(sqlite3=sqlite3, MASTER=file.name,
                              ALLOWED=('large', 'small'), MAX_VIDEOS_PER_RUN=12,
-                             pending_ocr_videos=pending_ocr_videos)
+                             pending_ocr_videos=pending_ocr_videos,
+                             select_ocr_videos=select_ocr_videos,
+                             os=type("Environment", (), {"environ": {}}))
             exec(textwrap.dedent(source[start:end]), namespace)
         self.assertEqual(len(namespace['selected']), 12)
         self.assertEqual(namespace['selected'][0], ('new', 'small'))
@@ -89,3 +91,24 @@ class OcrQueueTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TargetedOcrTests(unittest.TestCase):
+    def test_selects_only_two_requested_videos_in_queue_order(self):
+        pending = [("G2jJaKFJF0o", "duel_4"), ("I6sLt4ZoYl8", "duel_4"),
+                   ("P3dmFg4Uehw", "void_invasion")]
+        self.assertEqual(select_ocr_videos(pending, "P3dmFg4Uehw,I6sLt4ZoYl8"), pending[1:])
+        self.assertEqual(select_ocr_videos(pending, "I6sLt4ZoYl8 I6sLt4ZoYl8"), pending[1:2])
+        self.assertEqual(select_ocr_videos(pending, ""), pending)
+
+    def test_never_substitutes_missing_or_resolved_ids(self):
+        with self.assertRaises(ValueError):
+            select_ocr_videos([("I6sLt4ZoYl8", "duel_4")], "P3dmFg4Uehw")
+
+    def test_rejects_injected_inputs_and_excessive_requests(self):
+        for value in ["$(echo anything)", "https://youtu.be/I6sLt4ZoYl8",
+                      " ".join(f"video{i:06d}" for i in range(13))]:
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                select_ocr_videos([], value)
+        with self.assertRaises(ValueError):
+            select_ocr_videos([], "", 13)
