@@ -5978,11 +5978,11 @@
     "approved": 258,
     "ranked": 258,
     "pending_manual": 198,
-    "ocr_attempted": 159,
+    "ocr_attempted": 160,
     "ocr_matched": 68,
-    "ocr_unresolved": 91,
+    "ocr_unresolved": 92,
     "title_times": 165,
     "human_times": 36,
-    "last_updated": "2026-11-10 18:41:24"
+    "last_updated": "2026-11-11 02:48:04"
   }
 }
