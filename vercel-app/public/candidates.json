@@ -2459,6 +2459,19 @@
       "approved_at": "2026-09-16 10:10:59"
     },
     {
+      "id": 78915,
+      "character": "Ryan",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 128000,
+      "player_nick": "무의미무의미",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=IlN9mmjtmW4",
+      "channel": "무의미무의미",
+      "published_at": "2026-11-12T23:13:40Z",
+      "approved_at": "2026-11-13 03:25:46"
+    },
+    {
       "id": 66,
       "character": "Ryan",
       "category": "void_taint",
@@ -5969,20 +5982,33 @@
       "channel": "Borkaz",
       "published_at": "2026-11-09T10:27:51Z",
       "approved_at": "2026-11-09 21:27:19"
+    },
+    {
+      "id": 78915,
+      "character": "Ryan",
+      "category": "void_taint",
+      "floor": 3,
+      "time_ms": 128000,
+      "player_nick": "무의미무의미",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=IlN9mmjtmW4",
+      "channel": "무의미무의미",
+      "published_at": "2026-11-12T23:13:40Z",
+      "approved_at": "2026-11-13 03:25:46"
     }
   ],
   "processing": {
-    "discovered": 578,
-    "classified": 460,
-    "timed": 260,
-    "approved": 258,
-    "ranked": 258,
-    "pending_manual": 198,
+    "discovered": 580,
+    "classified": 462,
+    "timed": 261,
+    "approved": 259,
+    "ranked": 259,
+    "pending_manual": 199,
     "ocr_attempted": 160,
     "ocr_matched": 68,
     "ocr_unresolved": 92,
-    "title_times": 165,
+    "title_times": 166,
     "human_times": 36,
-    "last_updated": "2026-11-12 18:57:23"
+    "last_updated": "2026-11-13 03:26:40"
   }
 }
