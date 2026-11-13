@@ -6004,11 +6004,11 @@
     "approved": 259,
     "ranked": 259,
     "pending_manual": 199,
-    "ocr_attempted": 160,
+    "ocr_attempted": 161,
     "ocr_matched": 68,
-    "ocr_unresolved": 92,
+    "ocr_unresolved": 93,
     "title_times": 166,
     "human_times": 36,
-    "last_updated": "2026-11-13 03:26:40"
+    "last_updated": "2026-11-13 18:33:08"
   }
 }
