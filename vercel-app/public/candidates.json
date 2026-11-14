@@ -522,6 +522,19 @@
       "approved_at": "2026-10-31 13:33:37"
     },
     {
+      "id": 80668,
+      "character": "Ley/Rey",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 67000,
+      "player_nick": "시우 Siu",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=pzabSj8skvI",
+      "channel": "시우 Siu",
+      "published_at": "2026-11-14T15:18:37Z",
+      "approved_at": "2026-11-14 17:07:55"
+    },
+    {
       "id": 48345,
       "character": "Rin/Lin",
       "category": "tower_of_disappearance",
@@ -5995,20 +6008,33 @@
       "channel": "무의미무의미",
       "published_at": "2026-11-12T23:13:40Z",
       "approved_at": "2026-11-13 03:25:46"
+    },
+    {
+      "id": 80668,
+      "character": "Ley/Rey",
+      "category": "tower_of_disappearance",
+      "floor": 0,
+      "time_ms": 67000,
+      "player_nick": "시우 Siu",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=pzabSj8skvI",
+      "channel": "시우 Siu",
+      "published_at": "2026-11-14T15:18:37Z",
+      "approved_at": "2026-11-14 17:07:55"
     }
   ],
   "processing": {
-    "discovered": 580,
-    "classified": 462,
-    "timed": 261,
-    "approved": 259,
-    "ranked": 259,
-    "pending_manual": 199,
+    "discovered": 582,
+    "classified": 464,
+    "timed": 262,
+    "approved": 260,
+    "ranked": 260,
+    "pending_manual": 200,
     "ocr_attempted": 161,
     "ocr_matched": 68,
     "ocr_unresolved": 93,
-    "title_times": 166,
+    "title_times": 167,
     "human_times": 36,
-    "last_updated": "2026-11-14 03:16:48"
+    "last_updated": "2026-11-14 17:09:02"
   }
 }
