@@ -236,6 +236,19 @@
       "approved_at": "2026-09-10 02:51:17"
     },
     {
+      "id": 82134,
+      "character": "Ley/Rey",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 62000,
+      "player_nick": "시우 Siu",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=-Gnnai8tI-s",
+      "channel": "시우 Siu",
+      "published_at": "2026-11-15T09:34:17Z",
+      "approved_at": "2026-11-15 17:42:47"
+    },
+    {
       "id": 59388,
       "character": "Lime/Holy",
       "category": "duel_4",
@@ -6021,20 +6034,33 @@
       "channel": "시우 Siu",
       "published_at": "2026-11-14T15:18:37Z",
       "approved_at": "2026-11-14 17:07:55"
+    },
+    {
+      "id": 82134,
+      "character": "Ley/Rey",
+      "category": "duel_4",
+      "floor": 0,
+      "time_ms": 62000,
+      "player_nick": "시우 Siu",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=-Gnnai8tI-s",
+      "channel": "시우 Siu",
+      "published_at": "2026-11-15T09:34:17Z",
+      "approved_at": "2026-11-15 17:42:47"
     }
   ],
   "processing": {
-    "discovered": 582,
-    "classified": 464,
-    "timed": 262,
-    "approved": 260,
-    "ranked": 260,
+    "discovered": 583,
+    "classified": 465,
+    "timed": 263,
+    "approved": 261,
+    "ranked": 261,
     "pending_manual": 200,
     "ocr_attempted": 162,
     "ocr_matched": 68,
     "ocr_unresolved": 94,
-    "title_times": 167,
+    "title_times": 168,
     "human_times": 36,
-    "last_updated": "2026-11-15 02:40:50"
+    "last_updated": "2026-11-15 17:44:00"
   }
 }
