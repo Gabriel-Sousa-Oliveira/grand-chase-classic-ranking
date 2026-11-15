@@ -6030,11 +6030,11 @@
     "approved": 260,
     "ranked": 260,
     "pending_manual": 200,
-    "ocr_attempted": 161,
+    "ocr_attempted": 162,
     "ocr_matched": 68,
-    "ocr_unresolved": 93,
+    "ocr_unresolved": 94,
     "title_times": 167,
     "human_times": 36,
-    "last_updated": "2026-11-14 17:09:02"
+    "last_updated": "2026-11-15 02:40:50"
   }
 }
