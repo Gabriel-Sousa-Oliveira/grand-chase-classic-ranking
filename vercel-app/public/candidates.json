@@ -6050,17 +6050,17 @@
     }
   ],
   "processing": {
-    "discovered": 583,
-    "classified": 465,
+    "discovered": 584,
+    "classified": 466,
     "timed": 263,
     "approved": 261,
     "ranked": 261,
-    "pending_manual": 200,
+    "pending_manual": 201,
     "ocr_attempted": 162,
     "ocr_matched": 68,
     "ocr_unresolved": 94,
     "title_times": 168,
     "human_times": 36,
-    "last_updated": "2026-11-16 02:45:36"
+    "last_updated": "2026-11-16 21:04:00"
   }
 }
