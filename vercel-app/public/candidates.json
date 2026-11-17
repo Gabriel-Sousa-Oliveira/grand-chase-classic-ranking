@@ -6056,11 +6056,11 @@
     "approved": 261,
     "ranked": 261,
     "pending_manual": 201,
-    "ocr_attempted": 162,
+    "ocr_attempted": 163,
     "ocr_matched": 68,
-    "ocr_unresolved": 94,
+    "ocr_unresolved": 95,
     "title_times": 168,
     "human_times": 36,
-    "last_updated": "2026-11-16 21:04:00"
+    "last_updated": "2026-11-17 05:06:52"
   }
 }
