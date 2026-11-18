@@ -691,6 +691,19 @@
       "approved_at": "2026-09-09 17:50:38"
     },
     {
+      "id": 85867,
+      "character": "Ley/Rey",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 150000,
+      "player_nick": "시우 Siu",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=oODYs5Q1Qss",
+      "channel": "시우 Siu",
+      "published_at": "2026-11-18T07:34:08Z",
+      "approved_at": "2026-11-18 19:24:27"
+    },
+    {
       "id": 69022,
       "character": "Lire",
       "category": "void_apocalypse",
@@ -6047,20 +6060,33 @@
       "channel": "시우 Siu",
       "published_at": "2026-11-15T09:34:17Z",
       "approved_at": "2026-11-15 17:42:47"
+    },
+    {
+      "id": 85867,
+      "character": "Ley/Rey",
+      "category": "void_apocalypse",
+      "floor": 3,
+      "time_ms": 150000,
+      "player_nick": "시우 Siu",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=oODYs5Q1Qss",
+      "channel": "시우 Siu",
+      "published_at": "2026-11-18T07:34:08Z",
+      "approved_at": "2026-11-18 19:24:27"
     }
   ],
   "processing": {
-    "discovered": 584,
-    "classified": 466,
-    "timed": 263,
-    "approved": 261,
-    "ranked": 261,
+    "discovered": 585,
+    "classified": 467,
+    "timed": 264,
+    "approved": 262,
+    "ranked": 262,
     "pending_manual": 201,
     "ocr_attempted": 163,
     "ocr_matched": 68,
     "ocr_unresolved": 95,
-    "title_times": 168,
+    "title_times": 169,
     "human_times": 36,
-    "last_updated": "2026-11-18 04:22:50"
+    "last_updated": "2026-11-18 19:25:44"
   }
 }
