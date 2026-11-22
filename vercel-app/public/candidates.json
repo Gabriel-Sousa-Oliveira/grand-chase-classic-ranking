@@ -6082,11 +6082,11 @@
     "approved": 262,
     "ranked": 262,
     "pending_manual": 204,
-    "ocr_attempted": 164,
+    "ocr_attempted": 165,
     "ocr_matched": 68,
-    "ocr_unresolved": 96,
+    "ocr_unresolved": 97,
     "title_times": 169,
     "human_times": 37,
-    "last_updated": "2026-11-22 03:12:15"
+    "last_updated": "2026-11-22 18:32:16"
   }
 }
