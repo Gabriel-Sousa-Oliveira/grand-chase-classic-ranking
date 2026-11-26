@@ -6076,17 +6076,17 @@
     }
   ],
   "processing": {
-    "discovered": 588,
-    "classified": 469,
+    "discovered": 590,
+    "classified": 471,
     "timed": 264,
     "approved": 262,
     "ranked": 262,
-    "pending_manual": 204,
+    "pending_manual": 206,
     "ocr_attempted": 165,
     "ocr_matched": 68,
     "ocr_unresolved": 97,
     "title_times": 169,
     "human_times": 37,
-    "last_updated": "2026-11-26 05:05:15"
+    "last_updated": "2026-11-26 20:12:36"
   }
 }
