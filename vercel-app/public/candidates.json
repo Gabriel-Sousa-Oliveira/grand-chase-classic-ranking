@@ -1315,6 +1315,19 @@
       "approved_at": "2026-10-30 13:55:27"
     },
     {
+      "id": 96589,
+      "character": "Lire",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 58000,
+      "player_nick": "Lire활",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=9kspTvcKFqU",
+      "channel": "Lire활",
+      "published_at": "2026-11-27T02:28:27Z",
+      "approved_at": "2026-11-27 05:03:48"
+    },
+    {
       "id": 66621,
       "character": "Lire",
       "category": "void_invasion",
@@ -6073,20 +6086,33 @@
       "channel": "시우 Siu",
       "published_at": "2026-11-18T07:34:08Z",
       "approved_at": "2026-11-18 19:24:27"
+    },
+    {
+      "id": 96589,
+      "character": "Lire",
+      "category": "void_invasion",
+      "floor": 3,
+      "time_ms": 58000,
+      "player_nick": "Lire활",
+      "era_key": "current",
+      "video_url": "https://www.youtube.com/watch?v=9kspTvcKFqU",
+      "channel": "Lire활",
+      "published_at": "2026-11-27T02:28:27Z",
+      "approved_at": "2026-11-27 05:03:48"
     }
   ],
   "processing": {
-    "discovered": 590,
-    "classified": 471,
-    "timed": 264,
-    "approved": 262,
-    "ranked": 262,
+    "discovered": 591,
+    "classified": 472,
+    "timed": 265,
+    "approved": 263,
+    "ranked": 263,
     "pending_manual": 206,
-    "ocr_attempted": 165,
+    "ocr_attempted": 167,
     "ocr_matched": 68,
-    "ocr_unresolved": 97,
-    "title_times": 169,
+    "ocr_unresolved": 99,
+    "title_times": 170,
     "human_times": 37,
-    "last_updated": "2026-11-26 20:12:36"
+    "last_updated": "2026-11-27 05:04:52"
   }
 }
