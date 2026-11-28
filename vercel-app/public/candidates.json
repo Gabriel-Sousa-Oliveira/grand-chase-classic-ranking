@@ -6102,17 +6102,17 @@
     }
   ],
   "processing": {
-    "discovered": 592,
-    "classified": 473,
+    "discovered": 593,
+    "classified": 474,
     "timed": 265,
     "approved": 263,
     "ranked": 263,
-    "pending_manual": 207,
-    "ocr_attempted": 167,
+    "pending_manual": 208,
+    "ocr_attempted": 168,
     "ocr_matched": 68,
-    "ocr_unresolved": 99,
+    "ocr_unresolved": 100,
     "title_times": 170,
     "human_times": 37,
-    "last_updated": "2026-11-27 19:58:08"
+    "last_updated": "2026-11-28 04:46:06"
   }
 }
